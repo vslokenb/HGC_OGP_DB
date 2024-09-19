@@ -53,28 +53,30 @@ def Height(sheetname,key = 'Thick'):   ### change the key here for searching whe
         #print(x)
     return globals()[f'Height_{sheetname}']
 
-def Flat(sheetname,key = 'Thick'):   ### change the key here for searching where is the first Height in the excel
+def Flat(sheetname,key = 'Surf'): ### change the key here for searching where is the first Height in the excel
+    key = 'Surface'; ##### <---- important for this, or else we'd need to separate the keys into two.
     row = globals()[f"{sheetname}"].nrows
-    #print("total number of row is", row)
     for i in range(row):
-        actual = str(globals()[f'{sheetname}'].cell_value(i,2))
+        actual = str(globals()[f'{sheetname}'].cell_value(i,2));
+        subactual = str(globals()[f'{sheetname}'].cell_value(i,3));
+    
         if (key in actual):
-            print(f"First Height locates at line {i} in {sheetname}.xls")
-            print(f"Row name: {actual}")
-            print()
-            height1 = i
-            break
-    #height1 = i
+            if 'Profile' in subactual:
+                height1 = i
+                break
     globals()[f'Height_{sheetname}']=np.zeros((3,25))
     if sheetname == '815 unconstrained flatness':
         lines=[24,25,26]
     else:
-        lines=[height1,height1+1,height1+2]
-    #lines = [20,21,22]
-    # for i in range(25):
-    #     print(float(globals()[f'{sheetname}'].cell_value(lines[0]+i*5,5)))
-    i = 25
-    return float(globals()[f'{sheetname}'].cell_value(4+lines[0]+i*5,5))
+        ines=[height1,height1+1,height1+2]
+    
+    if 'Points' in str(globals()[f'{sheetname}'].cell_value(height1,3)):
+        flatness = (float(globals()[f'{sheetname}'].cell_value(height1,5)))
+    else:
+        flatness = (float(globals()[f'{sheetname}'].cell_value(height1,5)))
+    print()
+    print(f"Flatness is {flatness}, found on line {i} in {sheetname}.xls")
+    return flatness;
 
 def getDate(sheetname,key = 'Date'):   ### change the key here for searching where is the first Height in the excel
     row = globals()[f"{sheetname}"].nrows
