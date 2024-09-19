@@ -123,7 +123,7 @@ def AppendHeights(sheetnames,key = 'Thick', mappings = None):
     return All_Heights
 
 def AppendFlats(sheetnames,key = 'Surface'):
-    key = 'Surface
+    key = 'Surface';
     All_Flats=[]
     for j in range(len(sheetnames)):
         All_Flats.append(np.array(Flat(sheetnames[j],key)))
