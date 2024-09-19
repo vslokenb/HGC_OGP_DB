@@ -3,7 +3,8 @@ import os, sys, asyncio, send2trash
 import matplotlib
 matplotlib.use('Agg')
 from ogp_height_plotter import loadsheet, AppendFlats, AppendHeights, plot2d, uploadPostgres, get_offsets, check
-from postgres_tools.upload_inspect import upload_PostgreSQL
+from postgres_tools.upload_inspect import upload_PostgreSQL, GrabSensorOffsets
+from make_accuracy_plot import make_accuracy_plot, make_fake_plot
 from datetime import datetime
 
 OGPSurveyfile = (sys.argv[1]).replace("\\", "/")
@@ -15,13 +16,28 @@ trash_file = False
 
 if '/' in OGPSurveyfile:
     filesuffix = (OGPSurveyfile.split('/')[-1]).split('.')[0]
-    comp_type = OGPSurveyfile.split('/')[-2]
+    home_folder = OGPSurveyfile.split('/')[-2]
+    modname = OGPSurveyfile.split('/')[-1]
 elif '\\' in OGPSurveyfile:    ############ this may not be needed.
     filesuffix = (OGPSurveyfile.split('\\')[-1]).split('.')[0]
-    comp_type = OGPSurveyfile.split('\\')[-2]
+    home_folder = OGPSurveyfile.split('\\')[-2]
+    modname = OGPSurveyfile.split('/')[-1]
 else:
     filesuffix = OGPSurveyfile.split('.')[0]
-    comp_type = None
+    modname = OGPSurveyfile.split('/')[-1]
+    home_folder = None
+
+#important for getting comptype right 
+if home_folder == 'HD full':
+    if 'P' in modname:
+        comp_type = 'protomodules';
+    if 'M' in modname: 
+        comp_type = 'modules'
+        
+print('')
+print(f"###### NEW {comp_type} UPLOAD #######")
+print(f"###### FROM: {modname} #######")
+print('')
 
 print(f'Component type: {comp_type}')
 if comp_type == 'baseplates':
@@ -46,7 +62,7 @@ else:
     comp_type == 'modules'
     db_table_name = 'module_inspect'
 
-print(key)
+print("key:", key)
 
 resolution = 'LD'
 geometry = 'full'
@@ -71,6 +87,7 @@ for i in range(len(filenames)):
            limit = 0, vmini=vmini, vmaxi=vmaxi, 
            center = 25, rotate = 345, new_angle = new_angle,
            title = modtitle, savename = f"{comp_type}\{filesuffix}_heights", value = 1,details=1, day_count = None, mod_flat = mod_flats[i], show_plot = False)
+    acc_bytes = make_fake_plot();
     
     print(float(mod_flats[0]))
     db_upload = {
@@ -99,6 +116,18 @@ for i in range(len(filenames)):
             Traysheets = loadsheet([Tray1file,Tray2file])
         XOffset, YOffset, AngleOff = get_offsets([GantryTrayFile, OGPSurveyfile], Traysheets)
         db_upload.update({'module_name': modtitle, 'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3)})
+        try:
+            PMoffsets = asyncio.run(GrabSensorOffsets(modtitle))
+            print(PMoffsets)
+        except:
+            PMoffsets =(asyncio.get_event_loop()).run_until_complete(GrabSensorOffsets(modtitle))
+        
+        #SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets[0]
+        SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
+
+        print('Retreived Protomodule Offset Info: ', SensorXOffset, SensorYOffset, SensorAngleOff)
+        print('Making Accuracy Plot With:', modtitle, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
+        acc_bytes = make_accuracy_plot(modtitle, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff)
 
     try:
         asyncio.run(upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
