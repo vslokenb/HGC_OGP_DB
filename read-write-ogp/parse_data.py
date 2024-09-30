@@ -44,8 +44,8 @@ Sensor size: {{ SensorSize }}
 data_template = """
 {{FeatureType}} {{FeatureName}}
 Point     {{X_coordinate}}    {{Y_coordinate}}    {{Z_coordinate}}
-direction cosine:    {{I_coordinate}}    {{J_coordinate}}    {{KKKK.KKKKKKKKKK}}
-Radius            {{RRRR.RRR}}
+direction cosine:    {{I_coordinate}}    {{J_coordinate}}    {{K_coordinate}}
+Radius            {{Radius}}
 """
 
 default_template = """
@@ -63,8 +63,8 @@ Sensor size: {{ SensorSize }}
 <group name="feature">
 {{FeatureType}} {{FeatureName}}
 Point     {{X_coordinate}}    {{Y_coordinate}}    {{Z_coordinate}}
-direction cosine:    {{I_coordinate}}    {{J_coordinate}}    {{KKKK.KKKKKKKKKK}}
-Radius            {{RRRR.RRR}}
+direction cosine:    {{I_coordinate}}    {{J_coordinate}}    {{K_coordinate}}
+Radius            {{Radius}}
 </group>
 """
 
@@ -107,17 +107,3 @@ class DataParser():
         else: filtered_df = df[df['FeatureType'] == filterType]
 
         return filtered_df[feature_name].dropna()
-        
-if __name__ == '__main__':
-    file_dir = os.path.dirname(os.path.abspath(__file__))
-    template_dir = pjoin(file_dir, 'templates')
-    data_file = pjoin(template_dir, 'ex_fullOut.txt')
-    
-    dp = DataParser(data_file)
-    header, features = dp.read_temp_sep()
-    print(features)
-
-    # read_ogp_template(ogp_template_path, output_path)
-    # read_data(default_template, data_file)
-    # read_data(header_template, example_header)
-    
