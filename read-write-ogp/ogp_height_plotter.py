@@ -53,28 +53,30 @@ def Height(sheetname,key = 'Thick'):   ### change the key here for searching whe
         #print(x)
     return globals()[f'Height_{sheetname}']
 
-def Flat(sheetname,key = 'Thick'):   ### change the key here for searching where is the first Height in the excel
+def Flat(sheetname,key = 'Surf'): ### change the key here for searching where is the first Height in the excel
+    key = 'Surface'; ##### <---- important for this, or else we'd need to separate the keys into two.
     row = globals()[f"{sheetname}"].nrows
-    #print("total number of row is", row)
     for i in range(row):
-        actual = str(globals()[f'{sheetname}'].cell_value(i,2))
+        actual = str(globals()[f'{sheetname}'].cell_value(i,2));
+        subactual = str(globals()[f'{sheetname}'].cell_value(i,3));
+    
         if (key in actual):
-            print(f"First Height locates at line {i} in {sheetname}.xls")
-            print(f"Row name: {actual}")
-            print()
-            height1 = i
-            break
-    #height1 = i
+            if 'Profile' in subactual:
+                height1 = i
+                break
     globals()[f'Height_{sheetname}']=np.zeros((3,25))
     if sheetname == '815 unconstrained flatness':
         lines=[24,25,26]
     else:
-        lines=[height1,height1+1,height1+2]
-    #lines = [20,21,22]
-    # for i in range(25):
-    #     print(float(globals()[f'{sheetname}'].cell_value(lines[0]+i*5,5)))
-    i = 25
-    return float(globals()[f'{sheetname}'].cell_value(4+lines[0]+i*5,5))
+        ines=[height1,height1+1,height1+2]
+    
+    if 'Points' in str(globals()[f'{sheetname}'].cell_value(height1,3)):
+        flatness = (float(globals()[f'{sheetname}'].cell_value(height1,5)))
+    else:
+        flatness = (float(globals()[f'{sheetname}'].cell_value(height1,5)))
+    print()
+    print(f"Flatness is {flatness}, found on line {i} in {sheetname}.xls")
+    return flatness;
 
 def getDate(sheetname,key = 'Date'):   ### change the key here for searching where is the first Height in the excel
     row = globals()[f"{sheetname}"].nrows
@@ -122,7 +124,8 @@ def AppendHeights(sheetnames,key = 'Thick', mappings = None):
             All_Heights.append(np.array(Height(sheetnames[j],key)))
     return All_Heights
 
-def AppendFlats(sheetnames,key = 'Thick'):
+def AppendFlats(sheetnames,key = 'Surface'):
+    key = 'Surface';
     All_Flats=[]
     for j in range(len(sheetnames)):
         All_Flats.append(np.array(Flat(sheetnames[j],key)))
@@ -581,6 +584,16 @@ def angle(points,FDpoints=4,OffCenterPin = "Left", details = 0, plot = 0, Center
     print(f"Assembly Survey X Offset: {XOffset:.3f} mm")
     print(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
     print()
+    #ADDED For Rotation if NEEDED
+    if OffCenterPin == "Left":
+        NEWY = XOffset*-1;
+        NEWX = YOffset; 
+    elif OffCenterPin == "Right":
+        NEWY = XOffset;
+        NEWX = YOffset*1; 
+    print(f"Assembly Survey X Offset: {NEWX:.3f} mm (rotated)")
+    print(f"Assembly Survey Y Offset: {NEWY:.3f} mm (rotated)")
+    print()
     AngleOffset = angle_FD1 - angle_Pin
     print(f"Assembly Survey Rotational Offset is {AngleOffset:.5f} degrees")
     if plot == 1:
@@ -605,8 +618,47 @@ def get_offsets(filenames, Traysheets):
     traypin=[]
 
     searchTrayPin(sheetnames[0],keys,details=0,Tray = autoTray, points = points)
-    CenterOff, AngleOff,XOffset, YOffset = angle(points,FDpoints=len(fd), OffCenterPin="Left",details=0,plot=1, Center = Center, Off = Off, fd = fd)    
+    #print(points)
+    DiffKeys = True; CXchk1 = False; CYchk1 = False; DictKeys = points.keys();
+    for dictkey in points.keys():
+        if dictkey == 'CenterX':
+            CXchk1 = True;
+        if dictkey == 'CenterY':
+            CYchk1 = True; 
+        if CYchk1 and CXchk1: DiffKeys = False;
     
+    ####IMPORTANT  (Left or Right)  -edited by paolo
+    pinsetting = "Right";
+
+    ###### this NEEDS to be worked on for more trays and more positions, -Paolo 
+    ###### hard coded tray offsets from : "Tray 2 low light more points June 2023"
+    if DiffKeys: 
+        points.update({
+            'P1Center.X': 142.648,
+            'P1Center.Y': 298.465,
+            'P2Center.X': 91.899,
+            'P2Center.Y': 107.959,
+            'P1LEFT.X': 67.688,
+            'P1LEFT.Y': 298.445,
+            'P2LEFT.X': 16.949,
+            'P2LEFT.Y': 107.939,
+            'P1RIGHT.X': 217.585,
+            'P1RIGHT.Y': 298.455,
+            'P2RIGHT.X': 166.848,
+            'P2RIGHT.Y': 107.969,
+        }) 
+
+    #print(points);
+    """for sheetname in sheetnames:
+        TrayNum = TrayID(sheetname);
+        PosNum = PositionID(sheetname);"""
+    #print(fd);
+
+    PositionID = 1;
+    if PositionID == 1:
+        CenterOff, AngleOff, XOffset, YOffset = angle(points, FDpoints=len(fd), OffCenterPin='Left', details=0,plot=1, Center = "P1Center", Off = "P1LEFT", fd = fd)    
+    elif PositionID == 2:
+        CenterOff, AngleOff, XOffset, YOffset = angle(points, FDpoints=len(fd), OffCenterPin='Right', details=0,plot=1, Center = "P2Center", Off = "P2RIGHT", fd = fd)
     return XOffset, YOffset, AngleOff
 
 
