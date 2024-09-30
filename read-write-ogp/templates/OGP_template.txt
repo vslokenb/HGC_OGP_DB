@@ -1,0 +1,36 @@
+<reportheader>               
+{ProjectName}
+{ProjectLastModified}		
+{RunDateTime}
+
+Component ID: {$ComponentID} 
+Operator: {$CernID}   
+Geometry: {$geometry}
+Density: {$density}
+Sensor size: {$sensorsize} 
+</reportheader>
+
+---
+
+<feature>
+{FeatureType} {FeatureName}
+Point     {XXXX.XXXXXXXXXX}    {YYYY.YYYYYYYYYY}    {ZZZZ.ZZZZZZZZZZ}
+<point>    
+// no additional data
+</point>
+<line>
+direction cosine:    {IIII.IIIIIIIIII}    {JJJJ.JJJJJJJJJJ}    {KKKK.KKKKKKKKKK}
+</line>
+<circle>
+direction cosine:    {IIII.IIIIIIIIII}    {JJJJ.JJJJJJJJJJ}    {KKKK.KKKKKKKKKK}
+Radius            {RRRR.RRR}
+</circle>
+<plane>
+direction cosine:    {IIII.IIIIIIIIII}    {JJJJ.JJJJJJJJJJ}    {KKKK.KKKKKKKKKK}
+</plane>
+<default>
+</default>
+</feature>
+
+<reportfooter>     
+</reportfooter> 

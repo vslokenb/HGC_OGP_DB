@@ -5,7 +5,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
-import xlrd
+# import xlrd
 
 # from hexmap.plot_summary import *
 
@@ -192,8 +192,8 @@ def plot2d(x, y, zheight, limit = 0, vmini=1.05, vmaxi=4.5, center = 0, rotate =
         norm = cls.Normalize(vmin=vmini, vmax=vmaxi)
         sm = plt.cm.ScalarMappable(norm=norm, cmap=plt.cm.coolwarm)
         cb=plt.colorbar(sm, ax= axs); cb.minorticks_on()
-        for i in range(len(zheight)):
-            axs.annotate(f"${zheight[i]:.3f}$",(x[i],y[i]),color = "black", fontsize = 9)
+        # for i in range(len(zheight)):
+            # axs.annotate(f"${zheight[i]:.3f}$",(x[i],y[i]),color = "black", fontsize = 9)
             # axs.annotate(f"${i}$",(x[i]-2.5,y[i]-5.5),color = "green", fontsize = 7)
             # if zheight[i]-mean_h < 0:
             #     axs.annotate(f"(${(zheight[i]-mean_h):.3f}$)",(x[i]-2.5,y[i]-5.5),color = "blue", fontsize = 7)
