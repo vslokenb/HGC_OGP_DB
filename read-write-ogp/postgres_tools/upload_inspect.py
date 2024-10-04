@@ -66,3 +66,27 @@ async def upload_PostgreSQL(table_name, db_upload_data):
         print(f'Table {table_name} does not exist in the database.')
     await conn.close()
 
+async def GrabSensorOffsets(name):
+    try:
+        conn = await asyncpg.connect(
+            host='gut.physics.ucsb.edu',
+            database='hgcdb',
+            user='postgres',
+            password='hepuser',
+            port=5432
+        )
+        query = "SELECT proto_name, x_offset_mu, y_offset_mu, ang_offset_deg FROM proto_inspect"
+        rows = await conn.fetch(query)
+        #print(rows)
+        matching_offsets = []
+        for pmodule in rows:
+            if pmodule['proto_name'] == name.replace('M','P'):
+                xoffsets, yoffsets, angoffsets = pmodule['x_offset_mu'], pmodule['y_offset_mu'], pmodule['ang_offset_deg']
+                matching_offsets.append((xoffsets, yoffsets, angoffsets))
+
+        return matching_offsets
+    except asyncpg.PostgresError as e:
+        print(f"Error connecting to the database: {e}")
+        return None
+    finally:
+        await conn.close()
