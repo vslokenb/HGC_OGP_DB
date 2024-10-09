@@ -7,22 +7,125 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 # import xlrd
 
+class PlotTool:
+    def __init__(self, features, save_dir):
+        self.save_dir = save_dir
+        self.features = features
+    
+    def __call__(self, *args, **kwds):
+        pass
+
+    @staticmethod
+    def plot2d(x, y, zheight, limit = 0, vmini=1.05, vmaxi=4.5, center = 0, rotate = 0 , new_angle = 120, details = 0, title="", savename="", value = 1, day_count = None, mod_flat = None, show_plot = True):
+        mean_h = np.mean(zheight)
+        std_h = np.std(zheight)
+        max_h = max(zheight)
+        min_h = min(zheight)
+        print(f"Average Height is {mean_h:.3f} mm")
+        print(f"Maximum Height is {max_h:.3f} mm")
+        print(f"Minimum Height is {min_h:.3f} mm")
+        print(f"Height --> {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm")
+        print()
+        if center != 0:
+            if (type(center) is int) and (center >0 and center <26):
+                x = x- x[center-1]
+                y = y- y[center-1]
+                if details == 1:
+                    print(f"Point {center} center at (0,0)")
+            else:
+                print("Please give a integer between 1 and 25 for center point") 
+        else:
+            if details == 1:
+                print("No center")
+
+        if rotate != 0:
+            if (type(rotate) is int) and (rotate > 0 and rotate <26):
+                rotate_angle = vec_angle(x[rotate-1], y[rotate-1])
+            else:
+                rotate_angle = 0
+                # print("Please give a integer between 1 and 25 for rotate point")   
+            for i in range(len(x)):
+                x[i], y[i] = vec_rotate(x[i],y[i],rotate_angle, new_angle)
+            if details == 1:
+                print(f"Point {rotate} originally at {rotate_angle:.2f} degrees")
+                print(f"Point {rotate} rotates to {new_angle:.2f} degrees")
+
+        else:
+            if details == 1:
+                print("No rotation")
+
+        fig=plt.figure(dpi=150, figsize=(9,5))
+        axs=fig.add_subplot(111); axs.set_aspect('equal')
+        
+        
+        if value == 1:
+            image=axs.hexbin(x,y,zheight,gridsize=20, vmin = vmini, vmax = vmaxi, cmap=plt.cm.coolwarm)
+            norm = cls.Normalize(vmin=vmini, vmax=vmaxi)
+            sm = plt.cm.ScalarMappable(norm=norm, cmap=plt.cm.coolwarm)
+            cb=plt.colorbar(sm, ax= axs); cb.minorticks_on()
+            # for i in range(len(zheight)):
+                # axs.annotate(f"${zheight[i]:.3f}$",(x[i],y[i]),color = "black", fontsize = 9)
+                # axs.annotate(f"${i}$",(x[i]-2.5,y[i]-5.5),color = "green", fontsize = 7)
+                # if zheight[i]-mean_h < 0:
+                #     axs.annotate(f"(${(zheight[i]-mean_h):.3f}$)",(x[i]-2.5,y[i]-5.5),color = "blue", fontsize = 7)
+                # else:
+                #     axs.annotate(f"(${(zheight[i]-mean_h):.3f}$)",(x[i]-2.5,y[i]-5.5),color = "red", fontsize = 7)
+        # elif value == 0:
+        #     image=axs.hexbin(x,y,zheight-mean_h,gridsize=20, vmin = vmini, vmax = vmaxi, cmap=plt.cm.coolwarm)
+        #     norm = cls.Normalize(vmin=vmini, vmax=vmaxi)
+        #     for i in range(len(zheight)):
+        #         axs.annotate(f"${(zheight[i]-mean_h):.3f}$",(x[i],y[i]),color = "black")
+        else:
+            if title == '815 PCB fiducials':
+                thickness = np.array([10,11,12,13,14,15,16,17,18,1,2,3,4,5,6,7,8,9,19,20,21,22,23,24,25])
+                axs.annotate(f"{thickness[i]}",(x[i],y[i]),color="black")
+        #axs.annotate(f"{i+1}",(temp[0][i],temp[1][i]),color="black")
+            else:
+                axs.annotate(f"{i+1}",(x[i],y[i]),color="black")
+
+        
+        #axs.annotate("1", temp[0][0],temp[1][0])
+        axs.set_xlabel("x (mm)")
+        axs.set_ylabel("y (mm)")
+        axs.minorticks_on()
+        axs.set_xlim(left=-100, right=100)
+        axs.set_ylim(bottom=-100, top=100)
+        #axs.set_xticks([-100,-75,-50,-25,0,25,50,75,100])
+        #axs.set_yticks([-100,-75,-50,-25,0,25,50,75,100])
+        cb.set_label("Height (mm)")
+        axs.set_title(title)
+        if mod_flat is not None:
+            textstr = '\n'.join((f'mean: {mean_h:.3f} mm',f'std:     {std_h:.3f} mm','', f'height: {mean_h:.3f} mm', f'       $+$ ({max_h - mean_h:.3f}) mm', f'       $-$ ({mean_h - min_h:.3f}) mm',
+                                '',f'$\Delta$H = {max_h - min_h:.3f} mm','', f'maxH: {max_h:.3f} mm', f'minH:  {min_h:.3f} mm','', f'flatness: {mod_flat:.3f}'))
+        else:
+            textstr = '\n'.join((f'mean: {mean_h:.3f} mm',f'std:     {std_h:.3f} mm','', f'height: {mean_h:.3f} mm', f'       $+$ ({max_h - mean_h:.3f}) mm', f'       $-$ ({mean_h - min_h:.3f}) mm',
+                            '',f'$\Delta$H = {max_h - min_h:.3f} mm','', f'maxH: {max_h:.3f} mm', f'minH:  {min_h:.3f} mm',''))
+        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+        axs.text(1.3, 1.0, textstr, transform=axs.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+        # axs.text(1.3, 0.40, legendstr, transform=axs.transAxes, fontsize=5, verticalalignment='top', color = 'blue')
+        if day_count is not None:
+            legendstr = '\n'.join((f'Day',f'{day_count}'))
+            # legendstr = '\n'.join((f'',f'{day_count}'))
+            axs.text(1.3, 0.20, legendstr, transform=axs.transAxes, fontsize=20, verticalalignment='top', color = 'blue')
+
+        if show_plot:
+            plt.show(); 
+            plt.close()
+        
+        from io import BytesIO  
+        buffer = BytesIO()
+        plt.savefig(f"{(savename.split('/'))[-1]}.png", bbox_inches='tight') # uncomment here for saving the 2d plot
+        plt.savefig(buffer, format='png', bbox_inches='tight')
+        buffer.seek(0)
+        plt.close()
+        return buffer.read()
+    
+    @staticmethod
+    def vec_angle(x,y):
+        angle_arctan = np.degrees(np.arctan2(y,x))
+        return angle_arctan
+
 # from hexmap.plot_summary import *
-
-def read_file(loc,sheetname):
-    wb=xlrd.open_workbook(loc)
-    globals()[f"{sheetname}"]=wb.sheet_by_index(0)
-
-def loadsheet(filenames):
-    sheet = np.array([i.split(".xls")[0].split('/')[-1] for i in filenames])
-    for i in range(len(filenames)):
-        read_file(f'{filenames[i]}',sheet[i])
-    return sheet
-
-def displaysheet(sheet,row):
-    for i in range(row):
-        actual = globals()[f"{sheet}"].cell_value(i,2)
-        print(actual)
 
 def Height(sheetname,key = 'Thick'):   ### change the key here for searching where is the first Height in the excel
     row = globals()[f"{sheetname}"].nrows
@@ -141,117 +244,7 @@ def vec_rotate(old_x, old_y, old_angle, new_angle = 120):
     new_y = old_x*np.sin(rad)+old_y*np.cos(rad)
     return new_x, new_y
 
-def plot2d(x, y, zheight, limit = 0, vmini=1.05, vmaxi=4.5, center = 0, rotate = 0 , new_angle = 120, details = 0, title="", savename="", value = 1, day_count = None, mod_flat = None, show_plot = True):
 
-    # print('sorting for consisitency')
-    # argx = np.argsort(x)
-    # x, y, zheight = x[argx], y[argx], zheight[argx]
-    # argy = np.argsort(y)
-    # x, y, zheight = x[argy], y[argy], zheight[argy]
-    mean_h = np.mean(zheight)
-    std_h = np.std(zheight)
-    max_h = max(zheight)
-    min_h = min(zheight)
-    print(f"Average Height is {mean_h:.3f} mm")
-    print(f"Maximum Height is {max_h:.3f} mm")
-    print(f"Minimum Height is {min_h:.3f} mm")
-    print(f"Height --> {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm")
-    print()
-    if center != 0:
-        if (type(center) is int) and (center >0 and center <26):
-            ######## Last point is the center if given 25
-            x = x- x[center-1]
-            y = y- y[center-1]
-            if details == 1:
-                print(f"Point {center} center at (0,0)")
-        else:
-            print("Please give a integer between 1 and 25 for center point") 
-    else:
-        if details == 1:
-            print("No center")
-
-    if rotate != 0:
-        if (type(rotate) is int) and (rotate > 0 and rotate <26):
-            rotate_angle = vec_angle(x[rotate-1], y[rotate-1])
-        else:
-            rotate_angle = 0
-            # print("Please give a integer between 1 and 25 for rotate point")   
-        for i in range(len(x)):
-            x[i], y[i] = vec_rotate(x[i],y[i],rotate_angle, new_angle)
-        if details == 1:
-            print(f"Point {rotate} originally at {rotate_angle:.2f} degrees")
-            print(f"Point {rotate} rotates to {new_angle:.2f} degrees")
-
-    else:
-        if details == 1:
-            print("No rotation")
-
-    fig=plt.figure(dpi=150, figsize=(9,5))
-    axs=fig.add_subplot(111); axs.set_aspect('equal')
-    
-    
-    if value == 1:
-        image=axs.hexbin(x,y,zheight,gridsize=20, vmin = vmini, vmax = vmaxi, cmap=plt.cm.coolwarm)
-        norm = cls.Normalize(vmin=vmini, vmax=vmaxi)
-        sm = plt.cm.ScalarMappable(norm=norm, cmap=plt.cm.coolwarm)
-        cb=plt.colorbar(sm, ax= axs); cb.minorticks_on()
-        # for i in range(len(zheight)):
-            # axs.annotate(f"${zheight[i]:.3f}$",(x[i],y[i]),color = "black", fontsize = 9)
-            # axs.annotate(f"${i}$",(x[i]-2.5,y[i]-5.5),color = "green", fontsize = 7)
-            # if zheight[i]-mean_h < 0:
-            #     axs.annotate(f"(${(zheight[i]-mean_h):.3f}$)",(x[i]-2.5,y[i]-5.5),color = "blue", fontsize = 7)
-            # else:
-            #     axs.annotate(f"(${(zheight[i]-mean_h):.3f}$)",(x[i]-2.5,y[i]-5.5),color = "red", fontsize = 7)
-    # elif value == 0:
-    #     image=axs.hexbin(x,y,zheight-mean_h,gridsize=20, vmin = vmini, vmax = vmaxi, cmap=plt.cm.coolwarm)
-    #     norm = cls.Normalize(vmin=vmini, vmax=vmaxi)
-    #     for i in range(len(zheight)):
-    #         axs.annotate(f"${(zheight[i]-mean_h):.3f}$",(x[i],y[i]),color = "black")
-    else:
-        if title == '815 PCB fiducials':
-            thickness = np.array([10,11,12,13,14,15,16,17,18,1,2,3,4,5,6,7,8,9,19,20,21,22,23,24,25])
-            axs.annotate(f"{thickness[i]}",(x[i],y[i]),color="black")
-    #axs.annotate(f"{i+1}",(temp[0][i],temp[1][i]),color="black")
-        else:
-            axs.annotate(f"{i+1}",(x[i],y[i]),color="black")
-
-    
-    #axs.annotate("1", temp[0][0],temp[1][0])
-    axs.set_xlabel("x (mm)")
-    axs.set_ylabel("y (mm)")
-    axs.minorticks_on()
-    axs.set_xlim(left=-100, right=100)
-    axs.set_ylim(bottom=-100, top=100)
-    #axs.set_xticks([-100,-75,-50,-25,0,25,50,75,100])
-    #axs.set_yticks([-100,-75,-50,-25,0,25,50,75,100])
-    cb.set_label("Height (mm)")
-    axs.set_title(title)
-    if mod_flat is not None:
-        textstr = '\n'.join((f'mean: {mean_h:.3f} mm',f'std:     {std_h:.3f} mm','', f'height: {mean_h:.3f} mm', f'       $+$ ({max_h - mean_h:.3f}) mm', f'       $-$ ({mean_h - min_h:.3f}) mm',
-                            '',f'$\Delta$H = {max_h - min_h:.3f} mm','', f'maxH: {max_h:.3f} mm', f'minH:  {min_h:.3f} mm','', f'flatness: {mod_flat:.3f}'))
-    else:
-        textstr = '\n'.join((f'mean: {mean_h:.3f} mm',f'std:     {std_h:.3f} mm','', f'height: {mean_h:.3f} mm', f'       $+$ ({max_h - mean_h:.3f}) mm', f'       $-$ ({mean_h - min_h:.3f}) mm',
-                         '',f'$\Delta$H = {max_h - min_h:.3f} mm','', f'maxH: {max_h:.3f} mm', f'minH:  {min_h:.3f} mm',''))
-    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-    axs.text(1.3, 1.0, textstr, transform=axs.transAxes, fontsize=10, verticalalignment='top', bbox=props)
-    # legendstr = '\n'.join(('*Numbers in brackets represent', 'deviation from mean.'))
-    # axs.text(1.3, 0.40, legendstr, transform=axs.transAxes, fontsize=5, verticalalignment='top', color = 'blue')
-    if day_count is not None:
-        legendstr = '\n'.join((f'Day',f'{day_count}'))
-        # legendstr = '\n'.join((f'',f'{day_count}'))
-        axs.text(1.3, 0.20, legendstr, transform=axs.transAxes, fontsize=20, verticalalignment='top', color = 'blue')
-
-    if show_plot:
-        plt.show(); 
-        plt.close()
-    
-    from io import BytesIO  
-    buffer = BytesIO()
-    plt.savefig(f"{(savename.split('/'))[-1]}.png", bbox_inches='tight') # uncomment here for saving the 2d plot
-    plt.savefig(buffer, format='png', bbox_inches='tight')
-    buffer.seek(0)
-    plt.close()
-    return buffer.read()
 
 def get_data(x, y, zheight, limit = 0, vmini=1.05, vmaxi=4.5, center = 0, rotate = 0 , new_angle = 120, details = 0, title="", savename="", value = 1, day_count = None, mod_flat = None, show_plot = True):
 
