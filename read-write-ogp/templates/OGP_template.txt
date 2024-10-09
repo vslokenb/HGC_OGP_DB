@@ -12,6 +12,7 @@ Flatness: {$Flatness}
 ---
 </reportheader>
 
+</reportheader>
 <feature>
 {FeatureType} {FeatureName}
 Point     {XXXX.XXXXXXXXXX}    {YYYY.YYYYYYYYYY}    {ZZZZ.ZZZZZZZZZZ}
