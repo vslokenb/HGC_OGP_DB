@@ -3,10 +3,12 @@ from tkinter import filedialog, ttk
 import subprocess, os, asyncio
 from io import BytesIO
 from PIL import Image, ImageTk
-from src.upload_inspect import DBClient
+from src.upload_inspect import DBClient, comptable
 
 def select_files():
     """Open a file dialog to select files."""
+    global file_paths_text, file_paths_scrollbar
+    global root
     file_paths = filedialog.askopenfilenames()
     if file_paths:
         file_paths_text.config(state=tk.NORMAL)
@@ -23,6 +25,7 @@ def select_files():
         file_paths_text.config(state=tk.DISABLED)
 
 def process_selected_files():
+    global output_text, output_scrollbar
     try:
         file_paths = getattr(root, 'file_paths', None)
         if file_paths:
@@ -46,6 +49,7 @@ def process_selected_files():
         output_text.config(state=tk.DISABLED)
 
 def call_script_with_plotting(file_path):
+    """Call the Python script with the selected file path."""
     script_path = 'process_im.py'
     if '.xls' in file_path.lower():
         command = ['python', script_path, file_path]
@@ -57,6 +61,7 @@ def call_script_with_plotting(file_path):
 
 
 def update_image_list(file_paths, image_list):
+    """Update the image list with the selected files."""
     image_list.delete(0, tk.END)
     for file_path in file_paths:
         image_list.insert(tk.END, os.path.basename(file_path))  # Display only the file name
@@ -64,11 +69,12 @@ def update_image_list(file_paths, image_list):
 
 def display_selected_image(event):
     """Display the selected image in the image label."""
+    global image_label, image_lists, nested_notebook, dbclient
     selected_subtab = nested_notebook.tab(nested_notebook.select(), "text")
     selection = event.widget.curselection()
     if selection:
         file_path = event.widget.get(selection[0])
-        im = asyncio.run(request_PostgreSQL(selected_subtab, file_path))
+        im = asyncio.run(dbclient.request_PostgreSQL(selected_subtab, file_path))
         #image = Image.open(file_path)
         if im != []:
             image = Image.open(BytesIO(im[0]['hexplot']))
@@ -82,10 +88,10 @@ def display_selected_image(event):
     else:
         image_label.config(image=None)
 
-def refresh_listbox():
-    global subtab_label
+def refresh_listbox(dbclient: DBClient, subtab_label, image_lists):
+    """Refresh the listbox with the updated image list."""
     for s in range(len(subtab_label)):
-        re = asyncio.run(request_PostgreSQL(subtab_label[s]))
+        re = asyncio.run(dbclient.request_PostgreSQL(subtab_label[s]))
         pe = [r[f"{comptable[subtab_label[s]]['prefix']}_name"] for r in re]
         image_lists[s] = update_image_list(pe, image_lists[s])
 
@@ -104,7 +110,7 @@ def refresh_listbox():
 
 ##################################################################
         
-def fire_GUI():
+def fire_GUI(dbclient: DBClient):
     """Fire up the GUI. Provide a way to select files and process them."""
     root = tk.Tk()
     root.title('File Selection and Processing GUI')
@@ -146,7 +152,7 @@ def fire_GUI():
 
 
         # pe = ['a.png','b.png','c.png','a.png']
-    refresh_listbox()
+    refresh_listbox(dbclient, subtab_label, image_lists)
 
         # Create and configure comment box
     # comment_frame = tk.Frame(tab1)
