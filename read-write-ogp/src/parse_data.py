@@ -105,9 +105,9 @@ class DataParser():
 
         return header_results, feature_results
     
-    def output_features(self, output_file):
+    def output_features(self, output_filename):
         """Output feature results to a csv file."""
-        with open(output_file, 'w') as f:
+        with open(pjoin(self.output_dir, output_filename), 'w') as f:
             f.write(self.feature_results)
     
     def output_meta(self) -> str:

@@ -3,9 +3,10 @@ from tkinter import filedialog, ttk
 import subprocess, os, asyncio
 from io import BytesIO
 from PIL import Image, ImageTk
-from postgres_tools.upload_inspect import request_PostgreSQL, comptable
+from src.upload_inspect import DBClient
 
 def select_files():
+    """Open a file dialog to select files."""
     file_paths = filedialog.askopenfilenames()
     if file_paths:
         file_paths_text.config(state=tk.NORMAL)
@@ -62,6 +63,7 @@ def update_image_list(file_paths, image_list):
     return image_list
 
 def display_selected_image(event):
+    """Display the selected image in the image label."""
     selected_subtab = nested_notebook.tab(nested_notebook.select(), "text")
     selection = event.widget.curselection()
     if selection:

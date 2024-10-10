@@ -4,7 +4,7 @@ import asyncio, send2trash, glob, re, yaml, os
 import matplotlib
 matplotlib.use('Agg')
 from src.ogp_height_plotter import PlotTool, get_offsets
-from src.upload_inspect import upload_PostgreSQL, GrabSensorOffsets
+from src.upload_inspect import DBClient
 from src.parse_data import DataParser
 from make_accuracy_plot import make_accuracy_plot
 from datetime import datetime
@@ -17,9 +17,9 @@ hexaboards_params = {"key":"Flatness", "vmini": 1.2, "vmaxi": 2.9, "new_angle": 
 protomodules_params = {"key":"Thick", "vmini": 1.37, "vmaxi": 1.79, "new_angle": 270, "db_table_name": 'proto_inspect'}
 others_params = {"key":"Thick", "vmini": 2.75, "vmaxi": 4.0, "new_angle": 270, "db_table_name": 'module_inspect'}
 
-class ImageProcessor():
+class SurveyProcessor():
     """Process OGP Survey file and extract data for plotting and uploading to database."""
-    def __init__(self, OGPSurveyFilePath):
+    def __init__(self, OGPSurveyFilePath, yamlconfig):
         """Initialize ImageProcessor object.
         
         Parameters:
@@ -32,7 +32,12 @@ class ImageProcessor():
             self.OGPSurveyFile[i] = file.replace('\\', '/')
 
         print(f'filename to process/upload: {self.OGPSurveyFile}')
+        self.client = DBClient(yamlconfig)
         pass
+
+    def __call__(self):
+        self.getTrayFile()  
+        self.process_and_upload()
 
     def getTrayFile(self):
         """Get Gantry Tray file and Tray files for NSH. 
@@ -113,10 +118,10 @@ class ImageProcessor():
         else:
             component_params = others_params
             try:
-                PMoffsets = asyncio.run(GrabSensorOffsets(modtitle))
+                PMoffsets = asyncio.run(self.client.GrabSensorOffsets(modtitle))
                 print(PMoffsets)
             except:
-                PMoffsets =(asyncio.get_event_loop()).run_until_complete(GrabSensorOffsets(modtitle))
+                PMoffsets =(asyncio.get_event_loop()).run_until_complete(self.client.GrabSensorOffsets(modtitle))
             
             SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
 
@@ -162,9 +167,9 @@ class ImageProcessor():
             db_upload, db_table_name, modtitle = self.__getArgs__(ex_file)
             mappings = np.array([None],dtype=object)
             try:
-                asyncio.run(upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
+                asyncio.run(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
             except:
-                (asyncio.get_event_loop()).run_until_complete(upload_PostgreSQL(db_table_name, db_upload)) ## python 3.6
+                (asyncio.get_event_loop()).run_until_complete(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.6
             print(modtitle, 'uploaded!')
             # if trash_file:
                 # send2trash.send2trash(ex_file)
