@@ -74,6 +74,11 @@ Radius            {{Radius}}
 class DataParser():
     """Parse data file using TTP template."""
     def __init__(self, data_file, output_dir):
+        """Initialize DataParser object.
+        
+        Parameters:
+        - data_file (str): Path to the data output file by OGP surveys to be parsed.
+        - output_dir (str): Path to the output directory of the parsed data."""
         with open(data_file, 'r') as f:
             self.data = f.read()
         

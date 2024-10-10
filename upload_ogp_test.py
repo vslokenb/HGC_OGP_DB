@@ -4,7 +4,7 @@
 import psycopg2
 conn = psycopg2.connect(
     host = 'cmsmac04.phys.cmu.edu',
-    database = 'testdb3',
+    database = 'hgcdb',
     user = 'postgres',
     password = 'hgcal'
 )

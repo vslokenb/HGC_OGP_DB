@@ -104,102 +104,103 @@ def refresh_listbox():
 
 ##################################################################
         
-# Create the main window
-root = tk.Tk()
-root.title('File Selection and Processing GUI')
-root.geometry('800x800')  # Adjusted window size
-root.configure(bg='gray')
+def fire_GUI():
+    """Fire up the GUI. Provide a way to select files and process them."""
+    root = tk.Tk()
+    root.title('File Selection and Processing GUI')
+    root.geometry('800x800')  # Adjusted window size
+    root.configure(bg='gray')
 
-# Create and configure notebook
-notebook = ttk.Notebook(root)
+    # Create and configure notebook
+    notebook = ttk.Notebook(root)
 
-###################################################################
+    ###################################################################
 
-# Create and configure first tab
-tab1 = ttk.Frame(notebook)
-notebook.add(tab1, text='View Plots')
-notebook.pack(expand=True, fill="both")
+    # Create and configure first tab
+    tab1 = ttk.Frame(notebook)
+    notebook.add(tab1, text='View Plots')
+    notebook.pack(expand=True, fill="both")
 
-# Create nested notebook with subtabs
-nested_notebook = ttk.Notebook(tab1)
-nested_notebook.pack(expand=True, fill="both")
+    # Create nested notebook with subtabs
+    nested_notebook = ttk.Notebook(tab1)
+    nested_notebook.pack(expand=True, fill="both")
 
-subtabs = []
-image_lists = []
-subtab_label = ['baseplate','hexaboard','protomodule','module']
-for s in range(len(subtab_label)):  ## bp, hxp, pml, ml
-    subtabs.append(ttk.Frame(nested_notebook))
-    nested_notebook.add(subtabs[s], text=subtab_label[s])
+    subtabs = []
+    image_lists = []
+    subtab_label = ['baseplate','hexaboard','protomodule','module']
+    for s in range(len(subtab_label)):  ## bp, hxp, pml, ml
+        subtabs.append(ttk.Frame(nested_notebook))
+        nested_notebook.add(subtabs[s], text=subtab_label[s])
 
-# Create and configure listbox for image selection
-for s in range(len(subtab_label)):
-    image_list_frame = tk.Frame(subtabs[s])
-    image_list_scrollbar = tk.Scrollbar(image_list_frame)
-    image_list = tk.Listbox(image_list_frame, yscrollcommand=image_list_scrollbar.set, selectmode=tk.SINGLE, height=12, width=30) # Adjust the height and width of the listbox
-    image_list_scrollbar.config(command=image_list.yview)
-    image_list_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-    image_list.pack(pady=10, side=tk.LEFT, fill=tk.BOTH, expand=True)  # Adjust side and padding of the listbox
-    image_list_frame.pack(pady=10, fill=tk.BOTH, expand=True)
-    image_list.bind('<<ListboxSelect>>', display_selected_image)
-    image_lists.append(image_list)
-
-
-    # pe = ['a.png','b.png','c.png','a.png']
-refresh_listbox()
-
-    # Create and configure comment box
-# comment_frame = tk.Frame(tab1)
-# comment_label = tk.Label(comment_frame, text="Comment:")
-# comment_label.pack(side=tk.LEFT, padx=(10, 5))
-# comment_entry = tk.Entry(comment_frame, width=50)  # Adjust width of the comment entry
-# comment_entry.pack(side=tk.LEFT, padx=(0, 5))
-# submit_button = tk.Button(comment_frame, text="Submit Comment", command=submit_comment())
-# submit_button.pack(side=tk.LEFT)
-# comment_frame.pack(pady=5, fill=tk.X)
-
-image_display_frame = tk.Frame(tab1)
-image_label = tk.Label(image_display_frame)
-image_label.pack(pady=10)  # Adjust padding of the image label
-image_display_frame.pack(pady=10)
-
-refresh_button = tk.Button(tab1, text="Refresh", command=refresh_listbox)
-refresh_button.pack()
+    # Create and configure listbox for image selection
+    for s in range(len(subtab_label)):
+        image_list_frame = tk.Frame(subtabs[s])
+        image_list_scrollbar = tk.Scrollbar(image_list_frame)
+        image_list = tk.Listbox(image_list_frame, yscrollcommand=image_list_scrollbar.set, selectmode=tk.SINGLE, height=12, width=30) # Adjust the height and width of the listbox
+        image_list_scrollbar.config(command=image_list.yview)
+        image_list_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        image_list.pack(pady=10, side=tk.LEFT, fill=tk.BOTH, expand=True)  # Adjust side and padding of the listbox
+        image_list_frame.pack(pady=10, fill=tk.BOTH, expand=True)
+        image_list.bind('<<ListboxSelect>>', display_selected_image)
+        image_lists.append(image_list)
 
 
-### Include the watching portion
-#info_show = tk.Label(tab1, text = f'Watching directory: C:/Users/Admin/.../OGP_results')
-#info_show.pack()
+        # pe = ['a.png','b.png','c.png','a.png']
+    refresh_listbox()
+
+        # Create and configure comment box
+    # comment_frame = tk.Frame(tab1)
+    # comment_label = tk.Label(comment_frame, text="Comment:")
+    # comment_label.pack(side=tk.LEFT, padx=(10, 5))
+    # comment_entry = tk.Entry(comment_frame, width=50)  # Adjust width of the comment entry
+    # comment_entry.pack(side=tk.LEFT, padx=(0, 5))
+    # submit_button = tk.Button(comment_frame, text="Submit Comment", command=submit_comment())
+    # submit_button.pack(side=tk.LEFT)
+    # comment_frame.pack(pady=5, fill=tk.X)
+
+    image_display_frame = tk.Frame(tab1)
+    image_label = tk.Label(image_display_frame)
+    image_label.pack(pady=10)  # Adjust padding of the image label
+    image_display_frame.pack(pady=10)
+
+    refresh_button = tk.Button(tab1, text="Refresh", command=refresh_listbox)
+    refresh_button.pack()
+
+
+    ### Include the watching portion
+    #info_show = tk.Label(tab1, text = f'Watching directory: C:/Users/Admin/.../OGP_results')
+    #info_show.pack()
 
 
 
-##########################################################################
+    ##########################################################################
 
-# Create and configure second tab
-tab2 = ttk.Frame(notebook)
-notebook.add(tab2, text='Upload Files')
+    # Create and configure second tab
+    tab2 = ttk.Frame(notebook)
+    notebook.add(tab2, text='Upload Files')
 
-select_button = tk.Button(tab2, text='Select Files', command=select_files)
-process_button = tk.Button(tab2, text='Process Selected Files', command=process_selected_files)
+    select_button = tk.Button(tab2, text='Select Files', command=select_files)
+    process_button = tk.Button(tab2, text='Process Selected Files', command=process_selected_files)
 
-select_button.pack(pady=10)
+    select_button.pack(pady=10)
 
-file_paths_scrollbar = tk.Scrollbar(tab2)
-file_paths_text = tk.Text(tab2, height=15, width=90, wrap=tk.WORD, state=tk.DISABLED, yscrollcommand=file_paths_scrollbar.set)
-file_paths_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-file_paths_text.pack(pady=10)
+    file_paths_scrollbar = tk.Scrollbar(tab2)
+    file_paths_text = tk.Text(tab2, height=15, width=90, wrap=tk.WORD, state=tk.DISABLED, yscrollcommand=file_paths_scrollbar.set)
+    file_paths_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    file_paths_text.pack(pady=10)
 
-process_button.pack(pady=10)
+    process_button.pack(pady=10)
 
-output_scrollbar = tk.Scrollbar(tab2)
-output_text = tk.Text(tab2, height=15, width=90, wrap=tk.WORD, state=tk.DISABLED, yscrollcommand=output_scrollbar.set)
-output_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-output_text.pack(pady=10)
+    output_scrollbar = tk.Scrollbar(tab2)
+    output_text = tk.Text(tab2, height=15, width=90, wrap=tk.WORD, state=tk.DISABLED, yscrollcommand=output_scrollbar.set)
+    output_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    output_text.pack(pady=10)
 
-show_file_path = str(os.path.realpath(__file__)).split('file_selector.py')[0]
-info_show = tk.Label(tab2, text = f'Output saved here: '+ show_file_path)
-info_show.pack()
+    show_file_path = str(os.path.realpath(__file__)).split('file_selector.py')[0]
+    info_show = tk.Label(tab2, text = f'Output saved here: '+ show_file_path)
+    info_show.pack()
 
-notebook.pack(expand=True, fill='both')
+    notebook.pack(expand=True, fill='both')
 
-# Start the GUI event loop
-root.mainloop()
+    # Start the GUI event loop
+    root.mainloop()
