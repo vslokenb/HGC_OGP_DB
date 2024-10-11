@@ -154,8 +154,9 @@ class SurveyProcessor():
         y_points = DataParser.get_feature_from_df(df, 'Y_coordinate')
         z_points = DataParser.get_feature_from_df(df, 'Z_coordinate')
 
-        im_bytes = PlotTool.plot2d(x_points, y_points, z_points, limit = 0,
-            center = 5, rotate = 345, value = 1,details=1, show_plot = False, **im_args)
+        # im_bytes = PlotTool.plot2d(x_points, y_points, z_points, limit = 0,
+        #   center = 12, rotate = 345, value = 1,details=1, show_plot = False, **im_args)
+        im_bytes = PlotTool.plot2d(x_points, y_points, z_points, center=12, show_plot=False)
 
         # placeholder for comment till further update of templates
         comment = ''
@@ -181,10 +182,10 @@ class SurveyProcessor():
         for ex_file in self.OGPSurveyFile:
             db_upload, db_table_name, modtitle = self.__getArgs__(ex_file)
             mappings = np.array([None],dtype=object)
-            try:
-                asyncio.run(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
-            except:
-                (asyncio.get_event_loop()).run_until_complete(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.6
+            # try:
+            asyncio.run(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
+            # except:
+                #(asyncio.get_event_loop()).run_until_complete(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.6
             print(modtitle, 'uploaded!')
             # if trash_file:
                 # send2trash.send2trash(ex_file)
@@ -212,9 +213,9 @@ class SurveyProcessor():
     @staticmethod
     def getDateTime(metadata):
         """Get date and time from metadata."""
-        date_inspect = datetime.strptime(metadata['RunDate'], '%Y-%m-%d').date()
+        date_inspect = datetime.strptime(metadata['RunDate'], '%m:%d:%y').date()
         time_inspect = datetime.strptime(metadata['RunTime'], '%H:%M:%S').time()
         
-        return {"date_inspec": date_inspect, "time_inspect": time_inspect}
+        return {"date_inspect": date_inspect, "time_inspect": time_inspect}
         
     

@@ -113,7 +113,8 @@ class DataParser():
 
         if 'Flatness' not in self.header_results:
             raise ValueError('Flatness not found in header. Please check the OGP template.')
-
+        
+        self.header_results['Flatness'] = float(self.header_results['Flatness'])
         return header_results, feature_results
     
     def output_features(self, output_filename):

@@ -15,7 +15,7 @@ if __name__ == "__main__":
     dp = DataParser(data_file, template_dir)
     dp()
 
-    PlotTool.plot2d(dp.get_feature('X_coordinate'), dp.get_feature('Y_coordinate'), dp.get_feature('Z_coordinate'), center=5)
+    PlotTool.plot2d(dp.get_feature('X_coordinate'), dp.get_feature('Y_coordinate'), dp.get_feature('Z_coordinate'), center=12)
     
     
     
