@@ -6,11 +6,12 @@ matplotlib.use('Agg')
 from src.ogp_height_plotter import PlotTool, get_offsets
 from src.upload_inspect import DBClient
 from src.parse_data import DataParser
-from make_accuracy_plot import make_accuracy_plot
+from src.make_accuracy_plot import make_accuracy_plot
 from datetime import datetime
 
 pbase = os.path.basename
 pdir = os.path.dirname
+pjoin = os.path.join
 
 baseplates_params = {"key":"Surface", "vmini": 1.2, "vmaxi": 2.2, "new_angle": 0, "db_table_name": 'bp_inspect', "material": 'cf'}
 hexaboards_params = {"key":"Flatness", "vmini": 1.2, "vmaxi": 2.9, "new_angle": 0, "db_table_name": 'hxb_inspect'}
@@ -18,7 +19,7 @@ protomodules_params = {"key":"Thick", "vmini": 1.37, "vmaxi": 1.79, "new_angle":
 others_params = {"key":"Thick", "vmini": 2.75, "vmaxi": 4.0, "new_angle": 270, "db_table_name": 'module_inspect'}
 
 class SurveyProcessor():
-    """Process OGP Survey file and extract data for plotting and uploading to database."""
+    """Process Parsed OGP Survey CSV files and extract data for plotting and uploading to database."""
     def __init__(self, OGPSurveyFilePath, yamlconfig):
         """Initialize ImageProcessor object.
         
@@ -26,17 +27,28 @@ class SurveyProcessor():
         - OGPSurveyFilePath (str/list): (list of) Path(s) to OGP Survey output file."""
         if isinstance(OGPSurveyFilePath, str):
             self.OGPSurveyFile = [OGPSurveyFilePath]
+        elif isinstance(OGPSurveyFilePath, list):
+            self.OGPSurveyFile = OGPSurveyFilePath
+        else:
+            raise TypeError('OGP Survey file path must be a string or a list of strings.')
+
         for i, file in enumerate(self.OGPSurveyFile):
             if not file.endswith('.csv'):
-                raise ValueError('OGP Survey output file must be a csv file.')
+                raise ValueError('Parsed OGP result must be a csv file.')
             self.OGPSurveyFile[i] = file.replace('\\', '/')
+        
+        im_dir = pjoin(pdir(self.OGPSurveyFile[0]), 'images')
+        if not os.path.exists(im_dir):
+            os.makedirs(im_dir)
+        self.im_dir = im_dir
 
         print(f'filename to process/upload: {self.OGPSurveyFile}')
         self.client = DBClient(yamlconfig)
         pass
 
     def __call__(self):
-        self.getTrayFile()  
+        """Process and upload OGP Survey files."""
+        # self.getTrayFile()  
         self.process_and_upload()
 
     def getTrayFile(self):
@@ -89,6 +101,9 @@ class SurveyProcessor():
                 comp_type = 'protomodules';
             if 'M' in modname: 
                 comp_type = 'modules'
+        # placeholder
+        else:
+            comp_type = 'baseplates'
         
         print('')
         print(f"###### NEW {comp_type} UPLOAD #######")
@@ -132,15 +147,15 @@ class SurveyProcessor():
         print("key:", component_params['key'])
 
         im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
-                   "new_angle": component_params['new_angle'], "savename":f"{comp_type}\{filesuffix}_heights",
+                   "new_angle": component_params['new_angle'], "savename":pjoin(self.im_dir,f"{comp_type}\{filesuffix}_heights"),
                    "mod_flat": metadata['Flatness'], "title": metadata['ComponentID']}
         
         x_points = DataParser.get_feature_from_df(df, 'X_coordinate')
         y_points = DataParser.get_feature_from_df(df, 'Y_coordinate')
         z_points = DataParser.get_feature_from_df(df, 'Z_coordinate')
 
-        im_bytes = PlotTool.plot2d(x_points, y_points, z_points, limit = 0, **im_args,
-            center = 25, rotate = 345, value = 1,details=1, show_plot = False)
+        im_bytes = PlotTool.plot2d(x_points, y_points, z_points, limit = 0,
+            center = 5, rotate = 345, value = 1,details=1, show_plot = False, **im_args)
 
         # placeholder for comment till further update of templates
         comment = ''

@@ -1,14 +1,15 @@
-import os, yaml, sys
+import os, yaml, sys, glob, re
 
 pjoin = os.path.join
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
-src_dir = pjoin(file_dir, 'read-write-ogp', 'src')
+src_dir = pjoin(file_dir, 'read-write-ogp')
 if src_dir not in sys.path:
     sys.path.append(src_dir)
 
 from src.upload_inspect import DBClient
 from src.parse_data import DataParser
+from src.process_im import SurveyProcessor
 from src.file_selector import fire_GUI
 
 def create_default_config(file_path):
@@ -36,9 +37,19 @@ def main():
         return
     else:
         print("Using configuration file to create database client...")
+    
+    with open(config_file, 'r') as f:
+        config = yaml.safe_load(f)
+    
+    OGP_outputs = glob.glob(config['ogp_survey_dir'] + '/*.txt')
+    parsed_dir = pjoin(config['ogp_survey_dir'], 'parsed')
 
-    dbclient = DBClient(config_file)
-    fire_GUI(dbclient)
+    dp = DataParser(OGP_outputs, parsed_dir)
+    dp()
+
+    parsed_outputs = glob.glob(parsed_dir + '/*.csv')
+    uploader = SurveyProcessor(parsed_outputs, config_file)
+    uploader()
 
 if __name__ == '__main__':
     main()
