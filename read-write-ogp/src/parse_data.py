@@ -72,18 +72,29 @@ Radius            {{Radius}}
 """
 
 class DataParser():
-    """Parse data file using TTP template."""
+    """Parse data file(s) using TTP template."""
     def __init__(self, data_file, output_dir):
-        with open(data_file, 'r') as f:
-            self.data = f.read()
+        """Initialize DataParser object.
         
+        Parameters:
+        - data_file (str): Path to the data output file by OGP surveys to be parsed.
+        - output_dir (str): Path to the output directory of the parsed data."""
+        if isinstance(data_file, str):
+            data_file = [data_file]
+        
+        self.data_file = data_file
         self.output_dir = output_dir
+        
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
     
     def __call__(self):
         """Parse data file produced by default OGP template."""
-        self.read_temp_sep()
-        filename = self.output_meta()
-        self.output_features(f'{filename}.csv')
+        for filename in self.data_file:
+            self.data = open(filename, 'r').read()
+            self.read_temp_sep()
+            filename = self.output_meta()
+            self.output_features(f'{filename}.csv')
 
     def read_temp_sep(self, header_template=header_template, feature_template=data_template, delimiter='---'):
         """Read data file produced with header and feature templates separated by a delimiter."""
@@ -102,12 +113,13 @@ class DataParser():
 
         if 'Flatness' not in self.header_results:
             raise ValueError('Flatness not found in header. Please check the OGP template.')
-
+        
+        self.header_results['Flatness'] = float(self.header_results['Flatness'])
         return header_results, feature_results
     
-    def output_features(self, output_file):
+    def output_features(self, output_filename):
         """Output feature results to a csv file."""
-        with open(output_file, 'w') as f:
+        with open(pjoin(self.output_dir, output_filename), 'w') as f:
             f.write(self.feature_results)
     
     def output_meta(self) -> str:
