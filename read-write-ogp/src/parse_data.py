@@ -109,7 +109,7 @@ class DataParser():
         feature_results = parser.result(format='csv', structure="flat_list")
 
         self.header_results = header_results[0]
-        self.feature_results = feature_results[0]
+        self.feature_results = pd.read_csv(StringIO(feature_results[0])).drop_duplicates()
 
         if 'Flatness' not in self.header_results:
             raise ValueError('Flatness not found in header. Please check the OGP template.')
@@ -119,8 +119,7 @@ class DataParser():
     
     def output_features(self, output_filename):
         """Output feature results to a csv file."""
-        with open(pjoin(self.output_dir, output_filename), 'w') as f:
-            f.write(self.feature_results)
+        self.feature_results.to_csv(pjoin(self.output_dir, output_filename), index=False)
     
     def output_meta(self) -> str:
         """Output metadata to a file, with filename based on ComponentID and Operator.
@@ -133,16 +132,19 @@ class DataParser():
         with open(f'{self.output_dir}/{meta_file}', 'w') as f:
             yaml.dump(header_dict, f, default_flow_style=False)
         return filename
-        
-    def get_feature(self, feature_name, filterType=None):
-        """Get feature by name."""
-        csv_io = StringIO(self.feature_results)
-        df = pd.read_csv(csv_io)
-
-        return self.get_feature_from_df(df, feature_name, filterType)
     
     @staticmethod
-    def get_feature_from_df(df, feature_name, filterType=None):
+    def get_xyz(df: pd.DataFrame) -> pd.DataFrame:
+        """Get X, Y, Z coordinates from the dataframe."""
+        return df.dropna(subset=['X_coordinate', 'Y_coordinate', 'Z_coordinate'])
+    
+    @staticmethod
+    def get_feature_from_df(df: 'pd.DataFrame', feature_name, filterType=None) -> pd.Series:
+        """Get feature from the dataframe.
+        
+        Parameters:
+        - df (pd.DataFrame): Dataframe containing the parsed data.
+        - feature_name (str): Name of the feature to be extracted."""
         assert feature_name in df.columns, 'Feature not found'
 
         if filterType is None: filtered_df = df

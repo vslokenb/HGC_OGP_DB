@@ -1,22 +1,47 @@
-# import pandas as pd
-# import os, sys
 import numpy as np
-import matplotlib
-# matplotlib.use('Agg')
+import pandas as pd
+import os
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
-# import xlrd
+from src.parse_data import DataParser
 
 class PlotTool:
-    def __init__(self, features, save_dir):
+    def __init__(self, features: 'pd.DataFrame', save_dir):
+        """
+        Parameters
+        - `features`: dataframe of features to plot
+        - `save_dir`: directory to save the plots to"""
         self.save_dir = save_dir
-        self.features = features
+        self.features = DataParser.get_xyz(features)
+        self.x_points = self.features['X_coordinate']
+        self.y_points = self.features['Y_coordinate']
+        self.z_points = self.features['Z_coordinate']
     
-    def __call__(self, *args, **kwds):
-        pass
+    def __call__(self, **kwds):
+        """Plot the 2D height map of the given data."""
+        centerxy = self.get_center()
+        self.plot2d(self.x_points, self.y_points, self.z_points, centerxy, **kwds)
+    
+    def get_center(self) -> int:
+        """Get the index of the fiducial center in the dataframe by taking the average of the x and y coordinates."""
+        center_x = (max(self.x_points) + min(self.x_points)) / 2
+        center_y = (max(self.y_points) + min(self.y_points)) / 2
+        return (center_x, center_y)
 
     @staticmethod
-    def plot2d(x, y, zheight, limit = 0, vmini=1.05, vmaxi=4.5, center = 0, rotate = 0 , new_angle = 120, details = 0, title="", savename="", value = 1, day_count = None, mod_flat = None, show_plot = True):
+    def plot2d(x, y, zheight, centerxy, vmini=1.05, vmaxi=4.5, rotate = 0 , new_angle = 120, title="", savename="", value = 1, day_count = None, mod_flat = None, show_plot = True):
+        """Plot 2D height map of the given data.
+        Parameters
+        - `x`: x-coordinates
+        - `y`: y-coordinates
+        - `zheight`: height values
+        - `centerxy`: tuple of the center coordinates (x,y)
+        - `vmini`: minimum height value
+        - `vmaxi`: maximum height value
+        - `rotate`: index of the fiducial to rotate the plot around
+        - `new_angle`: angle to rotate the plot to
+        - `title`: title of the plot
+        - `value`: 1 for plotting height values, 0 for plotting deviation from mean"""
         mean_h = np.mean(zheight)
         std_h = np.std(zheight)
         max_h = max(zheight)
@@ -26,72 +51,38 @@ class PlotTool:
         print(f"Minimum Height is {min_h:.3f} mm")
         print(f"Height --> {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm")
         print()
-        if center != 0:
-            if (type(center) is int) and (center >0 and center <26):
-                x = x- x[center-1]
-                y = y- y[center-1]
-                if details == 1:
-                    print(f"Point {center} center at (0,0)")
-            else:
-                print("Please give a integer between 1 and 25 for center point") 
-        else:
-            if details == 1:
-                print("No center")
+        
+        center_x, center_y = centerxy
 
+        x = x- center_x
+        y = y- center_y
+
+        assert rotate >= 0 and rotate < len(x), "The specified index for rotation has to be within the range of the data."
         if rotate != 0:
-            if (type(rotate) is int) and (rotate > 0 and rotate <26):
-                rotate_angle = vec_angle(x[rotate-1], y[rotate-1])
-            else:
-                rotate_angle = 0
-                # print("Please give a integer between 1 and 25 for rotate point")   
+            rotate_angle = vec_angle(x[rotate-1], y[rotate-1]) if rotate != 0 else 0
             for i in range(len(x)):
                 x[i], y[i] = vec_rotate(x[i],y[i],rotate_angle, new_angle)
-            if details == 1:
-                print(f"Point {rotate} originally at {rotate_angle:.2f} degrees")
-                print(f"Point {rotate} rotates to {new_angle:.2f} degrees")
-
-        else:
-            if details == 1:
-                print("No rotation")
 
         fig=plt.figure(dpi=150, figsize=(9,5))
         axs=fig.add_subplot(111); axs.set_aspect('equal')
         
-        
-        if value == 1:
-            image=axs.hexbin(x,y,zheight,gridsize=20, vmin = vmini, vmax = vmaxi, cmap=plt.cm.coolwarm)
-            norm = cls.Normalize(vmin=vmini, vmax=vmaxi)
-            sm = plt.cm.ScalarMappable(norm=norm, cmap=plt.cm.coolwarm)
-            cb=plt.colorbar(sm, ax= axs); cb.minorticks_on()
-            # for i in range(len(zheight)):
-                # axs.annotate(f"${zheight[i]:.3f}$",(x[i],y[i]),color = "black", fontsize = 9)
-                # axs.annotate(f"${i}$",(x[i]-2.5,y[i]-5.5),color = "green", fontsize = 7)
-                # if zheight[i]-mean_h < 0:
-                #     axs.annotate(f"(${(zheight[i]-mean_h):.3f}$)",(x[i]-2.5,y[i]-5.5),color = "blue", fontsize = 7)
-                # else:
-                #     axs.annotate(f"(${(zheight[i]-mean_h):.3f}$)",(x[i]-2.5,y[i]-5.5),color = "red", fontsize = 7)
-        # elif value == 0:
-        #     image=axs.hexbin(x,y,zheight-mean_h,gridsize=20, vmin = vmini, vmax = vmaxi, cmap=plt.cm.coolwarm)
-        #     norm = cls.Normalize(vmin=vmini, vmax=vmaxi)
-        #     for i in range(len(zheight)):
-        #         axs.annotate(f"${(zheight[i]-mean_h):.3f}$",(x[i],y[i]),color = "black")
-        else:
-            if title == '815 PCB fiducials':
-                thickness = np.array([10,11,12,13,14,15,16,17,18,1,2,3,4,5,6,7,8,9,19,20,21,22,23,24,25])
-                axs.annotate(f"{thickness[i]}",(x[i],y[i]),color="black")
-        #axs.annotate(f"{i+1}",(temp[0][i],temp[1][i]),color="black")
-            else:
-                axs.annotate(f"{i+1}",(x[i],y[i]),color="black")
+        axs.hexbin(x,y,zheight,gridsize=20, vmin = vmini, vmax = vmaxi, cmap=plt.cm.coolwarm)
+        norm = cls.Normalize(vmin=vmini, vmax=vmaxi)
+        sm = plt.cm.ScalarMappable(norm=norm, cmap=plt.cm.coolwarm)
+        cb=plt.colorbar(sm, ax= axs); cb.minorticks_on()
+        # else:
+        #     if title == '815 PCB fiducials':
+        #         thickness = np.array([10,11,12,13,14,15,16,17,18,1,2,3,4,5,6,7,8,9,19,20,21,22,23,24,25])
+        #         axs.annotate(f"{thickness[i]}",(x[i],y[i]),color="black")
+        # #axs.annotate(f"{i+1}",(temp[0][i],temp[1][i]),color="black")
+        #     else:
+        #         axs.annotate(f"{i+1}",(x[i],y[i]),color="black")
 
-        
-        #axs.annotate("1", temp[0][0],temp[1][0])
         axs.set_xlabel("x (mm)")
         axs.set_ylabel("y (mm)")
         axs.minorticks_on()
         axs.set_xlim(left=-100, right=100)
         axs.set_ylim(bottom=-100, top=100)
-        #axs.set_xticks([-100,-75,-50,-25,0,25,50,75,100])
-        #axs.set_yticks([-100,-75,-50,-25,0,25,50,75,100])
         cb.set_label("Height (mm)")
         axs.set_title(title)
         if mod_flat is not None:
@@ -102,10 +93,8 @@ class PlotTool:
                             '',f'$\Delta$H = {max_h - min_h:.3f} mm','', f'maxH: {max_h:.3f} mm', f'minH:  {min_h:.3f} mm',''))
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         axs.text(1.3, 1.0, textstr, transform=axs.transAxes, fontsize=10, verticalalignment='top', bbox=props)
-        # axs.text(1.3, 0.40, legendstr, transform=axs.transAxes, fontsize=5, verticalalignment='top', color = 'blue')
         if day_count is not None:
             legendstr = '\n'.join((f'Day',f'{day_count}'))
-            # legendstr = '\n'.join((f'',f'{day_count}'))
             axs.text(1.3, 0.20, legendstr, transform=axs.transAxes, fontsize=20, verticalalignment='top', color = 'blue')
 
         if show_plot:
@@ -119,246 +108,25 @@ class PlotTool:
         buffer.seek(0)
         plt.close()
         return buffer.read()
-    
-    @staticmethod
-    def vec_angle(x,y):
-        angle_arctan = np.degrees(np.arctan2(y,x))
-        return angle_arctan
-
-# from hexmap.plot_summary import *
-
-def Height(sheetname,key = 'Thick'):   ### change the key here for searching where is the first Height in the excel
-    row = globals()[f"{sheetname}"].nrows
-    #print("total number of row is", row)
-    for i in range(row):
-        actual = str(globals()[f'{sheetname}'].cell_value(i,2))
-        if (key in actual):
-            print(f"First Height locates at line {i} in {sheetname}.xls")
-            print(f"Row name: {actual}")
-            print()
-            height1 = i
-            break
-    #height1 = i
-    globals()[f'Height_{sheetname}']=np.zeros((3,25))
-    if sheetname == '815 unconstrained flatness':
-        lines=[24,25,26]
-    else:
-        lines=[height1,height1+1,height1+2]
-    #lines = [20,21,22]
-    for i in range(0,25):
-    #print(i)
-        x=float(globals()[f'{sheetname}'].cell_value(lines[0]+i*5,5))
-        y=float(globals()[f'{sheetname}'].cell_value(lines[1]+i*5,5))
-        z=float(globals()[f'{sheetname}'].cell_value(lines[2]+i*5,5))
-        globals()[f'Height_{sheetname}'][0,i]=x
-        globals()[f'Height_{sheetname}'][1,i]=y
-        globals()[f'Height_{sheetname}'][2,i]=z
-        #print(x)
-    return globals()[f'Height_{sheetname}']
-
-def Flat(sheetname,key = 'Surf'): ### change the key here for searching where is the first Height in the excel
-    key = 'Surface'; ##### <---- important for this, or else we'd need to separate the keys into two.
-    row = globals()[f"{sheetname}"].nrows
-    for i in range(row):
-        actual = str(globals()[f'{sheetname}'].cell_value(i,2));
-        subactual = str(globals()[f'{sheetname}'].cell_value(i,3));
-    
-        if (key in actual):
-            if 'Profile' in subactual:
-                height1 = i
-                break
-    globals()[f'Height_{sheetname}']=np.zeros((3,25))
-    if sheetname == '815 unconstrained flatness':
-        lines=[24,25,26]
-    else:
-        ines=[height1,height1+1,height1+2]
-    
-    if 'Points' in str(globals()[f'{sheetname}'].cell_value(height1,3)):
-        flatness = (float(globals()[f'{sheetname}'].cell_value(height1,5)))
-    else:
-        flatness = (float(globals()[f'{sheetname}'].cell_value(height1,5)))
-    print()
-    print(f"Flatness is {flatness}, found on line {i} in {sheetname}.xls")
-    return flatness;
-
-def getDate(sheetname,key = 'Date'):   ### change the key here for searching where is the first Height in the excel
-    row = globals()[f"{sheetname}"].nrows
-    print('row acquired')
-    #print("total number of row is", row)
-    for i in range(row):
-        print(i, str(globals()[f'{sheetname}'].cell_value(i,0)), str(globals()[f'{sheetname}'].cell_value(i,1)), str(globals()[f'{sheetname}'].cell_value(i,2)))
-        actual = str(globals()[f'{sheetname}'].cell_value(i,2))
-        if (key in actual):
-            print(f"First Date locates at line {i} in {sheetname}.xls")
-            print(f"Row name: {actual}")
-            print()
-            height1 = i
-            break
-    #height1 = i
-    globals()[f'Height_{sheetname}']=np.zeros((3,25))
-    if sheetname == '815 unconstrained flatness':
-        lines=[24,25,26]
-    else:
-        lines=[height1,height1+1,height1+2]
-    #lines = [20,21,22]
-    for i in range(0,25):
-    #print(i)
-        x=float(globals()[f'{sheetname}'].cell_value(lines[0]+i*5,5))
-        y=float(globals()[f'{sheetname}'].cell_value(lines[1]+i*5,5))
-        z=float(globals()[f'{sheetname}'].cell_value(lines[2]+i*5,5))
-        globals()[f'Height_{sheetname}'][0,i]=x
-        globals()[f'Height_{sheetname}'][1,i]=y
-        globals()[f'Height_{sheetname}'][2,i]=z
-        #print(x)
-    return globals()[f'Height_{sheetname}']
-
-def AppendTime(sheetnames,key = 'Date'):
-    All_Heights=[]
-    for j in range(len(sheetnames)):
-      All_Heights.append(np.array(getDate(sheetnames[j],key)))
-    return All_Heights
-
-def AppendHeights(sheetnames,key = 'Thick', mappings = None):
-    All_Heights=[]
-    for j in range(len(sheetnames)):
-        if mappings[j] is not None:
-            All_Heights.append(np.array(Height(sheetnames[j],key))[:,mappings[j]])
-        else:
-            All_Heights.append(np.array(Height(sheetnames[j],key)))
-    return All_Heights
-
-def AppendFlats(sheetnames,key = 'Surface'):
-    key = 'Surface';
-    All_Flats=[]
-    for j in range(len(sheetnames)):
-        All_Flats.append(np.array(Flat(sheetnames[j],key)))
-    return All_Flats
 
 def vec_angle(x,y):
     angle_arctan = np.degrees(np.arctan2(y,x))
     return angle_arctan
 
 def vec_rotate(old_x, old_y, old_angle, new_angle = 120):
+    """Rotate a vector by a given angle.
+
+    Parameters
+    - `old_x`: x-coordinate of the vector
+    - `old_y`: y-coordinate of the vector
+    - `old_angle`: angle of the vector
+    - `new_angle`: angle to rotate the vector to"""
     rad = np.radians(new_angle - old_angle)
     new_x = old_x*np.cos(rad)-old_y*np.sin(rad)
     new_y = old_x*np.sin(rad)+old_y*np.cos(rad)
     return new_x, new_y
-
-
-
-def get_data(x, y, zheight, limit = 0, vmini=1.05, vmaxi=4.5, center = 0, rotate = 0 , new_angle = 120, details = 0, title="", savename="", value = 1, day_count = None, mod_flat = None, show_plot = True):
-
-    # print('sorting for consisitency')
-    # argx = np.argsort(x)
-    # x, y, zheight = x[argx], y[argx], zheight[argx]
-    # argy = np.argsort(y)
-    # x, y, zheight = x[argy], y[argy], zheight[argy]
-    mean_h = np.mean(zheight)
-    std_h = np.std(zheight)
-    max_h = max(zheight)
-    min_h = min(zheight)
-    print(f"Average Height is {mean_h:.3f} mm")
-    print(f"Maximum Height is {max_h:.3f} mm")
-    print(f"Minimum Height is {min_h:.3f} mm")
-    print(f"Height --> {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm")
-    print()
-    if center != 0:
-        if (type(center) is int) and (center >0 and center <26):
-            ######## Last point is the center if given 25
-            x = x- x[center-1]
-            y = y- y[center-1]
-            if details == 1:
-                print(f"Point {center} center at (0,0)")
-        else:
-            print("Please give a integer between 1 and 25 for center point") 
-    else:
-        if details == 1:
-            print("No center")
-
-    if rotate != 0:
-        if (type(rotate) is int) and (rotate > 0 and rotate <26):
-            rotate_angle = vec_angle(x[rotate-1], y[rotate-1])
-        else:
-            rotate_angle = 0
-            # print("Please give a integer between 1 and 25 for rotate point")   
-        for i in range(len(x)):
-            x[i], y[i] = vec_rotate(x[i],y[i],rotate_angle, new_angle)
-        if details == 1:
-            print(f"Point {rotate} originally at {rotate_angle:.2f} degrees")
-            print(f"Point {rotate} rotates to {new_angle:.2f} degrees")
-
-    else:
-        if details == 1:
-            print("No rotation")
-
-    fig=plt.figure(dpi=150, figsize=(9,5))
-    axs=fig.add_subplot(111); axs.set_aspect('equal')
     
-    
-    if value == 1:
-        image=axs.hexbin(x,y,zheight,gridsize=20, vmin = vmini, vmax = vmaxi, cmap=plt.cm.coolwarm)
-        norm = cls.Normalize(vmin=vmini, vmax=vmaxi)
-        sm = plt.cm.ScalarMappable(norm=norm, cmap=plt.cm.coolwarm)
-        cb=plt.colorbar(sm, ax= axs); cb.minorticks_on()
-        for i in range(len(zheight)):
-            axs.annotate(f"${zheight[i]:.3f}$",(x[i],y[i]),color = "black", fontsize = 9)
-            # axs.annotate(f"${i}$",(x[i]-2.5,y[i]-5.5),color = "green", fontsize = 7)
-            # if zheight[i]-mean_h < 0:
-            #     axs.annotate(f"(${(zheight[i]-mean_h):.3f}$)",(x[i]-2.5,y[i]-5.5),color = "blue", fontsize = 7)
-            # else:
-            #     axs.annotate(f"(${(zheight[i]-mean_h):.3f}$)",(x[i]-2.5,y[i]-5.5),color = "red", fontsize = 7)
-    # elif value == 0:
-    #     image=axs.hexbin(x,y,zheight-mean_h,gridsize=20, vmin = vmini, vmax = vmaxi, cmap=plt.cm.coolwarm)
-    #     norm = cls.Normalize(vmin=vmini, vmax=vmaxi)
-    #     for i in range(len(zheight)):
-    #         axs.annotate(f"${(zheight[i]-mean_h):.3f}$",(x[i],y[i]),color = "black")
-    else:
-        if title == '815 PCB fiducials':
-            thickness = np.array([10,11,12,13,14,15,16,17,18,1,2,3,4,5,6,7,8,9,19,20,21,22,23,24,25])
-            axs.annotate(f"{thickness[i]}",(x[i],y[i]),color="black")
-    #axs.annotate(f"{i+1}",(temp[0][i],temp[1][i]),color="black")
-        else:
-            axs.annotate(f"{i+1}",(x[i],y[i]),color="black")
 
-    
-    #axs.annotate("1", temp[0][0],temp[1][0])
-    axs.set_xlabel("x (mm)")
-    axs.set_ylabel("y (mm)")
-    axs.minorticks_on()
-    axs.set_xlim(left=-100, right=100)
-    axs.set_ylim(bottom=-100, top=100)
-    #axs.set_xticks([-100,-75,-50,-25,0,25,50,75,100])
-    #axs.set_yticks([-100,-75,-50,-25,0,25,50,75,100])
-    cb.set_label("Height (mm)")
-    axs.set_title(title)
-    if mod_flat is not None:
-        textstr = '\n'.join((f'mean: {mean_h:.3f} mm',f'std:     {std_h:.3f} mm','', f'height: {mean_h:.3f} mm', f'       $+$ ({max_h - mean_h:.3f}) mm', f'       $-$ ({mean_h - min_h:.3f}) mm',
-                            '',f'$\Delta$H = {max_h - min_h:.3f} mm','', f'maxH: {max_h:.3f} mm', f'minH:  {min_h:.3f} mm','', f'flatness: {mod_flat:.3f}'))
-    else:
-        textstr = '\n'.join((f'mean: {mean_h:.3f} mm',f'std:     {std_h:.3f} mm','', f'height: {mean_h:.3f} mm', f'       $+$ ({max_h - mean_h:.3f}) mm', f'       $-$ ({mean_h - min_h:.3f}) mm',
-                         '',f'$\Delta$H = {max_h - min_h:.3f} mm','', f'maxH: {max_h:.3f} mm', f'minH:  {min_h:.3f} mm',''))
-    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-    axs.text(1.3, 1.0, textstr, transform=axs.transAxes, fontsize=10, verticalalignment='top', bbox=props)
-    # legendstr = '\n'.join(('*Numbers in brackets represent', 'deviation from mean.'))
-    # axs.text(1.3, 0.40, legendstr, transform=axs.transAxes, fontsize=5, verticalalignment='top', color = 'blue')
-    if day_count is not None:
-        legendstr = '\n'.join((f'Day',f'{day_count}'))
-        # legendstr = '\n'.join((f'',f'{day_count}'))
-        axs.text(1.3, 0.20, legendstr, transform=axs.transAxes, fontsize=20, verticalalignment='top', color = 'blue')
-
-    if show_plot:
-        plt.show(); 
-        plt.close()
-    
-    plt.savefig(f"{(savename.split('/'))[-1]}.png", bbox_inches='tight') # uncomment here for saving the 2d plot
-    plt.close()
-
-def uploadPostgres(x, y, zheight, mod_flat, title):
-    return None
-
-####################################
-
-import os
 def check(file):
     if os.path.exists(file):
         return True
@@ -366,73 +134,6 @@ def check(file):
         print('FILEPATHS MAY BE WRONG!! CANNOT FIND ' + file)
         print()
         return False
-
-def searchTrayPin(sheet,keys, details = 0, Tray = 0, points = None):
-    if Tray == 1:
-        if "TrayNumber" in globals():
-            sheet = Traysheets[globals()["TrayNumber"]-1]
-        else:
-            print("Could not find any Tray number in the OGPSurveyfile by auto detection")
-            print("Continue using the GantryTrayfile")
-            print()
-    Feature = 0
-    row = globals()[f"{sheet}"].nrows
-    #print(f"total row is {row}")
-    for i in range(row):
-        actual = str(globals()[f"{sheet}"].cell_value(i,2))
-        for j in range(len(keys)):
-            if (keys[j] in actual):
-                Feature += 1
-    print(f"Found {Feature} Feature rows")
-    for i in range(row):
-        actual = str(globals()[f"{sheet}"].cell_value(i,2))
-        for j in range(len(keys)):
-            if (keys[j] in actual):
-                if Feature == 2:
-                    x = float(globals()[f"{sheet}"].cell_value(i,5))
-                    y = float(globals()[f"{sheet}"].cell_value(i+1,5))
-                    points[f"{keys[j]}.X"] = x
-                    points[f"{keys[j]}.Y"] = y
-                if Feature == 4:
-                    value = float(globals()[f"{sheet}"].cell_value(i,4))
-                    if "X" in actual:
-                         points[f"{keys[j]}.X"] = value
-                    if "Y" in actual:
-                        points[f"{keys[j]}.Y"] = value
-                if details == 1:
-                    print(f"{keys[j]} locates at line {i} in {sheet}.xls")
-                    print(f"Row name: {actual}")
-                    #print(f"value: {value}")
-    print()
-
-def searchSensorFD(sheet,keys,details = 0,Tray = 0,Traykeys=["Tray"], fd = None, points=None):
-    row = globals()[f"{sheet}"].nrows
-    for i in range(row):
-        actual = str(globals()[f'{sheet}'].cell_value(i,2))
-        if Tray == 1:
-            for k in range(len(Traykeys)):
-                if (Traykeys[k] in actual):
-                    for c in range(3,6):
-                        if "T" in str(globals()[f"{sheet}"].cell_value(i,c)):
-                            globals()["TrayNumber"] = int(actual.split("Tray")[-1])
-                            print("Auto detect Tray to be", actual)
-                            print()
-                            break
-                    break
-        for j in range(len(keys)):
-            if (keys[j] in actual):
-                x = float(globals()[f'{sheet}'].cell_value(i,5))
-                y = float(globals()[f'{sheet}'].cell_value(i+1,5))
-                if details == 1:
-                    print(f"Sensor Fiducial locates at line {i} in {sheet}.xls")
-                    print(f"Row name: {actual}")
-                    print(f"x: {x}, y: {y}")
-                fd.append(actual)
-                points[actual] = np.array([x,y])
-                break
-    print(f"Found {len(fd)} Sensor Fiducial Points")
-    print()
-    return fd, points
 
 def plotFD(FDpoints,FDCenter,Center, Off, points, fd, sheetnames = ['','']):
     CenterX = f"{Center}.X"
