@@ -25,6 +25,7 @@ def select_files():
         file_paths_text.config(state=tk.DISABLED)
 
 def process_selected_files():
+    """Process the selected files."""
     global output_text, output_scrollbar
     try:
         file_paths = getattr(root, 'file_paths', None)
