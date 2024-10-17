@@ -29,7 +29,7 @@ def create_default_config(file_path):
     print(f"Configuration file created at {file_path}")
     print("Please update the configuration file with the correct database connection information!")
 
-def main():
+def main_func():
     config_file = 'config.yaml'
     if not os.path.exists(config_file):
         create_default_config(config_file)
@@ -50,6 +50,3 @@ def main():
     parsed_outputs = glob.glob(parsed_dir + '/*.csv')
     uploader = SurveyProcessor(parsed_outputs, config_file)
     uploader()
-
-if __name__ == '__main__':
-    main()
