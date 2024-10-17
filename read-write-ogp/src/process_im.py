@@ -7,16 +7,12 @@ from src.ogp_height_plotter import PlotTool, get_offsets
 from src.upload_inspect import DBClient
 from src.parse_data import DataParser
 from src.make_accuracy_plot import make_accuracy_plot
+from src.param import *
 from datetime import datetime
 
 pbase = os.path.basename
 pdir = os.path.dirname
 pjoin = os.path.join
-
-baseplates_params = {"key":"Surface", "vmini": 1.2, "vmaxi": 2.2, "new_angle": 0, "db_table_name": 'bp_inspect', "material": 'cf'}
-hexaboards_params = {"key":"Flatness", "vmini": 1.2, "vmaxi": 2.9, "new_angle": 0, "db_table_name": 'hxb_inspect'}
-protomodules_params = {"key":"Thick", "vmini": 1.37, "vmaxi": 1.79, "new_angle": 270, "db_table_name": 'proto_inspect'}
-others_params = {"key":"Thick", "vmini": 2.75, "vmaxi": 4.0, "new_angle": 270, "db_table_name": 'module_inspect'}
 
 class SurveyProcessor():
     """Process Parsed OGP Survey CSV files and extract data for plotting and uploading to database."""
