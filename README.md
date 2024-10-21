@@ -47,6 +47,6 @@ python3 auto_upload.py
 ```
 
 ## Using pgAdmin4 to view tables (Instructions to follow)
-Install [postgreSQL-15 with pgAdmin4](https://www.postgresql.org/download/) on your computers. Make sure you add ```psql``` to your path.
+Install [postgreSQL-15 with pgAdmin4](https://www.pgadmin.org/download/) on your computers. Make sure you add ```psql``` to your path.
 
 
