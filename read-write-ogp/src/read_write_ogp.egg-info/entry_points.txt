@@ -1,0 +1,2 @@
+[console_scripts]
+uploadOGPresults = main:main_func
