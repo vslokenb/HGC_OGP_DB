@@ -3,18 +3,17 @@ from setuptools import setup, find_packages
 setup(
     name="read-write-ogp",
     version="0.1.0",                   
-    packages=find_packages("read-write-ogp/src"),
+    packages=find_packages(where="read-write-ogp/src"),  # Required: Specify the package directory
     package_dir={"": "read-write-ogp/src"},
     install_requires=[                 # List of dependencies
         "pwinput>=1.0.0"
         "numpy>=1.20.0",
         "pandas>=2.0.0",
         "asyncpg>=0.24.0",
-        "tk>=7.0.0",
     ],
     entry_points={                      # Optional: Entry points for command-line scripts
         "console_scripts": [
-            "uploadOGPresults=read-write-ogp.main:main_func",
+            "uploadOGPresults=main:main_func",
         ],
     },
     author="CMU HGCal MAC",
