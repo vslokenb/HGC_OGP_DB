@@ -1,8 +1,0 @@
-README.md
-setup.py
-read-write-ogp/src/read_write_ogp.egg-info/PKG-INFO
-read-write-ogp/src/read_write_ogp.egg-info/SOURCES.txt
-read-write-ogp/src/read_write_ogp.egg-info/dependency_links.txt
-read-write-ogp/src/read_write_ogp.egg-info/entry_points.txt
-read-write-ogp/src/read_write_ogp.egg-info/requires.txt
-read-write-ogp/src/read_write_ogp.egg-info/top_level.txt

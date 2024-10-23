@@ -3,7 +3,7 @@ import os, yaml, sys, glob, re
 pjoin = os.path.join
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
-src_dir = pjoin(file_dir, 'read-write-ogp')
+src_dir = pjoin(file_dir, 'rwOGP')
 if src_dir not in sys.path:
     sys.path.append(src_dir)
 
@@ -15,20 +15,20 @@ from src.file_selector import fire_GUI
 SETTINGS_FILE = pjoin(os.path.expanduser('~'), ".my-cli-tool", "settings.yaml")
 
 def create_default_config():
-    """Create a default YAML configuration file. Only needs to be set up once ideally."""
+    """Create a default YAML configuration file and a SETTINGS file to keep track of program environment vars. Only needs to be set up once ideally."""
 
     print("Do you want to create the config file at a custom location? (y/n)")
     choice = input().strip().lower()
 
+    home_dir = os.path.expanduser('~')
+
     if choice == 'y':
         print("Please enter the directory where you want to create the config file:")
-        custom_path = input().strip()
+        custom_path = os.path.expanduser(input().strip())
         if os.path.isdir(custom_path):
-            custom_path = pjoin(custom_path, "config.yaml")
-        config_file = custom_path
+            config_file = pjoin(custom_path, "config.yaml")
     else:
         print("Creating the config file in the default location...")
-        home_dir = os.path.expanduser('~')
         config_dir = pjoin(home_dir, '.config')
         config_file = pjoin(config_dir, 'config.yaml')
 
@@ -49,6 +49,7 @@ def create_default_config():
     print(f"Configuration file created at {config_file}")
     print("Please update the configuration file with the correct database connection information!")
 
+    os.makedirs(pjoin(home_dir, '.my-cli-tool'), exist_ok=True)
     inventory_path = pjoin(home_dir, '.my-cli-tool', 'inventory.txt')
 
     with open(SETTINGS_FILE, 'w') as f:

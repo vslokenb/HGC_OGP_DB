@@ -1,3 +1,4 @@
-pwinput>=1.0.0numpy>=1.20.0
+pwinput>=1.0.0
+numpy>=1.20.0
 pandas>=2.0.0
 asyncpg>=0.24.0

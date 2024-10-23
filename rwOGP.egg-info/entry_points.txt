@@ -1,0 +1,2 @@
+[console_scripts]
+uploadOGPresults = rwOGP.main:main_func
