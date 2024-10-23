@@ -1,0 +1,8 @@
+README.md
+setup.py
+rwOGP/src/rwOGP.egg-info/PKG-INFO
+rwOGP/src/rwOGP.egg-info/SOURCES.txt
+rwOGP/src/rwOGP.egg-info/dependency_links.txt
+rwOGP/src/rwOGP.egg-info/entry_points.txt
+rwOGP/src/rwOGP.egg-info/requires.txt
+rwOGP/src/rwOGP.egg-info/top_level.txt

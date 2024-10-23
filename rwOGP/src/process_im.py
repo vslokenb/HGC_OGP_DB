@@ -20,7 +20,7 @@ class SurveyProcessor():
         """Initialize ImageProcessor object.
         
         Parameters:
-        - OGPSurveyFilePath (str/list): (list of) Path(s) to OGP Survey output file."""
+        - OGPSurveyFilePath (str/list): (list of) Path(s) to parsed output csvs of OGP Surveys"""
         if isinstance(OGPSurveyFilePath, str):
             self.OGPSurveyFile = [OGPSurveyFilePath]
         elif isinstance(OGPSurveyFilePath, list):
