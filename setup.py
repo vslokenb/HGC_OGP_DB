@@ -6,7 +6,7 @@ setup(
     packages=find_packages(where="read-write-ogp/src"),  # Required: Specify the package directory
     package_dir={"": "read-write-ogp/src"},
     install_requires=[                 # List of dependencies
-        "pwinput>=1.0.0"
+        "pwinput>=1.0.0",
         "numpy>=1.20.0",
         "pandas>=2.0.0",
         "asyncpg>=0.24.0",
