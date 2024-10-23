@@ -2,7 +2,8 @@ import time, os, subprocess
 import argparse
 
 class FileUploader():
-    def __init__(self, checkdir, log_file = 'filelog.txt'):
+    def __init__(self, checkdir, log_file = '.filelog.txt'):
+        """Initialize the file uploader""" 
         self.log_file = log_file
         self.checkdir = checkdir
     
@@ -14,7 +15,9 @@ class FileUploader():
         """
         if os.path.exists(self.log_file):
             logged_files = self.read_log_file()
-        else: logged_files = []
+        else:
+            print("No log file found. Creating a new one ==>") 
+            logged_files = []
 
         curr_files = self.lst_dir()
         new_files = [file for file in curr_files if file not in logged_files]

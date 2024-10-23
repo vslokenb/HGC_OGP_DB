@@ -5,19 +5,19 @@ file_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(file_dir)
 sys.path.append(parent_dir)
 
-from parse_data import DataParser, pjoin
-from ogp_height_plotter import plot2d
+from src.parse_data import DataParser, pjoin
+from src.ogp_height_plotter import PlotTool
 
 if __name__ == "__main__":
     template_dir = pjoin(parent_dir, 'templates')
     data_file = pjoin(template_dir, 'ex_fullOut.txt')
     
-    dp = DataParser(data_file)
-    header, features = dp.read_temp_sep()
+    dp = DataParser(data_file, template_dir)
+    dp()
 
-    dp.output_features(pjoin(parent_dir, 'templates', 'features.csv'))
+    pt = PlotTool(dp.feature_results, template_dir)
+    pt()
 
-    plot2d(dp.get_feature('X_coordinate'), dp.get_feature('Y_coordinate'), dp.get_feature('Z_coordinate'))
     
     
     

@@ -1,14 +1,12 @@
 # OGP Station
- Code to write to the local DB from the OGP station
+Intended to be installed on the OGP computer. Running this program processes and uploads OGP survey outputs of components/modules to the local database. The GUI allows the user to view plots of the data and upload new files.
 
 ## Getting started
 In Python 3.6 or greater on the OGP computer: 
 ```
-pip install asyncpg
-pip install pwinput
-pip install tk
+pip install git+https://github.com/cmu-hgc-mac/HGC_OGP_DB.git
 ```
-(In the future, this will be moved to an initial config file)
+
 1. Make sure the .yaml file on the OGP computer is up to date with the correct database name.
 2. Save the location of the **watch directory**  in the .yaml file.
 3. As the OGP user, please have access to the OGP database password.
