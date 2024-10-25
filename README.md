@@ -1,15 +1,20 @@
-# OGP Station
-Intended to be installed on the OGP computer. Running this program processes and uploads OGP survey outputs of components/modules to the local database. The GUI allows the user to view plots of the data and upload new files.
+# Package for OGP + Database: rwOGP
+This package is intended to be used to read and write data from the OGP to a local database. The package is divided into two parts: 
+1. CLI tool for automatic upload of data from the OGP to the local database.
+2. GUI to read data from the local database to the OGP
 
 ## Getting started
 In Python 3.6 or greater on the OGP computer: 
 ```
-pip install git+https://github.com/cmu-hgc-mac/HGC_OGP_DB.git
+pip install git+https://github.com/cmu-hgc-mac/HGC_OGP_DB.git@template_based
 ```
+Then run in terminal
+```
+uploadOGPresults
+```
+If run for the first time, this prompts user to enter a secure folder/directory to create a configuration file containing information about database connection and OGP survey results. Modify the configuration file to include the correct information.
 
-1. Make sure the .yaml file on the OGP computer is up to date with the correct database name.
-2. Save the location of the **watch directory**  in the .yaml file.
-3. As the OGP user, please have access to the OGP database password.
+Running this command after will automatically postprocess and upload the OGP survey results to the database.
 
 ## Starting a GUI instance (will be moved into a config file)
 ```
