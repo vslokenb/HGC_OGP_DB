@@ -50,7 +50,7 @@ def create_default_config():
     print("Please update the configuration file with the correct database connection information!")
 
     os.makedirs(pjoin(home_dir, '.my-cli-tool'), exist_ok=True)
-    inventory_path = pjoin(home_dir, '.my-cli-tool', 'inventory.txt')
+    inventory_path = pjoin(home_dir, '.my-cli-tool', 'inventory.json')
 
     with open(SETTINGS_FILE, 'w') as f:
         yaml.dump({'config_path': config_file, 'inventory_path': inventory_path}, f)

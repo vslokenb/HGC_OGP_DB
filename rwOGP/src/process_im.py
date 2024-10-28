@@ -14,6 +14,47 @@ pbase = os.path.basename
 pdir = os.path.dirname
 pjoin = os.path.join
 
+class InventoryUpdater():
+    def __init__(self, inventory_path, ogp_survey_dir):
+        with open(inventory_path, 'r') as f:
+            self.inventory_list = [line.strip() for line in f]
+        
+    def __call__(self):
+        if self.__check_empty():
+            pass
+        else:
+            self.__update_inventory()
+        
+    def __update_inventory(self):
+        """Update inventory with new OGP Survey files."""
+        new_files = self.__get_new_files()
+        if new_files == []:
+            print('No new OGP Survey files to update.')
+            return
+        else:
+            self.__update_inventory_file(new_files)
+    
+    def __get_new_files(self):
+        """Get new OGP Survey files to update inventory."""
+        new_files = []
+        for file in self.inventory_list:
+            if file not in self.inventory_list:
+                new_files.append(file)
+        return new_files
+        
+    def __check_empty(self) -> bool:
+        """Check if inventory is empty and prompt user to upload all existing OGP results to database."""
+        if self.inventory_list == []:
+            print("Initialize Inventory of OGP results for the first time...Would you like to process and upload all the existing OGP results to database? (Y/N)")
+            choice = input().strip().lower()
+            if choice == 'y':
+                pass
+        return False
+            
+        
+
+
+
 class SurveyProcessor():
     """Process Parsed OGP Survey CSV files and extract data for plotting and uploading to database."""
     def __init__(self, OGPSurveyFilePath, yamlconfig):

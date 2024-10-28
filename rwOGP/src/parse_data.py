@@ -77,7 +77,7 @@ class DataParser():
         """Initialize DataParser object.
         
         Parameters:
-        - data_file (str): Path to the data output file by OGP surveys to be parsed.
+        - data_file (str/list[str]): Path(s) to the data output file by OGP surveys to be parsed.
         - output_dir (str): Path to the output directory of the parsed data."""
         if isinstance(data_file, str):
             data_file = [data_file]
