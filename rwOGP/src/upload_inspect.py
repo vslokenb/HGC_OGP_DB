@@ -21,13 +21,11 @@ def get_query_write(table_name, column_names):
 
 class DBClient():
     """Client to interact with the PostgreSQL database."""
-    def __init__(self, yamlconfig):
+    def __init__(self, config):
         """Initialize the database client.
         
         Parameters:
-        - yamlconfig (str): Path to the yaml configuration file, containing database connection information."""
-        with open(yamlconfig, 'r') as f:
-            config = yaml.safe_load(f)
+        - config: a loaded yaml configuration object."""
         self.host = config['host']
         self.database = config['database']
         self.user = config['user']
