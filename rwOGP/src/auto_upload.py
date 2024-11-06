@@ -1,4 +1,4 @@
-import os, subprocess, json, glob
+import os, subprocess, json, glob, yaml
 import argparse
 from .parse_data import DataParser
 from .process_im import SurveyProcessor
@@ -7,11 +7,14 @@ pexist = os.path.exists
 pjoin = os.path.join
 
 class InventoryUpdater():
-    def __init__(self, ogp_survey_dir, inventory_path, config_path):
+    """Update the inventory of OGP results and upload new files to the database."""
+    
+    def __init__(self, inventory_path, config_yaml):
         """Initialize the file uploader"""
         self.inventory_p = inventory_path
-        self.checkdir = ogp_survey_dir
-        self.config_path = config_path
+        self.config = config_yaml
+        self.checkdir = self.config.get('ogp_survey_dir')
+        self.parsed_dir = self.config.get('ogp_parsed_dir')
     
     def __call__(self):
         if pexist(self.inventory_p):
@@ -23,7 +26,10 @@ class InventoryUpdater():
     
     def __create_new(self) -> dict:
         """Create a new inventory dictionary. 
-        With structure like {subdir:[files]}"""
+        With structure like {subdir:[files]} 
+        
+        Return
+        - txt_files_by_subdir: dictionary of subdirectories and their corresponding txt files."""
         txt_files_by_subdir = {}
         for item in os.listdir(self.checkdir):
             subdir_path = pjoin(self.checkdir, item)
@@ -54,20 +60,23 @@ class InventoryUpdater():
         return False
     
     def __update_inventory(self) -> dict:
-        """Update the inventory of OGP results and return the changed inventory. Write the updated inventory to the inventory file."""
+        """Update the inventory of OGP results and return the changed files in inventory structure. Write the updated inventory to the inventory file.
+        
+        Return 
+        - changed_inventory: dictionary of subdirectories and their corresponding changed files."""
         new_inventory = self.__create_new()
 
-        updated_inventory = self.inventory.copy()
+        old_inventory = self.inventory.copy()
 
         changed_inventory = {}
 
         for subdir, files in new_inventory.items():
-            if subdir not in updated_inventory:
+            if subdir not in old_inventory:
                 print(f"New subdirectory detected: {subdir}")
                 changed_inventory[subdir] = files
             else:
-                new_files = set(files) - set(updated_inventory[subdir])
-                removed_files = set(updated_inventory[subdir]) - set(files)
+                new_files = set(files) - set(old_inventory[subdir])
+                removed_files = set(old_inventory[subdir]) - set(files)
                 if new_files:
                     print(f"New files in {subdir}: {new_files}")
                 if removed_files:
@@ -79,17 +88,17 @@ class InventoryUpdater():
                     
         return changed_inventory
     
-    def upload_files(self, new_files):
-        """Upload files to the database"""
+    def upload_files(self, invent):
+        """Upload files to the database.
         
-        for subdir, files in new_files.items():
+        Parameters
+        - `invent`: dictionary of {subdir:[files]} to be uploaded."""
+        for subdir, files in invent.items():
             inputs = [pjoin(self.checkdir, subdir, file) for file in files]
-            output_dir = pjoin(self.checkdir, 'parsed', subdir)
-            dp = DataParser(inputs, output_dir)
-            dp()
+            dp = DataParser(inputs, self.parsed_dir)
+            gen_meta, gen_features = dp()
 
-            parsed_outputs = glob.glob(output_dir + '/*.csv')
-            uploader = SurveyProcessor(parsed_outputs, self.config_path)
+            uploader = SurveyProcessor(gen_features, self.config)
         
     def run_on_new_files(self, files, action):
         """Run the action on each file in the list of files
