@@ -10,6 +10,7 @@ setup(
         "numpy>=1.20.0",
         "pandas>=2.0.0",
         "asyncpg>=0.24.0",
+        "ttp==0.9.5"
     ],
     entry_points={                      # Optional: Entry points for command-line scripts
         "console_scripts": [
