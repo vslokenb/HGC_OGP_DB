@@ -3,3 +3,4 @@
 *.yaml
 .vscode/
 **/.*
+*.egg-info/

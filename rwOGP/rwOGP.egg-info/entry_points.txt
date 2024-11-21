@@ -1,0 +1,3 @@
+[console_scripts]
+seeInventory = main:invent_print
+uploadOGPresults = main:main_func

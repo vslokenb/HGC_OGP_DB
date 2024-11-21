@@ -6,7 +6,6 @@ from io import StringIO
 
 pjoin = os.path.join
 
-# WIP
 def read_ogp_template(template_file, output_file):
     """Read OGP template file and convert it to TTP template file."""
     with open(template_file, 'rb') as f:
@@ -72,12 +71,13 @@ Radius            {{Radius}}
 """
 
 class DataParser():
-    """Parse data file(s) using TTP template."""
+    """Parse data file(s) using TTP template. 
+    Output metadata, which contains info such as geometry and density, and feature results, which are dataframes containing the parsed data."""
     def __init__(self, data_file, output_dir):
         """Initialize DataParser object.
         
         Parameters:
-        - data_file (str): Path to the data output file by OGP surveys to be parsed.
+        - data_file (str/list[str]): Path(s) to the data output file by OGP surveys to be parsed.
         - output_dir (str): Path to the output directory of the parsed data."""
         if isinstance(data_file, str):
             data_file = [data_file]
@@ -88,13 +88,22 @@ class DataParser():
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
     
-    def __call__(self):
-        """Parse data file produced by default OGP template."""
+    def __call__(self) -> tuple:
+        """Parse data file produced by default OGP template. Create metadata file and output feature results to a csv file.
+        
+        Return 
+        - gen_meta (list): List of metadata files generated.
+        - gen_features (list): List of feature files generated."""
+        gen_meta = []
+        gen_features = []
         for filename in self.data_file:
             self.data = open(filename, 'r').read()
             self.read_temp_sep()
             filename = self.output_meta()
             self.output_features(f'{filename}.csv')
+            gen_features.append(pjoin(self.output_dir, f'{filename}.csv'))
+            gen_meta.append(pjoin(self.output_dir, f'{filename}_meta.yaml'))
+        return gen_meta, gen_features
 
     def read_temp_sep(self, header_template=header_template, feature_template=data_template, delimiter='---'):
         """Read data file produced with header and feature templates separated by a delimiter."""
