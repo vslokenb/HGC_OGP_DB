@@ -6,7 +6,6 @@ from io import StringIO
 
 pjoin = os.path.join
 
-# WIP
 def read_ogp_template(template_file, output_file):
     """Read OGP template file and convert it to TTP template file."""
     with open(template_file, 'rb') as f:
@@ -102,8 +101,8 @@ class DataParser():
             self.read_temp_sep()
             filename = self.output_meta()
             self.output_features(f'{filename}.csv')
-            gen_features.append(f'{filename}.csv')
-            gen_meta.append(f'{filename}_meta.yaml')
+            gen_features.append(pjoin(self.output_dir, f'{filename}.csv'))
+            gen_meta.append(pjoin(self.output_dir, f'{filename}_meta.yaml'))
         return gen_meta, gen_features
 
     def read_temp_sep(self, header_template=header_template, feature_template=data_template, delimiter='---'):

@@ -18,7 +18,7 @@ class InventoryUpdater():
         self.parsed_dir = self.config.get('ogp_parsed_dir')
     
     def __call__(self):
-        if pexist(self.inventory_p):
+        if not pexist(self.inventory_p):
             self.__deal_empty()
             return
             
@@ -27,6 +27,7 @@ class InventoryUpdater():
         
         new_files = self.__update_inventory()
         self.upload_files(new_files)
+
         with open(self.inventory_p, 'w') as f:
             json.dump(self.__create_new(), f)
     
@@ -57,7 +58,7 @@ class InventoryUpdater():
         - bool: whether all existing OGP results are uploaded to database."""
         txt_files_by_subdir = self.__create_new()
 
-        with json.open(self.inventory_p, 'w') as f:
+        with open(self.inventory_p, 'w') as f:
             json.dump(txt_files_by_subdir, f)
 
         print("Initialize Inventory of OGP results for the first time...Would you like to process and upload all the existing OGP results to database? (Y/N)")
@@ -107,11 +108,12 @@ class InventoryUpdater():
         - `invent`: dictionary of {subdir:[files]} to be uploaded. subdir should be names of components, e.g. baseplate, modules, etc."""
         for subdir, files in invent.items():
             inputs = [pjoin(self.checkdir, subdir, file) for file in files]
-            dp = DataParser(inputs, self.parsed_dir)
-            gen_meta, gen_features = dp()
-
-            uploader = SurveyProcessor(gen_features, gen_meta, self.config)
-            uploader(subdir)
+            if inputs:
+                dp = DataParser(inputs, self.parsed_dir)
+                gen_meta, gen_features = dp()
+                
+                uploader = SurveyProcessor(gen_features, gen_meta, self.config)
+                uploader(subdir)
         
     def run_on_new_files(self, files, action):
         """Run the action on each file in the list of files
