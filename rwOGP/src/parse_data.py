@@ -72,7 +72,8 @@ Radius            {{Radius}}
 """
 
 class DataParser():
-    """Parse data file(s) using TTP template."""
+    """Parse data file(s) using TTP template. 
+    Output metadata, which contains info such as geometry and density, and feature results, which are dataframes containing the parsed data."""
     def __init__(self, data_file, output_dir):
         """Initialize DataParser object.
         

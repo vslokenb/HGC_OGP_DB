@@ -6,7 +6,7 @@ import matplotlib.colors as cls
 from src.parse_data import DataParser
 
 class PlotTool:
-    def __init__(self, features: 'pd.DataFrame', save_dir):
+    def __init__(self, features: 'pd.DataFrame', save_dir=None):
         """
         Parameters
         - `features`: dataframe of features to plot
@@ -20,7 +20,8 @@ class PlotTool:
     def __call__(self, **kwds):
         """Plot the 2D height map of the given data."""
         centerxy = self.get_center()
-        self.plot2d(self.x_points, self.y_points, self.z_points, centerxy, **kwds)
+        im_bytes = self.plot2d(self.x_points, self.y_points, self.z_points, centerxy, **kwds)
+        return im_bytes
     
     def get_center(self) -> int:
         """Get the index of the fiducial center in the dataframe by taking the average of the x and y coordinates."""

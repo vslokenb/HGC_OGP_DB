@@ -1,5 +1,4 @@
-import os, subprocess, json, glob, yaml
-import argparse
+import os, subprocess, json
 from .parse_data import DataParser
 from .process_im import SurveyProcessor
 
@@ -23,17 +22,19 @@ class InventoryUpdater():
             
         with open(self.inventory_p, 'r') as f:
             self.inventory = json.load(f)
+        
+        new_files = self.__update_inventory()
+        self.upload_files(new_files)
     
     def __create_new(self) -> dict:
         """Create a new inventory dictionary. 
         With structure like {subdir:[files]} 
         
         Return
-        - txt_files_by_subdir: dictionary of subdirectories and their corresponding txt files."""
+        - dictionary of subdirectories and their corresponding txt files."""
         txt_files_by_subdir = {}
         for item in os.listdir(self.checkdir):
             subdir_path = pjoin(self.checkdir, item)
-        
             if os.path.isdir(subdir_path):
                 txt_files = [
                     file for file in os.listdir(subdir_path) 
@@ -46,7 +47,10 @@ class InventoryUpdater():
         return txt_files_by_subdir
     
     def __deal_empty(self) -> bool:
-        """Check if inventory is empty and prompt user to upload all existing OGP results to database."""
+        """Check if inventory is empty and prompt user to upload all existing OGP results to database.
+        
+        Return 
+        - bool: whether all existing OGP results are uploaded to database."""
         txt_files_by_subdir = self.__create_new()
 
         with json.open(self.inventory_p, 'w') as f:
@@ -56,8 +60,12 @@ class InventoryUpdater():
         choice = input().strip().lower()
 
         if choice == 'y':
-            pass
-        return False
+            print("Uploading all existing OGP results to database...")
+            self.upload_files(txt_files_by_subdir)
+            return True
+        else:
+            print("Exiting...")
+            return False
     
     def __update_inventory(self) -> dict:
         """Update the inventory of OGP results and return the changed files in inventory structure. Write the updated inventory to the inventory file.
@@ -89,16 +97,17 @@ class InventoryUpdater():
         return changed_inventory
     
     def upload_files(self, invent):
-        """Upload files to the database.
+        """Parse, postprocess and upload files to the database.
         
         Parameters
-        - `invent`: dictionary of {subdir:[files]} to be uploaded."""
+        - `invent`: dictionary of {subdir:[files]} to be uploaded. subdir should be names of components, e.g. baseplate, modules, etc."""
         for subdir, files in invent.items():
             inputs = [pjoin(self.checkdir, subdir, file) for file in files]
             dp = DataParser(inputs, self.parsed_dir)
             gen_meta, gen_features = dp()
 
-            uploader = SurveyProcessor(gen_features, self.config)
+            uploader = SurveyProcessor(gen_features, gen_meta, self.config)
+            uploader(subdir)
         
     def run_on_new_files(self, files, action):
         """Run the action on each file in the list of files
@@ -107,18 +116,3 @@ class InventoryUpdater():
         - `files`: list of files to run the action on, without parent directory prefix."""
         for file in files:
             subprocess.Popen(['python', action, os.path.join(self.checkdir, file)])
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Watch a directory for new files and process them.')
-    parser.add_argument('-d', '--directory', type=str, help='Directory to watch for new files', default="C:/Users/Admin/Desktop/module_assembly_surveys/offsets/OGP_results")
-    args = parser.parse_args()
-    
-    directory_to_watch = parser.d
-    print("============================================")
-    print(f'Watching directory: {directory_to_watch}')
-
-    parent_dir = os.path.dirname(os.path.abspath(__file__))
-    process_file_path = os.path.join(parent_dir, 'process_im.py')
-
-    uploader = FileUploader(directory_to_watch)
-    uploader(process_file_path)
