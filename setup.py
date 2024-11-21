@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="rwOGP",
-    version="0.1.0",                   
+    version="0.1.0",
     packages=find_packages(where='rwOGP'),  # Required: Specify the package directory
     package_dir={'': 'rwOGP'},  # Required: Specify the package directory
     install_requires=[                 # List of dependencies
@@ -13,8 +13,8 @@ setup(
     ],
     entry_points={                      # Optional: Entry points for command-line scripts
         "console_scripts": [
-            "uploadOGPresults=main:main_func",
-            "seeInventory=main:invent_print",
+            "uploadOGPresults=rwOGP.main:main_func",
+            "seeInventory=rwOGP.main:invent_print",
         ],
     },
     author="CMU HGCal MAC",
