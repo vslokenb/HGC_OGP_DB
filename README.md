@@ -4,6 +4,19 @@ This package is intended to be used to read and write data from the OGP to a loc
 2. GUI to read data from the local database to the OGP
 
 ## Getting started
+### Method 1: Run Python directly
+Clone the repository and install the required packages:
+```
+git clone git@github.com:cmu-hgc-mac/HGC_OGP_DB.git
+git checkout template_based
+```
+Run the following command to postprocess and upload the OGP survey results to the database:
+```
+cd HGC_OGP_DB
+python rwOGP/main.py
+```
+
+### Method 2: Install as a package (Under Development)
 In Python 3.6 or greater on the OGP computer: 
 ```
 pip install git+https://github.com/cmu-hgc-mac/HGC_OGP_DB.git@template_based
@@ -15,12 +28,6 @@ uploadOGPresults
 If run for the first time, this prompts user to enter a secure folder/directory to create a configuration file containing information about database connection and OGP survey results. Modify the configuration file to include the correct information.
 
 Running this command after will automatically postprocess and upload the OGP survey results to the database.
-
-## Starting a GUI instance (will be moved into a config file)
-```
-cd read-write-ogp
-python3 file_selector.py
-```
 
 ## How to use:
 This GUI contains two tabs: 'View Plots' and 'Upload Files'.

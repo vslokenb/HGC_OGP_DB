@@ -27,6 +27,8 @@ def create_default_config():
     else:
         print("Creating the config file in the default location...")
         config_dir = pjoin(home_dir, '.config')
+        if not os.path.exists(config_dir):
+            os.makedirs(config_dir)
         config_file = pjoin(config_dir, 'rwOGP_DBconfig.yaml')
 
     print("Creating default configuration file...")

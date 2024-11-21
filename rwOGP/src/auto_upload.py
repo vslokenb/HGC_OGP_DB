@@ -114,6 +114,8 @@ class InventoryUpdater():
                 
                 uploader = SurveyProcessor(gen_features, gen_meta, self.config)
                 uploader(subdir)
+            else:
+                print(f"No files from {subdir} to process/upload to database.")
         
     def run_on_new_files(self, files, action):
         """Run the action on each file in the list of files
