@@ -7,9 +7,11 @@ pjoin = os.path.join
 
 class InventoryUpdater():
     """Update the inventory of OGP results and upload new files to the database."""
-    
     def __init__(self, inventory_path, config_yaml):
-        """Initialize the file uploader"""
+        """Initialize the file uploader.
+        
+        Parameters
+        - `inventory_path`: path to the inventory json file."""
         self.inventory_p = inventory_path
         self.config = config_yaml
         self.checkdir = self.config.get('ogp_survey_dir')
@@ -25,6 +27,8 @@ class InventoryUpdater():
         
         new_files = self.__update_inventory()
         self.upload_files(new_files)
+        with open(self.inventory_p, 'w') as f:
+            json.dump(self.__create_new(), f)
     
     def __create_new(self) -> dict:
         """Create a new inventory dictionary. 

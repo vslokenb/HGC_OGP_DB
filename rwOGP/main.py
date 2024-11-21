@@ -7,10 +7,7 @@ src_dir = pjoin(file_dir, 'rwOGP')
 if src_dir not in sys.path:
     sys.path.append(src_dir)
 
-from src.upload_inspect import DBClient
-from src.parse_data import DataParser
-from src.process_im import SurveyProcessor
-from src.file_selector import fire_GUI
+from src.auto_upload import InventoryUpdater
 
 SETTINGS_FILE = pjoin(os.path.expanduser('~'), ".my-cli-tool", "settings.yaml")
 
@@ -60,11 +57,11 @@ def load_config():
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, 'r') as f:
             settings = yaml.safe_load(f)
-        return settings['config_path']
+        return settings['config_path'], settings['inventory_path']
     return None
 
 def main_func():
-    config_path = load_config()
+    config_path, inventory_path = load_config()
     if config_path is None:
         print("Program will now exit. Please update the configuration file and run the program again.")
         create_default_config()
@@ -73,13 +70,6 @@ def main_func():
         print("Using configuration file to create database client...")
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
-        
-    # OGP_outputs = glob.glob(config['ogp_survey_dir'] + '/*.txt')
-    # parsed_dir = pjoin(config['ogp_survey_dir'], 'parsed')
-
-    # dp = DataParser(OGP_outputs, parsed_dir)
-    # dp()
-
-    # parsed_outputs = glob.glob(parsed_dir + '/*.csv')
-    # uploader = SurveyProcessor(parsed_outputs, config_file)
-    # uploader()
+    
+    updater = InventoryUpdater(inventory_path, config)
+    updater()
