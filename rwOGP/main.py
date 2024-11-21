@@ -87,3 +87,6 @@ def invent_print():
         with open(invent_path, 'r') as f:
             inventory = json.load(f)
         print(inventory)
+
+if __name__ == "__main__":
+    main_func()
