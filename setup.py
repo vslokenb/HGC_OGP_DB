@@ -13,8 +13,8 @@ setup(
     ],
     entry_points={                      # Optional: Entry points for command-line scripts
         "console_scripts": [
-            "uploadOGPresults=rwOGP.main:main_func",
-            "seeInventory=rwOGP.main:invent_print",
+            "uploadOGPresults=main:main_func",
+            "seeInventory=main:invent_print",
         ],
     },
     author="CMU HGCal MAC",
