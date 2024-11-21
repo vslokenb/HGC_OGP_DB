@@ -1,4 +1,4 @@
-import os, yaml, sys, glob, re
+import os, yaml, sys
 
 pjoin = os.path.join
 
