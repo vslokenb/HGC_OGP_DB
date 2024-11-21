@@ -5,11 +5,12 @@
 
 Component ID: {$ComponentID} 
 Operator: {$CernID}   
-Geometry: {$geometry}
-Density: {$density}
-Sensor size: {$sensorsize} 
-
+Geometry: {$Geometry}
+Density: {$Density}
+Sensor size: {$Sensorsize} 
+Flatness: {$Flatness}
 ---
+</reportheader>
 
 </reportheader>
 <feature>
