@@ -8,7 +8,6 @@ This package is intended to be used to read and write data from the OGP to a loc
 Clone the repository and install the required packages:
 ```
 git clone git@github.com:cmu-hgc-mac/HGC_OGP_DB.git
-git checkout template_based
 ```
 Run the following command to postprocess and upload the OGP survey results to the database:
 ```
