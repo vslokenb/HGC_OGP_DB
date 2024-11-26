@@ -4,6 +4,8 @@ This package is intended to be used to read and write data from the OGP to a loc
 2. GUI to read data from the local database to the OGP
 
 ## Getting started
+Set the output template of all OGP survey programs to be `OGP_template.txt` file.
+
 ### Method 1: Run Python directly
 Clone the repository and install the required packages:
 ```

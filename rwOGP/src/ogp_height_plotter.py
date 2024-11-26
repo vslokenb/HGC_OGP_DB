@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
+from src.param import one_tray_param
 
 class PlotTool:
     def __init__(self, features: 'pd.DataFrame', save_dir=None):
@@ -127,15 +128,6 @@ def vec_rotate(old_x, old_y, old_angle, new_angle = 120):
     new_y = old_x*np.sin(rad)+old_y*np.cos(rad)
     return new_x, new_y
     
-
-def check(file):
-    if os.path.exists(file):
-        return True
-    else:
-        print('FILEPATHS MAY BE WRONG!! CANNOT FIND ' + file)
-        print()
-        return False
-
 def plotFD(FDpoints,FDCenter,Center, Off, points, fd, sheetnames = ['','']):
     CenterX = f"{Center}.X"
     CenterY = f"{Center}.Y"
@@ -178,38 +170,20 @@ def plotFD(FDpoints,FDCenter,Center, Off, points, fd, sheetnames = ['','']):
     print()
 
 
-def angle(points,FDpoints=4,OffCenterPin = "Left", details = 0, plot = 0, Center = None, Off = None, fd = None):
-    CenterX = f"{Center}.X"
-    CenterY = f"{Center}.Y"
-    OffX = f"{Off}.X"
-    OffY = f"{Off}.Y"
+def angle(centerXY, offsetXY, FDPoints, OffCenterPin, details = 0, plot = 0, Off = None):
+    """Calculate the angle and offset of the sensor from the tray fiducials."""
+    centerX, centerY = centerXY
+    offsetX, offsetY = offsetXY
+    pinX = abs(centerX - offsetX)
+    pinY = abs(centerY - offsetY)
+
+    assert len(FDPoints) == 2 or len(FDPoints) == 4, "The number of fiducial points must be either 2 or 4."
     
-    if (FDpoints != 2) and (FDpoints != 4):
-        print(f"{FDpoints} Fiducial Points. Invalid Number. Please use either 2 or 4 Fiducial Points")
-        #print("Detailing the Sensor FD points searching process for debugging")
-        return 
-    else:
-        print(f"Using {FDpoints} Fiducial Points ")
-    print()
-    if (OffCenterPin != "Left") and (OffCenterPin != "Right"):
-        print("Invalid OffCenter Pin Position")
-        print("Please indicate whether OffCenter Pin is on the Left or Right to the Center Pin")
-        #break
-        return
-    else:
-        if OffCenterPin == "Left":
-            Pin = np.array([points[CenterX],points[CenterY]]) - np.array([points[OffX],points[OffY]])
-            print("OffCenter Pin is on the Left relative to the Center Pin")
-        if OffCenterPin == "Right":
-            Pin = np.array([points[OffX],points[OffY]]) - np.array([points[CenterX],points[CenterY]]) 
-            print("OffCenter Pin is on the Right relative to the Center Pin")
-    #elif (OffCenterPin != "Left") and (OffCenterPin != "Right"):
-        #print("Please indicate whether OffCenter Pin is on the Left or Right to the Center Pin")
-        #break
-        print()
-        PinCenter = np.array([points[CenterX],points[CenterY]])
-        angle_Pin= np.degrees(np.arctan2(Pin[1],Pin[0]))
-    #print(f"Pin X' axis is at angle {angle_Pin:.3f} degrees")
+    PinCenter = np.array([centerX, centerY])
+    angle_Pin= np.degrees(np.arctan2(pinY, pinX))
+
+    FDCenter = np.mean(FDPoints, axis=0)
+
     if FDpoints==2:
         FD1 = points[fd[0]]-points[fd[1]]
         if FD1[1] > 0:
@@ -298,7 +272,7 @@ def angle(points,FDpoints=4,OffCenterPin = "Left", details = 0, plot = 0, Center
 
 
 
-def get_offsets(filenames, Traysheets):
+def get_offsets(filenames, pin_pos):
     sheetnames = loadsheet(filenames)
     autoTray = 0
     points = {}
@@ -306,13 +280,11 @@ def get_offsets(filenames, Traysheets):
     sensorKeys = ["Sensor", "Corner","P1","FD3","FD6","FDthree","FDsix"]  ### Key words for searching Sensor FD points in the file
     fd=[]
 
-    searchSensorFD(sheetnames[1],sensorKeys,details = 0, Tray = autoTray, Traykeys = TrayKeys, fd=fd,points = points)
     Center = 'P1Center'
     Off = 'P1OffcenterPin'
     keys = [Center, Off]
     traypin=[]
 
-    searchTrayPin(sheetnames[0],keys,details=0,Tray = autoTray, points = points)
     #print(points)
     DiffKeys = True; CXchk1 = False; CYchk1 = False; DictKeys = points.keys();
     for dictkey in points.keys():
@@ -328,20 +300,7 @@ def get_offsets(filenames, Traysheets):
     ###### this NEEDS to be worked on for more trays and more positions, -Paolo 
     ###### hard coded tray offsets from : "Tray 2 low light more points June 2023"
     if DiffKeys: 
-        points.update({
-            'P1Center.X': 142.648,
-            'P1Center.Y': 298.465,
-            'P2Center.X': 91.899,
-            'P2Center.Y': 107.959,
-            'P1LEFT.X': 67.688,
-            'P1LEFT.Y': 298.445,
-            'P2LEFT.X': 16.949,
-            'P2LEFT.Y': 107.939,
-            'P1RIGHT.X': 217.585,
-            'P1RIGHT.Y': 298.455,
-            'P2RIGHT.X': 166.848,
-            'P2RIGHT.Y': 107.969,
-        }) 
+        points.update(one_tray_param) 
 
     #print(points);
     """for sheetname in sheetnames:

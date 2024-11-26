@@ -1,6 +1,6 @@
 import os, subprocess, json
 from .parse_data import DataParser
-from .process_im import SurveyProcessor
+from .process_survey import SurveyProcessor
 
 pexist = os.path.exists
 pjoin = os.path.join

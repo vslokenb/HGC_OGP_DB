@@ -5,7 +5,6 @@ import matplotlib
 matplotlib.use('Agg')
 from src.ogp_height_plotter import PlotTool, get_offsets
 from src.upload_inspect import DBClient
-from src.parse_data import DataParser
 from src.make_accuracy_plot import make_accuracy_plot
 from src.param import *
 from datetime import datetime
