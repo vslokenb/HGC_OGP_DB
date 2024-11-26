@@ -18,7 +18,7 @@ python rwOGP/main.py
 ### Method 2: Install as a package (Under Development)
 In Python 3.6 or greater on the OGP computer: 
 ```
-pip install git+https://github.com/cmu-hgc-mac/HGC_OGP_DB.git@template_based
+pip install git+https://github.com/cmu-hgc-mac/HGC_OGP_DB.git
 ```
 Then run in terminal
 ```
