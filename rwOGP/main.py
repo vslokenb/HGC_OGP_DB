@@ -40,7 +40,8 @@ def create_default_config():
         'inst_code': 'CM',
         'institution_name': 'Carnegie Mellon University',
         'ogp_survey_dir': '/path/to/ogp/survey/directory',
-        'ogp_parsed_dir': '/path/to/ogp/parsed/directory'
+        'ogp_parsed_dir': '/path/to/ogp/parsed/directory',
+        'ogp_tray_dir': '/path/to/ogp/tray/directory'
     }
 
     with open(config_file, 'w') as f:

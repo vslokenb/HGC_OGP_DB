@@ -3,7 +3,7 @@ import pandas as pd
 import asyncio, send2trash, glob, re, yaml, os
 import matplotlib
 matplotlib.use('Agg')
-from src.ogp_height_plotter import PlotTool, get_offsets
+from src.ogp_height_plotter import PlotTool
 from src.upload_inspect import DBClient
 from src.make_accuracy_plot import make_accuracy_plot
 from src.param import *
@@ -15,7 +15,7 @@ pjoin = os.path.join
 
 class SurveyProcessor():
     """Process Parsed OGP Survey CSV files and extract data for plotting and uploading to database."""
-    def __init__(self, OGPSurveyFilePath: list, MetaFilePath: list, yamlconfig):
+    def __init__(self, OGPSurveyFilePath: list, MetaFilePath: list, TrayDir: str, yamlconfig: dict):
         """Initialize ImageProcessor object.
         
         Parameters:
@@ -33,6 +33,7 @@ class SurveyProcessor():
         if not os.path.exists(im_dir):
             os.makedirs(im_dir)
         self.im_dir = im_dir
+        self.tray_dir = TrayDir
 
         print(f'filename to process/upload: {self.OGPSurveyFile}')
         self.client = DBClient(yamlconfig)
@@ -40,35 +41,7 @@ class SurveyProcessor():
 
     def __call__(self, component_type):
         """Process and upload OGP Survey files."""
-        # self.getTrayFile()  
         self.process_and_upload(component_type)
-
-    def getTrayFile(self):
-        """Get Gantry Tray file and Tray files for NSH. 
-        
-        Return 
-        - GantryTrayFile (str): Path to Gantry Tray file.
-        - tray_files (list): List of paths to Tray files for NSH.
-        - trash_file (bool): True if OGP Survey file is to be trashed."""
-
-        base_path = self.OGPSurveyFile[0].split('OGP_results')[0]
-        GantryTrayFile = base_path + 'OGP_results/assembly_trays/assembly_tray_input.xls'
-
-        tray_files_pattern = base_path + 'data/Tray * for NSH.xls' 
-        tray_files = glob.glob(tray_files_pattern)
-
-        if tray_files == []: 
-            raise FileNotFoundError(f'Tray files not found. Please put pin measurement files for trays as {base_path}data/Tray * for NSH.xls')
-        
-        tray_files.sort(key=lambda x: int(re.search(r'Tray (\d+)', x).group(1)))
-
-        # placeholder
-        trash_file = False
-
-        self.tray_files = tray_files
-        self.GantryTrayFile = GantryTrayFile
-
-        return GantryTrayFile, tray_files, trash_file
  
     def __getArgs__(self, ex_file, meta_file, comp_type):
         """Get arguments for uploading to database, including the necessary meta data to upload and the image bytes.
@@ -85,6 +58,8 @@ class SurveyProcessor():
         modtitle = metadata['ComponentID']
 
         df = pd.read_csv(ex_file)
+        plotter = PlotTool(metadata, df, self.tray_dir)
+
         filesuffix = pbase(ex_file).split('.')[0]
 
         if comp_type == 'baseplates':
@@ -95,9 +70,7 @@ class SurveyProcessor():
             component_params = hexaboards_params
         elif comp_type == 'protomodules':
             component_params = protomodules_params
-            ### This part will break! Need to fix it.
-            Traysheets = [pd.read_csv(tray) for tray in self.tray_files]
-            XOffset, YOffset, AngleOff = get_offsets([self.GantryTrayFile, self.OGPSurveyFile], Traysheets)
+            XOffset, YOffset, AngleOff = plotter.get_offsets()
             db_upload.update({'proto_name': modtitle, 'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3)})
         else:
             raise ValueError("Component type not recognized. \
@@ -122,7 +95,6 @@ class SurveyProcessor():
                    "new_angle": component_params['new_angle'], "savename": pjoin(self.im_dir, comp_type, f"{filesuffix}_heights"),
                    "mod_flat": metadata['Flatness'], "title": metadata['ComponentID']}
         
-        plotter = PlotTool(df)
         im_bytes = plotter(show_plot=False)
 
         comment = ''

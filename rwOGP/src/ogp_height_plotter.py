@@ -1,18 +1,24 @@
 import numpy as np
 import pandas as pd
 import os
+import yaml
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
 from src.param import one_tray_param
 
+pjoin = os.path.join
+
 class PlotTool:
-    def __init__(self, features: 'pd.DataFrame', save_dir=None):
+    def __init__(self, meta, features: 'pd.DataFrame', tray_dir, save_dir=None):
         """
         Parameters
+        - `meta`: metadata of the features, including Tray ID, Operator, and Component ID
         - `features`: dataframe of features to plot
         - `save_dir`: directory to save the plots to"""
         self.save_dir = save_dir
+        self.meta = meta
+        self.tray_dir = tray_dir
         self.features = DataParser.get_xyz(features)
         self.x_points = self.features['X_coordinate']
         self.y_points = self.features['Y_coordinate']
@@ -109,6 +115,29 @@ class PlotTool:
         buffer.seek(0)
         plt.close()
         return buffer.read()
+
+    def get_offsets(self):
+        """Get the offsets of the sensor from the tray fiducials.
+        
+        Return 
+        - `XOffset`: x-offset of the sensor from the tray center
+        - `YOffset`: y-offset of the sensor from the tray center
+        - `AngleOff`: angle of the sensor from the tray fiducials"""
+        PositionID = self.meta['PositionID']
+        TrayNo = self.meta['TrayNo']
+        TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
+        with open(TrayFile, 'r') as f:
+            trayinfo = yaml.safe_load(f)
+        
+        if PositionID == 1:
+            pos = 'left'
+        else: pos = 'right'
+        
+        centerxy = tuple(trayinfo[f'p{PositionID}_center_pin_xy'])
+        offsetxy = tuple(trayinfo[f'p{PositionID}_offcenter_pin_{pos}_xy'])
+    
+        CenterOff, AngleOff, XOffset, YOffset = angle(centerxy, offsetxy, self.features)    
+        return XOffset, YOffset, AngleOff
 
 def vec_angle(x,y):
     angle_arctan = np.degrees(np.arctan2(y,x))
@@ -252,49 +281,6 @@ def angle(centerXY:tuple, offsetXY:tuple, FDPoints:np.array):
     # print(f"Assembly Survey Rotational Offset is {AngleOffset:.5f} degrees")
 
     return CenterOffset, AngleOffset, XOffset, YOffset
-
-def get_offsets(filenames, pin_pos):
-    sheetnames = loadsheet(filenames)
-    autoTray = 0
-    points = {}
-    TrayKeys = ["Tray","T"]
-    sensorKeys = ["Sensor", "Corner","P1","FD3","FD6","FDthree","FDsix"]  ### Key words for searching Sensor FD points in the file
-    fd=[]
-
-    Center = 'P1Center'
-    Off = 'P1OffcenterPin'
-    keys = [Center, Off]
-    traypin=[]
-
-    #print(points)
-    DiffKeys = True; CXchk1 = False; CYchk1 = False; DictKeys = points.keys();
-    for dictkey in points.keys():
-        if dictkey == 'CenterX':
-            CXchk1 = True;
-        if dictkey == 'CenterY':
-            CYchk1 = True; 
-        if CYchk1 and CXchk1: DiffKeys = False;
-    
-    ####IMPORTANT  (Left or Right)  -edited by paolo
-    pinsetting = "Right";
-
-    ###### this NEEDS to be worked on for more trays and more positions, -Paolo 
-    ###### hard coded tray offsets from : "Tray 2 low light more points June 2023"
-    if DiffKeys: 
-        points.update(one_tray_param) 
-
-    #print(points);
-    """for sheetname in sheetnames:
-        TrayNum = TrayID(sheetname);
-        PosNum = PositionID(sheetname);"""
-    #print(fd);
-
-    PositionID = 1;
-    if PositionID == 1:
-        CenterOff, AngleOff, XOffset, YOffset = angle(points, FDpoints=len(fd), OffCenterPin='Left', details=0,plot=1, Center = "P1Center", Off = "P1LEFT", fd = fd)    
-    elif PositionID == 2:
-        CenterOff, AngleOff, XOffset, YOffset = angle(points, FDpoints=len(fd), OffCenterPin='Right', details=0,plot=1, Center = "P2Center", Off = "P2RIGHT", fd = fd)
-    return XOffset, YOffset, AngleOff
 
 def quality(Center, Rotation, position = "P1", details =0, note = 0):
     '''

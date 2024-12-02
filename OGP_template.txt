@@ -9,6 +9,7 @@ Geometry: {$Geometry}
 Density: {$Density}
 Sensor size: {$Sensorsize} 
 Flatness: {$Flatness}
+Position ID: {$PositionID}
 TrayNo: {$TrayNo}
 ---
 </reportheader>
