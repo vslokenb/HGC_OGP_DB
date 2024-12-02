@@ -128,13 +128,14 @@ class SurveyProcessor():
         comment = ''
 
         db_upload = {
+            'part_name': metadata['ComponentID'],
             'flatness': metadata['Flatness'], 
             'thickness': np.round(np.mean(plotter.z_points),3), 
             'x_points':(plotter.x_points).tolist(), 
             'y_points':(plotter.y_points).tolist(), 
             'z_points':(plotter.z_points).tolist(),
             'hexplot':im_bytes, 
-            'inspector': metadata['Operator'], 
+            'inspector': metadata['CernID'], 
             'comment':comment}
         
         db_upload.update(self.getDateTime(metadata))

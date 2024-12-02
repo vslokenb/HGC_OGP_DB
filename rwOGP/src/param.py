@@ -1,3 +1,4 @@
+from colorama import Fore
 baseplates_params = {"key":"Surface", "vmini": 1.2, "vmaxi": 2.2, "new_angle": 0, "db_table_name": 'bp_inspect', "material": 'cf'}
 hexaboards_params = {"key":"Flatness", "vmini": 1.2, "vmaxi": 2.9, "new_angle": 0, "db_table_name": 'hxb_inspect'}
 protomodules_params = {"key":"Thick", "vmini": 1.37, "vmaxi": 1.79, "new_angle": 270, "db_table_name": 'proto_inspect'}
@@ -17,3 +18,14 @@ one_tray_param = {
             'P2RIGHT.X': 166.848,
             'P2RIGHT.Y': 107.969,
         }
+
+colorClassify = {'-1': Fore.MAGENTA + 'NO INFO' + Fore.BLACK, 
+                       '0': Fore.GREEN + 'GREEN' + Fore.BLACK,
+                       '1': Fore.YELLOW + 'YELLOW' + Fore.BLACK, 
+                       '2': Fore.RED + 'RED' + Fore.BLACK}
+classify = {'-1': 'NO INFO',
+                         '0': 'GREEN',
+                         '1': 'YELLOW',
+                         '2': 'RED'}
+degrees = [0.03, 0.06, 90]
+centers = [0.050, 0.100, 10.0]

@@ -51,8 +51,7 @@ class PlotTool:
         print(f"Average Height is {mean_h:.3f} mm")
         print(f"Maximum Height is {max_h:.3f} mm")
         print(f"Minimum Height is {min_h:.3f} mm")
-        print(f"Height --> {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm")
-        print()
+        print(f"Height --> {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm. \n")
         
         center_x, center_y = centerxy
 
@@ -128,50 +127,59 @@ def vec_rotate(old_x, old_y, old_angle, new_angle = 120):
     new_y = old_x*np.sin(rad)+old_y*np.cos(rad)
     return new_x, new_y
     
-def plotFD(FDpoints,FDCenter,Center, Off, points, fd, sheetnames = ['','']):
-    CenterX = f"{Center}.X"
-    CenterY = f"{Center}.Y"
-    OffX = f"{Off}.X"
-    OffY = f"{Off}.Y"
-    if FDpoints == 2:
-        Xp = [points[CenterX],points[OffX], points[fd[0]][0],points[fd[1]][0]]
-        Yp = [points[CenterY],points[OffY], points[fd[0]][1],points[fd[1]][1]]
-        plt.figure(dpi=250)
-        plt.plot(Xp,Yp,'o',ms=2)
-        plt.arrow(Xp[1],Yp[1],Xp[0]-Xp[1],Yp[0]-Yp[1],lw=0.5,color='g')
-        plt.arrow(Xp[2],Yp[2],Xp[3]-Xp[2],Yp[3]-Yp[2],lw=0.5,color='orange')
-        plt.plot(FDCenter[0],FDCenter[1],'ro',label='FDCenter',ms=2)
-        names = ['P1CenterPin','P1OffcenterPin','FD1','FD2']
-        for i in range(len(Xp)): 
-            plt.annotate(names[i],(Xp[i],Yp[i]))
-        plt.legend()
-        plt.xlim(60,160)
-        plt.title(sheetnames[1])
-        plt.xlabel("x [mm]")
-        plt.ylabel("y [mm]")
-    if FDpoints == 4:
-        Xp = [points[CenterX],points[OffX], points[fd[0]][0],points[fd[1]][0],points[fd[2]][0],points[fd[3]][0]]
-        Yp = [points[CenterY],points[OffY], points[fd[0]][1],points[fd[1]][1],points[fd[2]][1],points[fd[3]][1]]
-        plt.figure(dpi=250)
-        plt.plot(Xp,Yp,'o',ms=2)
-        plt.arrow(Xp[1],Yp[1],Xp[0]-Xp[1],Yp[0]-Yp[1],lw=0.5,color='g')
-        #plt.plot([(Xp[3]+Xp[2])/2],[(Yp[3]+Yp[2])/2],lw=0.5)
-        plt.arrow(Xp[2],Yp[2],Xp[4]-Xp[2],Yp[4]-Yp[2],lw=0.5,color='orange')
-        plt.arrow(Xp[3],Yp[3],Xp[5]-Xp[3],Yp[5]-Yp[3],lw=0.5,color='orange')
-        plt.plot(FDCenter[0],FDCenter[1],'ro',label='FDCenter',ms=2)
-        names = ['P1CenterPin','P1OffcenterPin','FD1','FD2','FD3','FD4']
-        for i in range(len(Xp)): 
-            plt.annotate(names[i],(Xp[i],Yp[i]))
-        plt.legend()
-        plt.xlim(60,160)
-        plt.title(sheetnames[1])
-        plt.xlabel("x [mm]")
-        plt.ylabel("y [mm]")
-    print()
+def plotFD(FDpoints:np.array, FDCenter:tuple, CenterXY:tuple, OffXY:tuple) -> None:
+    """Plot the fiducial points and the center of the sensor.
+    
+    Parameters
+    - `FDpoints`: array of fiducial points
+    - `FDCenter`: center of the fiducial points
+    - `CenterXY`: center of the sensor
+    - `OffXY`: offset of the sensor"""
+    CenterX, CenterY = CenterXY
+    OffX, OffY = OffXY
+    x_values = np.append(FDpoints[:,0], [CenterX, OffX])
+    y_values = np.append(FDpoints[:,1], [CenterY, OffY])
+    names = [f'FD{no}' for no in range(1, len(FDpoints)+1)]
+    names.extend(['Center', 'Offcenter'])
 
+    plt.figure(dpi=250)
+    plt.plot(x_values,y_values,'o',ms=2)
+    plt.arrow(OffX, OffY, CenterX-OffX, CenterY-OffY, lw=0.5, color='g')
+    plt.plot(FDCenter[0], FDCenter[1], 'ro', label='FDCenter', ms=2)
+    for i in range(len(x_values)):
+        plt.annotate(names[i], (x_values[i], y_values[i]))
+    
+    plt.legend()
+    plt.xlim(60,160)
+    plt.xlabel("x [mm]")
+    plt.ylabel("y [mm]")
 
-def angle(centerXY, offsetXY, FDPoints, OffCenterPin, details = 0, plot = 0, Off = None):
-    """Calculate the angle and offset of the sensor from the tray fiducials."""
+    plt.title("Fiducial Points")
+
+#! Messy part: serve as reference for future development
+    # if FDpoints == 2:
+    #     plt.arrow(Xp[2],Yp[2],Xp[3]-Xp[2],Yp[3]-Yp[2],lw=0.5,color='orange')
+
+    # if FDpoints == 4:
+    #     plt.arrow(Xp[2],Yp[2],Xp[4]-Xp[2],Yp[4]-Yp[2],lw=0.5,color='orange')
+    #     plt.arrow(Xp[3],Yp[3],Xp[5]-Xp[3],Yp[5]-Yp[3],lw=0.5,color='orange')
+    #     plt.plot(FDCenter[0],FDCenter[1],'ro',label='FDCenter',ms=2)
+    #     names = ['P1CenterPin','P1OffcenterPin','FD1','FD2','FD3','FD4']
+
+def angle(centerXY:tuple, offsetXY:tuple, FDPoints:np.array):
+    """Calculate the angle and offset of the sensor from the tray fiducials.
+    
+    Parameters
+    - `centerXY`: center of the sensor
+    - `offsetXY`: offset of the sensor
+    - `FDPoints`: array of fiducial points
+    
+    Return
+    - `CenterOffset`: offset of the sensor from the tray center
+    - `AngleOffset`: angle of the sensor from the tray fiducials
+    - `XOffset`: x-offset of the sensor from the tray center
+    - `YOffset`: y-offset of the sensor from the tray center"""
+    
     centerX, centerY = centerXY
     offsetX, offsetY = offsetXY
     pinX = abs(centerX - offsetX)
@@ -184,93 +192,66 @@ def angle(centerXY, offsetXY, FDPoints, OffCenterPin, details = 0, plot = 0, Off
 
     FDCenter = np.mean(FDPoints, axis=0)
 
-    if FDpoints==2:
-        FD1 = points[fd[0]]-points[fd[1]]
-        if FD1[1] > 0:
-            angle_FD1= np.degrees(np.arctan2(FD1[1],FD1[0]))-90
-        else:
-            angle_FD1= np.degrees(np.arctan2(FD1[1],FD1[0]))+90
-        FDCenter = (points[fd[0]]+points[fd[1]])/2
-        if details == 1:
-            print(f"FD1-2 X'' axis is at angle {angle_FD1:.5f} degrees")
-            print()
-            print(f"FDCenter at x:{FDCenter[0]:.3f} mm, y:{FDCenter[1]:.3f} mm")
-            print(f"PinCenter at x:{PinCenter[0]:.3f} mm, y:{PinCenter[1]:.3f} mm")
-        print()
-        """XOffset = FDCenter[0]-PinCenter[0]
-        YOffset = FDCenter[1]-PinCenter[1]
-        print(f"Assembly Survey X Offset: {XOffset:.3f} mm")
-        print(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
-        print()
-        AngleOffset = angle_FD1 - angle_Pin
-        print(f"Assembly Survey Rotational Offset is {AngleOffset:.5f} degrees")"""
-    if FDpoints==4:
-        FD1 = points[fd[0]]-points[fd[2]]
-        if FD1[1] > 0:
-            angle_FD1= np.degrees(np.arctan2(FD1[1],FD1[0])) -90
-        else:
-            angle_FD1= np.degrees(np.arctan2(FD1[1],FD1[0])) +90
-        FD2 = points[fd[1]]-points[fd[3]]
-        FD = (points[fd[0]]+points[fd[1]])/2 - (points[fd[2]]+points[fd[3]])/2
-        FDCenter = (points[fd[0]]+points[fd[1]]+points[fd[2]]+points[fd[3]])/4
-        if FD2[1] > 0:
-            angle_FD2= np.degrees(np.arctan2(FD2[1],FD2[0]))-90
-        else:
-            angle_FD2= np.degrees(np.arctan2(FD2[1],FD2[0]))+90
-        if details == 1:
-            print(f"FD1-3 X'' axis is at angle {angle_FD1:.5f} degrees")
-            print(f"angle of FD1-3 X'' relative to Assembly Tray Pin X' is {angle_FD1 - angle_Pin:.5f} degrees")
-            print(f"FD2-4 X'' axis is at angle {angle_FD2:.5f} degrees")
-            print(f"angle of FD2-4 X'' relative to Assembly Tray Pin X' is {angle_FD2 - angle_Pin:.5f} degrees")
-            print()
-            print(f"FDCenter at x:{FDCenter[0]:.3f} mm, y:{FDCenter[1]:.3f} mm")
-            print(f"PinCenter at x:{PinCenter[0]:.3f} mm, y:{PinCenter[1]:.3f} mm")
-            print()
-        """XOffset = FDCenter[0]-PinCenter[0]
-        YOffset = FDCenter[1]-PinCenter[1]
-        print(f"Assembly Survey X Offset: {XOffset:.3f} mm")
-        print(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
-        print()
-        #print('arctan Method')
-        print()"""
-        u_Pin = Pin/np.linalg.norm(Pin)
-        angle_Pin= np.degrees(np.arctan2(Pin[1],Pin[0]))
-        #if details == 1:
-            #print(f"Pin X' axis is at angle {angle_Pin:.3f} degrees")
-            #print()
-        u_FD = FD/np.linalg.norm(FD)
-        angle_FD= np.degrees(np.arctan2(FD[1],FD[0]))-90
-        if details == 1:
-            print(f"Pin X' axis is at angle {angle_Pin:.5f} degrees")
-            print()
-            print(f"FD1-4 X'' axis is at angle {angle_FD:.5f} degrees")
-        #print(f"Assembly Survey Rotational Offset is {angle_FD - angle_Pin:.5f} degrees")
-        #print()
-        #angle_FD1= np.degrees(np.arctan2(FD1[1],FD1[0]))
-        #print(f"FD1-2 X'' axis is at angle {angle_FD1} degrees")
     XOffset = FDCenter[0]-PinCenter[0]
     YOffset = FDCenter[1]-PinCenter[1]
-    print(f"Assembly Survey X Offset: {XOffset:.3f} mm")
-    print(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
-    print()
-    #ADDED For Rotation if NEEDED
-    if OffCenterPin == "Left":
-        NEWY = XOffset*-1;
-        NEWX = YOffset; 
-    elif OffCenterPin == "Right":
-        NEWY = XOffset;
-        NEWX = YOffset*1; 
-    print(f"Assembly Survey X Offset: {NEWX:.3f} mm (rotated)")
-    print(f"Assembly Survey Y Offset: {NEWY:.3f} mm (rotated)")
-    print()
-    AngleOffset = angle_FD1 - angle_Pin
-    print(f"Assembly Survey Rotational Offset is {AngleOffset:.5f} degrees")
-    if plot == 1:
-        plotFD(FDpoints,FDCenter,Center, Off, points, fd,)
+
+    print(f"Assembly Survey Y Offset: {YOffset:.3f} mm. \n")
+    print(f"Assembly Survey Y Offset: {YOffset:.3f} mm. \n")
+
     CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
+
+    Pin = np.array([pinX, pinY])
+    u_Pin = Pin/np.linalg.norm(Pin)
+    angle_Pin= np.degrees(np.arctan2(Pin[1],Pin[0]))
+
+    if len(FDPoints) == 2:
+        FD1 = FDPoints[0] - FDPoints[1]
+        angle_FD1= np.degrees(np.arctan2(FD1[1],FD1[0]))-90 if FD1[1] > 0 else np.degrees(np.arctan2(FD1[1],FD1[0]))+90
+        print(f"FD1-2 X'' axis is at angle {angle_FD1:.5f} degrees. \n")
+        print(f"FDCenter at x:{FDCenter[0]:.3f} mm, y:{FDCenter[1]:.3f} mm")
+        print(f"PinCenter at x:{PinCenter[0]:.3f} mm, y:{PinCenter[1]:.3f} mm")
+        
+        #! What's the purpose of these lines?
+        # AngleOffset = angle_FD1 - angle_Pin
+        # print(f"Assembly Survey Rotational Offset is {AngleOffset:.5f} degrees")
+    
+    if len(FDPoints) == 4:
+        FD1 = FDPoints[0] - FDPoints[2]
+        angle_FD1 = np.degrees(np.arctan2(FD1[1],FD1[0]))-90 if FD1[1] > 0 else np.degrees(np.arctan2(FD1[1],FD1[0]))+90
+        FD2 = FDPoints[1] - FDPoints[3]
+        angle_FD2 = np.degrees(np.arctan2(FD2[1],FD2[0]))-90 if FD2[1] > 0 else np.degrees(np.arctan2(FD2[1],FD2[0]))+90
+        FD = (FD1+FD2)/2
+        print(f"FD1-3 X'' axis is at angle {angle_FD1:.5f} degrees")
+        print(f"angle of FD1-3 X'' relative to Assembly Tray Pin X' is {angle_FD1 - angle_Pin:.5f} degrees")
+        print(f"FD2-4 X'' axis is at angle {angle_FD2:.5f} degrees")
+        print(f"angle of FD2-4 X'' relative to Assembly Tray Pin X' is {angle_FD2 - angle_Pin:.5f} degrees. \n")
+        print(f"FDCenter at x:{FDCenter[0]:.3f} mm, y:{FDCenter[1]:.3f} mm")
+        print(f"PinCenter at x:{PinCenter[0]:.3f} mm, y:{PinCenter[1]:.3f} mm. \n")
+        #! What's the purpose of these lines?
+        #print(f"Pin X' axis is at angle {angle_Pin:.3f} degrees. \n")
+        # u_FD = FD/np.linalg.norm(FD)
+        # angle_FD= np.degrees(np.arctan2(FD[1],FD[0]))-90
+        # print(f"Pin X' axis is at angle {angle_Pin:.5f} degrees. \n")
+        # print(f"FD1-4 X'' axis is at angle {angle_FD:.5f} degrees")
+        #print(f"Assembly Survey Rotational Offset is {angle_FD - angle_Pin:.5f} degrees. \n")
+        #angle_FD1= np.degrees(np.arctan2(FD1[1],FD1[0]))
+        #print(f"FD1-2 X'' axis is at angle {angle_FD1} degrees")
+
+
+    AngleOffset = angle_FD1 - angle_Pin
+    #! ADDED For Rotation if NEEDED
+    # if OffCenterPin == "Left":
+    #     NEWY = XOffset*-1;
+    #     NEWX = YOffset; 
+    # elif OffCenterPin == "Right":
+    #     NEWY = XOffset;
+    #     NEWX = YOffset*1; 
+    # print(f"Assembly Survey X Offset: {NEWX:.3f} mm (rotated)")
+    # print(f"Assembly Survey Y Offset: {NEWY:.3f} mm (rotated)")
+    
+    # print(f"Assembly Survey Rotational Offset is {AngleOffset:.5f} degrees")
+
     return CenterOffset, AngleOffset, XOffset, YOffset
-
-
 
 def get_offsets(filenames, pin_pos):
     sheetnames = loadsheet(filenames)
@@ -314,24 +295,6 @@ def get_offsets(filenames, pin_pos):
     elif PositionID == 2:
         CenterOff, AngleOff, XOffset, YOffset = angle(points, FDpoints=len(fd), OffCenterPin='Right', details=0,plot=1, Center = "P2Center", Off = "P2RIGHT", fd = fd)
     return XOffset, YOffset, AngleOff
-
-
-
-
-import re
-import colorama
-from colorama import Fore, Style
-
-colorClassify = {'-1': Fore.MAGENTA + 'NO INFO' + Fore.BLACK, 
-                       '0': Fore.GREEN + 'GREEN' + Fore.BLACK,
-                       '1': Fore.YELLOW + 'YELLOW' + Fore.BLACK, 
-                       '2': Fore.RED + 'RED' + Fore.BLACK}
-classify = {'-1': 'NO INFO',
-                         '0': 'GREEN',
-                         '1': 'YELLOW',
-                         '2': 'RED'}
-degrees = [0.03, 0.06, 90]
-centers = [0.050, 0.100, 10.0]
 
 def quality(Center, Rotation, position = "P1", details =0, note = 0):
     '''
