@@ -32,8 +32,8 @@ def read_ogp_template(template_file, output_file):
 
 header_template = """
 {{ ProjectName }}
-LastModified: {{ LastModifiedDate }} {{ LastModifiedTime }}
-RunTime: {{ RunDate }} {{ RunTime }}
+{{ LastModifiedDate }} {{ LastModifiedTime }}
+{{ RunDate }} {{ RunTime }}
 Component ID: {{ ComponentID }}
 Operator: {{ Operator }}
 Geometry: {{ Geometry }}

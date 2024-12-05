@@ -107,7 +107,7 @@ class SurveyProcessor():
             'y_points':(plotter.y_points).tolist(), 
             'z_points':(plotter.z_points).tolist(),
             'hexplot':im_bytes, 
-            'inspector': metadata['CernID'], 
+            'inspector': metadata['Operator'], 
             'comment':comment}
         
         db_upload.update(self.getDateTime(metadata))
