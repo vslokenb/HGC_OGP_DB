@@ -15,7 +15,7 @@ pjoin = os.path.join
 
 class SurveyProcessor():
     """Process Parsed OGP Survey CSV files and extract data for plotting and uploading to database."""
-    def __init__(self, OGPSurveyFilePath: list, MetaFilePath: list, TrayDir: str, yamlconfig: dict):
+    def __init__(self, OGPSurveyFilePath: list, MetaFilePath: list, yamlconfig: dict):
         """Initialize ImageProcessor object.
         
         Parameters:
@@ -33,7 +33,7 @@ class SurveyProcessor():
         if not os.path.exists(im_dir):
             os.makedirs(im_dir)
         self.im_dir = im_dir
-        self.tray_dir = TrayDir
+        self.tray_dir = yamlconfig.get('ogp_tray_dir')
 
         print(f'filename to process/upload: {self.OGPSurveyFile}')
         self.client = DBClient(yamlconfig)
