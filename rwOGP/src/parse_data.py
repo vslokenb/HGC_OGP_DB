@@ -49,27 +49,6 @@ direction cosine:    {{I_coordinate}}    {{J_coordinate}}    {{K_coordinate}}
 Radius            {{Radius}}
 """
 
-## currently not used
-default_template = """
-<group name="reportheader">
-{{ ProjectName }}
-LastModified: {{ LastModifiedDate }} {{ LastModifiedTime }}
-RunTime: {{ RunDate }} {{ RunTime }}
-Component ID: {{ ComponentID }}
-Operator: {{ Operator }}
-Geometry: {{ Geometry }}
-Density: {{ Density }}
-Sensor size: {{ SensorSize }}
-</group>
-
-<group name="feature">
-{{FeatureType}} {{FeatureName}}
-Point     {{X_coordinate}}    {{Y_coordinate}}    {{Z_coordinate}}
-direction cosine:    {{I_coordinate}}    {{J_coordinate}}    {{K_coordinate}}
-Radius            {{Radius}}
-</group>
-"""
-
 class DataParser():
     """Parse data file(s) using TTP template. 
     Output metadata, which contains info such as geometry and density, and feature results, which are dataframes containing the parsed data."""

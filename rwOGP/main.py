@@ -65,6 +65,7 @@ def load_config():
     return None
 
 def main_func():
+    """Main function to run the program."""
     settings = load_config()
     if settings is None:
         print("Program will now exit. Please update the configuration file and run the program again.")

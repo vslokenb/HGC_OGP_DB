@@ -100,7 +100,6 @@ class SurveyProcessor():
         comment = ''
 
         db_upload = {
-            'part_name': metadata['ComponentID'],
             'flatness': metadata['Flatness'], 
             'thickness': np.round(np.mean(plotter.z_points),3), 
             'x_points':(plotter.x_points).tolist(), 
