@@ -1,8 +1,7 @@
 <reportheader>               
 {ProjectName}
-{ProjectLastModified}		
-{RunDateTime}
-
+LastModified: {ProjectLastModified}		
+Runtime: {RunDateTime}
 Component ID: {$ComponentID} 
 Operator: {$CernID}   
 Geometry: {$Geometry}

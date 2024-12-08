@@ -1,53 +1,10 @@
-import re, os, yaml
+import os, yaml
 from ttp import ttp
 import pandas as pd
-import chardet
 from io import StringIO
 
+from templates import header_template, data_template
 pjoin = os.path.join
-
-def read_ogp_template(template_file, output_file):
-    """Read OGP template file and convert it to TTP template file."""
-    with open(template_file, 'rb') as f:
-        raw_data = f.read()
-    result = chardet.detect(raw_data)
-    
-    with open(template_file, 'r', encoding=result['encoding'], errors='ignore') as f:
-        template = f.read()
-    template = template.replace('{', '{{').replace('}', '}}')
-
-    template = re.sub(r'<(?!reportheader|feature)(\w+)>', '', template)
-    template = re.sub(r'</(?!reportheader|feature)(\w+)>', '', template)
-
-    template = re.sub(r'<(\w+)>', r"<group name='\1'>", template)
-
-    lines = template.splitlines()
-    filtered_lines = [line for line in lines if not line.strip().startswith('//')]
-    template = '\n'.join(filtered_lines)
-    template = re.sub(r'(?<=\b[A-Z])[A-Z]+\.[A-Z]+', r'_coordinate', template)
-    print(template)
-
-    # with open(output_file, 'w', encoding='utf-8') as f:
-        # f.write(template)
-
-header_template = """
-{{ ProjectName }}
-{{ LastModifiedDate }} {{ LastModifiedTime }}
-{{ RunDate }} {{ RunTime }}
-Component ID: {{ ComponentID }}
-Operator: {{ Operator }}
-Geometry: {{ Geometry }}
-Density: {{ Density }}
-Sensor size: {{ SensorSize }}
-Flatness: {{ Flatness }}
-"""
-
-data_template = """
-{{FeatureType}} {{FeatureName}}
-Point     {{X_coordinate}}    {{Y_coordinate}}    {{Z_coordinate}}
-direction cosine:    {{I_coordinate}}    {{J_coordinate}}    {{K_coordinate}}
-Radius            {{Radius}}
-"""
 
 class DataParser():
     """Parse data file(s) using TTP template. 
@@ -99,10 +56,10 @@ class DataParser():
         self.header_results = header_results[0]
         self.feature_results = pd.read_csv(StringIO(feature_results[0])).drop_duplicates()
 
-        if 'Flatness' not in self.header_results:
-            raise ValueError('Flatness not found in header. Please check the OGP template.')
+        # if 'Flatness' not in self.header_results:
+        # raise ValueError('Flatness not found in header. Please check the OGP template.')
         
-        self.header_results['Flatness'] = float(self.header_results['Flatness'])
+        # self.header_results['Flatness'] = float(self.header_results['Flatness'])
         return header_results, feature_results
     
     def output_features(self, output_filename):
@@ -115,6 +72,7 @@ class DataParser():
         Return 
         - filename (str): Filename prefix of the metadata file."""
         header_dict = self.header_results
+        print(header_dict)
         filename = f"{header_dict['ComponentID']}_{header_dict['Operator']}"
         meta_file = f'{filename}_meta.yaml'
         with open(f'{self.output_dir}/{meta_file}', 'w') as f:
@@ -139,3 +97,7 @@ class DataParser():
         else: filtered_df = df[df['FeatureType'] == filterType]
 
         return filtered_df[feature_name].dropna()
+
+if __name__ == "__main__":
+    dp = DataParser('templates/ex_fullOut.txt', 'templates')
+    dp()
