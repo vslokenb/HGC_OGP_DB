@@ -57,10 +57,10 @@ class DataParser():
         self.header_results = header_results[0]
         self.feature_results = pd.read_csv(StringIO(feature_results[0])).drop_duplicates()
 
-        # if 'Flatness' not in self.header_results:
-        # raise ValueError('Flatness not found in header. Please check the OGP template.')
+        if 'Flatness' not in self.header_results:
+            raise ValueError('Flatness not found in header. Please check the OGP template.')
         
-        # self.header_results['Flatness'] = float(self.header_results['Flatness'])
+        self.header_results['Flatness'] = float(self.header_results['Flatness'])
         return header_results, feature_results
     
     def output_features(self, output_filename):
