@@ -29,3 +29,24 @@ classify = {'-1': 'NO INFO',
                          '2': 'RED'}
 degrees = [0.03, 0.06, 90]
 centers = [0.050, 0.100, 10.0]
+
+header_template = """
+{{ ProjectName }}
+LastModified: {{ LastModifiedDate }} {{ LastModifiedTime }}
+Runtime: {{ RunDate }} {{ RunTime }}
+Component ID: {{ ComponentID }}
+Operator: {{ Operator }}
+Geometry: {{ Geometry }}
+Density: {{ Density }}
+Sensor size: {{ SensorSize }}
+Flatness: {{ Flatness }}
+Position ID: {{ PositionID }}
+TrayNo: {{ TrayNo }}
+"""
+
+data_template = """
+{{FeatureType}} {{FeatureName}}
+Point     {{X_coordinate}}    {{Y_coordinate}}    {{Z_coordinate}}
+direction cosine:    {{I_coordinate}}    {{J_coordinate}}    {{K_coordinate}}
+Radius            {{Radius}}
+"""

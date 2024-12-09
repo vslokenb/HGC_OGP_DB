@@ -3,7 +3,8 @@ from ttp import ttp
 import pandas as pd
 from io import StringIO
 
-from templates import header_template, data_template
+from src.param import header_template, data_template
+
 pjoin = os.path.join
 
 class DataParser():
@@ -97,7 +98,3 @@ class DataParser():
         else: filtered_df = df[df['FeatureType'] == filterType]
 
         return filtered_df[feature_name].dropna()
-
-if __name__ == "__main__":
-    dp = DataParser('templates/ex_fullOut.txt', 'templates')
-    dp()
