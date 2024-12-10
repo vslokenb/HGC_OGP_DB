@@ -4,7 +4,7 @@ This package is intended to be used to read and write data from the OGP to a loc
 2. GUI to read data from the local database to the OGP
 
 ## Getting started
-Set the output template of all OGP survey programs to be `OGP_template.txt` file.
+Set the output template of all OGP survey programs to be [OGP_template.txt](https://github.com/cmu-hgc-mac/HGC_OGP_DB/blob/main/rwOGP/templates/OGP_template.txt) file.
 
 ### Method 1: Run Python directly
 Clone the repository and install the required packages:
@@ -44,11 +44,16 @@ This GUI contains two tabs: 'View Plots' and 'Upload Files'.
 
 ![OGP_GUI](https://github.com/murthysindhu/HGC_DB_postgres/assets/58646122/dbeddf4c-2dc8-4da7-8f26-f916d1c69b74)
 
-## How this works (for developers)
-- [```file_selector.py```](https://github.com/murthysindhu/HGC_DB_postgres/blob/main/read-write-ogp/file_selector.py) runs the GUI instance
-- Code for reading/writing from local db are in [```postgres_tools/upload_inspect.py```](https://github.com/murthysindhu/HGC_DB_postgres/blob/main/read-write-ogp/postgres_tools/upload_inspect.py).
-- The 'Upload Files' tab calls [```process_im.py```](https://github.com/murthysindhu/HGC_DB_postgres/blob/main/read-write-ogp/process_im.py) to process data by module type.
-- The processing itself happens in [```ogp_height_plotter.py```](https://github.com/murthysindhu/HGC_DB_postgres/blob/main/read-write-ogp/ogp_height_plotter.py) to process data by module type.
+## Developer's Notes:
+### Template change
+- If the template is changed, how data is parsed from the OGP output files will also need to be modified accordingly in `src/param.py`.
+- The meta data needs to follow the format: 
+  ```
+  LastModified: {ProjectLastModified}		
+  Runtime: {RunDateTime}
+  ```
+  Otherwise [ttp](https://ttp.readthedocs.io/en/latest/) package will have trouble parsing the data.
+  
 
 ## To create a watcher instance (will be moved into a config file)
 (To ber combined with file_selector GUI)
