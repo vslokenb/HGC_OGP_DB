@@ -10,5 +10,5 @@ if src_dir not in sys.path:
 from src.parse_data import DataParser
 
 if __name__ == '__main__':
-    parser = DataParser(pjoin('rwOGP', 'templates', 'dummy2.txt'), 'templates')
+    parser = DataParser(pjoin('rwOGP', 'templates', 'dummy6.txt'), 'templates')
     parser()

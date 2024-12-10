@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
 from src.param import one_tray_param
+import warnings
 
 pjoin = os.path.join
 
@@ -124,13 +125,13 @@ class PlotTool:
         - `YOffset`: y-offset of the sensor from the tray center
         - `AngleOff`: angle of the sensor from the tray fiducials"""
         if not self.meta.get('PositionID'): 
-            raise UserWarning("PositionID not found in metadata. Default to Position ID 1.")
+            warnings.warn("PositionID not found in metadata. Default to Position ID 1.")
             PositionID = 1
         else:
             PositionID = int(self.meta['PositionID'])
 
         if not self.meta.get('TrayNo'):
-            raise UserWarning("TrayNo not found in metadata. Default to Tray No 1.")
+            warnings.warn("TrayNo not found in metadata. Default to Tray 1.")
             TrayNo = 1
         else:
             TrayNo = int(self.meta['TrayNo'])
