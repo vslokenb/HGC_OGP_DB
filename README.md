@@ -55,13 +55,6 @@ This GUI contains two tabs: 'View Plots' and 'Upload Files'.
   Otherwise [ttp](https://ttp.readthedocs.io/en/latest/) package will have trouble parsing the data.
   
 
-## To create a watcher instance (will be moved into a config file)
-(To ber combined with file_selector GUI)
-```
-cd read-write-ogp
-python3 auto_upload.py
-```
-
 ## Using pgAdmin4 to view tables (Instructions to follow)
 Install [postgreSQL-15 with pgAdmin4](https://www.pgadmin.org/download/) on your computers. Make sure you add ```psql``` to your path.
 
