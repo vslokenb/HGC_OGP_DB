@@ -6,8 +6,8 @@ Operator: pjordano
 Geometry: full
 Density: HDFULL
 Sensor size:  
-Flatness: 
-Position ID: 
+Flatness: 1.7
+Position ID: 1
 TrayNo: 
 ---
 Plane Pos1_MThickness1

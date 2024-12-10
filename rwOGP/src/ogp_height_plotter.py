@@ -123,8 +123,18 @@ class PlotTool:
         - `XOffset`: x-offset of the sensor from the tray center
         - `YOffset`: y-offset of the sensor from the tray center
         - `AngleOff`: angle of the sensor from the tray fiducials"""
-        PositionID = self.meta['PositionID']
-        TrayNo = self.meta['TrayNo']
+        if not self.meta.get('PositionID'): 
+            raise UserWarning("PositionID not found in metadata. Default to Position ID 1.")
+            PositionID = 1
+        else:
+            PositionID = int(self.meta['PositionID'])
+
+        if not self.meta.get('TrayNo'):
+            raise UserWarning("TrayNo not found in metadata. Default to Tray No 1.")
+            TrayNo = 1
+        else:
+            TrayNo = int(self.meta['TrayNo'])
+
         TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
         with open(TrayFile, 'r') as f:
             trayinfo = yaml.safe_load(f)

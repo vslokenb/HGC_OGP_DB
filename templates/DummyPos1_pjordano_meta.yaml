@@ -1,9 +1,11 @@
 ComponentID: DummyPos1
 Density: HDFULL
+Flatness: 1.7
 Geometry: full
 LastModifiedDate: '12:09:24'
 LastModifiedTime: '10:17:07'
 Operator: pjordano
+PositionID: '1'
 ProjectName: CMU_Constrained_survey
 RunDate: '12:09:24'
 RunTime: '10:02:26'
