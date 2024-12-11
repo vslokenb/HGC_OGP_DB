@@ -148,6 +148,7 @@ class PlotTool:
         offsetxy = tuple(trayinfo[f'p{PositionID}_offcenter_pin_{pos}_xy'])
 
         FD_points = self.features[self.features['FeatureName'].str.contains('FD')]
+        FD_points = FD_points[['X_coordinate', 'Y_coordinate']].values
     
         CenterOff, AngleOff, XOffset, YOffset = angle(centerxy, offsetxy, FD_points)    
         return XOffset, YOffset, AngleOff
