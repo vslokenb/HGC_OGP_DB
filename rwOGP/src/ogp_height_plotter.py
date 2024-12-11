@@ -111,7 +111,7 @@ class PlotTool:
         
         from io import BytesIO  
         buffer = BytesIO()
-        plt.savefig(f"{(savename.split('/'))[-1]}.png", bbox_inches='tight') # uncomment here for saving the 2d plot
+        plt.savefig(f"{(savename.split('/'))[-1]}.png", bbox_inches='tight')
         plt.savefig(buffer, format='png', bbox_inches='tight')
         buffer.seek(0)
         plt.close()
