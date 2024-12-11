@@ -1,0 +1,15 @@
+tray_no: 1
+tray_name: "Tray 1"
+module_geoms: ['LDR', 'HDT', 'LD5', 'LDL', 'LDT', 'LDB']
+# module_geoms: ['LD Right', 'HD Top', 'LD Five', 'LD Left', 'LD Top', 'LD Bottom']
+tray_fiducial_xy: [0.000, 392.81221]
+# Assuming this ^ is  tray fiducial with respect to bottom tray feducial.
+p1_center_pin_xy: [141.14502, 288.25081]
+p2_center_pin_xy: [91.02989, 97.56949]
+p1_offcenter_pin_left_xy: [66.19010, 287.98146]
+p2_offcenter_pin_right_xy: [165.98480, 97.83884] 
+date_meas: 20241029
+time_meas: 140600
+inspector: Jessica
+institution: CMU
+comment: First test Yaml, Made by Joy

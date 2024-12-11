@@ -50,3 +50,8 @@ Point     {{X_coordinate}}    {{Y_coordinate}}    {{Z_coordinate}}
 direction cosine:    {{I_coordinate}}    {{J_coordinate}}    {{K_coordinate}}
 Radius            {{Radius}}
 """
+
+data_template_simple = """
+{{FeatureType}} {{FeatureName}}
+Point\s+{{X_coordinate | float}}\s+{{Y_coordinate | float}}\s+{{Z_coordinate | float | default(None)}}
+"""
