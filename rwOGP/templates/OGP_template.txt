@@ -10,6 +10,7 @@ Sensor size: {$Sensorsize}
 Flatness: {$Flatness}
 Position ID: {$PositionID}
 TrayNo: {$TrayNo}
+Weight: {$Weight}
 ---
 </reportheader>
 

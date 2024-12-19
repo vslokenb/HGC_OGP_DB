@@ -25,10 +25,10 @@ class PlotTool:
         self.y_points = self.features['Y_coordinate']
         self.z_points = self.features['Z_coordinate']
     
-    def __call__(self, **kwds):
+    def __call__(self, **args):
         """Plot the 2D height map of the given data."""
         centerxy = self.get_center()
-        im_bytes = self.plot2d(self.x_points, self.y_points, self.z_points, centerxy, **kwds)
+        im_bytes = self.plot2d(self.x_points, self.y_points, self.z_points, centerxy, **args)
         return im_bytes
     
     def get_center(self) -> int:
@@ -38,7 +38,7 @@ class PlotTool:
         return (center_x, center_y)
 
     @staticmethod
-    def plot2d(x, y, zheight, centerxy, vmini=1.05, vmaxi=4.5, rotate = 0 , new_angle = 120, title="", savename="", value = 1, day_count = None, mod_flat = None, show_plot = True):
+    def plot2d(x, y, zheight, centerxy, vmini, vmaxi, new_angle, title, savename, mod_flat, value = 1, rotate=0, show_plot = True):
         """Plot 2D height map of the given data.
         Parameters
         - `x`: x-coordinates
@@ -101,9 +101,6 @@ class PlotTool:
                             '',f'$\Delta$H = {max_h - min_h:.3f} mm','', f'maxH: {max_h:.3f} mm', f'minH:  {min_h:.3f} mm',''))
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         axs.text(1.3, 1.0, textstr, transform=axs.transAxes, fontsize=10, verticalalignment='top', bbox=props)
-        if day_count is not None:
-            legendstr = '\n'.join((f'Day',f'{day_count}'))
-            axs.text(1.3, 0.20, legendstr, transform=axs.transAxes, fontsize=20, verticalalignment='top', color = 'blue')
 
         if show_plot:
             plt.show(); 
@@ -111,7 +108,7 @@ class PlotTool:
         
         from io import BytesIO  
         buffer = BytesIO()
-        plt.savefig(f"{(savename.split('/'))[-1]}.png", bbox_inches='tight')
+        plt.savefig(savename, bbox_inches='tight')
         plt.savefig(buffer, format='png', bbox_inches='tight')
         buffer.seek(0)
         plt.close()

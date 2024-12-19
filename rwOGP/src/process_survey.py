@@ -71,12 +71,12 @@ class SurveyProcessor():
         elif comp_type == 'protomodules':
             component_params = protomodules_params
             XOffset, YOffset, AngleOff = plotter.get_offsets()
-            db_upload.update({'proto_name': modtitle, 'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3)})
-        
-        #Changes by Paolo:
+            db_upload.update({'proto_name': modtitle, 'x_offset_mu':np.round(XOffset*1000), 
+                              'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
+                              "weight": metadata['Weight']})
         elif comp_type == 'modules':
-            component_params = modules_paramas  # <--- IS THIS CORRECT?  
-            XOffset, YOffset, AngleOff = plotter.get_offsets() # <--- IS THIS CORRECT?  
+            component_params = modules_params
+            XOffset, YOffset, AngleOff = plotter.get_offsets()
             db_upload.update({'module_name': modtitle, 'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3)}) # <--- IS THIS CORRECT?  
             try:
                 PMoffsets = asyncio.run(self.client.GrabSensorOffsets(modtitle))
@@ -89,19 +89,9 @@ class SurveyProcessor():
             print('Protomodule Offset Info: ', SensorXOffset, SensorYOffset, SensorAngleOff)
             print('Making Accuracy Plot With:', modtitle, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
             acc_bytes = make_accuracy_plot(modtitle, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff)    
-
-        ### Alternativley:          This should do all the offset calculations and uploading we need, without my accuracy plot, which is not a priority.
-        # """
-        # elif comp_type == 'modules':
-        #     component_params = modules_paramas  
-        #     XOffset, YOffset, AngleOff = plotter.get_offsets()  
-        #     db_upload.update({'module_name': modtitle, 'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3)})
-        # """
-        ###############
         else:
             raise ValueError("Component type not recognized. \
                 Currently only supports baseplates, hexaboards, and protomodules. Please change the directory this file belongs to or add customed component type.")
-            print(f"your component was not a valid type: {comp_type}")
 
         
         #THIS CAN GET DELETED V
@@ -128,7 +118,7 @@ class SurveyProcessor():
                    "new_angle": component_params['new_angle'], "savename": pjoin(self.im_dir, comp_type, f"{filesuffix}_heights"),
                    "mod_flat": metadata['Flatness'], "title": metadata['ComponentID']}
         
-        im_bytes = plotter(show_plot=False)
+        im_bytes = plotter(im_args)
 
         comment = ''
 

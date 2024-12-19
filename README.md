@@ -30,6 +30,11 @@ If run for the first time, this prompts user to enter a secure folder/directory 
 
 Running this command after will automatically postprocess and upload the OGP survey results to the database.
 
+## Troubleshooting
+### Missing entries
+1. Check if OGP survey program is properly named. Spaces are very likely to cause parsing issues and therefore should be avoided. 
+Correct Example: CMU_OGP_module_survey_2024
+
 ## How to use:
 This GUI contains two tabs: 'View Plots' and 'Upload Files'.
 - View plots shows plots data from the OGP. (TBD: Change limit on number of files)
