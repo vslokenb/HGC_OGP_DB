@@ -10,6 +10,7 @@ if src_dir not in sys.path:
 
 from src.parse_data import DataParser
 from src.ogp_height_plotter import PlotTool
+from src.param import protomodules_params as component_params
 
 if __name__ == '__main__':
     parser = DataParser(pjoin('rwOGP', 'templates', 'dummy4.txt'), 'tests')
@@ -21,5 +22,10 @@ if __name__ == '__main__':
 
     feature_df = pd.read_csv(features[0])
     PT = PlotTool(metadata, feature_df, 'rwOGP/templates/trays', 'tests')
-    PT.get_offsets()
+    
+    im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
+            "new_angle": component_params['new_angle'], "savename": "ex_heights",
+            "mod_flat": metadata['Flatness'], "title": metadata['ComponentID']}
+
+    PT(**im_args)
 

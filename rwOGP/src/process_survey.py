@@ -118,7 +118,7 @@ class SurveyProcessor():
                    "new_angle": component_params['new_angle'], "savename": pjoin(self.im_dir, comp_type, f"{filesuffix}_heights"),
                    "mod_flat": metadata['Flatness'], "title": metadata['ComponentID']}
         
-        im_bytes = plotter(im_args)
+        im_bytes = plotter(**im_args)
 
         comment = ''
 
