@@ -73,7 +73,7 @@ class SurveyProcessor():
             XOffset, YOffset, AngleOff = plotter.get_offsets()
             db_upload.update({'proto_name': modtitle, 'x_offset_mu':np.round(XOffset*1000), 
                               'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
-                              "weight": metadata['Weight']})
+                              "weight": metadata.get('Weight', None)})
         elif comp_type == 'modules':
             component_params = modules_params
             XOffset, YOffset, AngleOff = plotter.get_offsets()

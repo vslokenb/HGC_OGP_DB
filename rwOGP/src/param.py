@@ -42,7 +42,6 @@ Sensor size: {{ SensorSize }}
 Flatness: {{ Flatness }}
 Position ID: {{ PositionID }}
 TrayNo: {{ TrayNo }}
-Weight: {{ Weight }}
 """
 
 data_template = """
