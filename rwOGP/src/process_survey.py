@@ -95,27 +95,6 @@ class SurveyProcessor():
             raise ValueError("Component type not recognized. \
                 Currently only supports baseplates, hexaboards, and protomodules. Please change the directory this file belongs to or add customed component type.")
 
-        
-        #THIS CAN GET DELETED V
-        """
-        # else:
-        #     component_params = others_params
-        #     try:
-        #         PMoffsets = asyncio.run(self.client.GrabSensorOffsets(modtitle))
-        #         print(PMoffsets)
-        #     except:
-        #         PMoffsets =(asyncio.get_event_loop()).run_until_complete(self.client.GrabSensorOffsets(modtitle))
-            
-        #     SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
-
-        #     print('Retreived Protomodule Offset Info: ', SensorXOffset, SensorYOffset, SensorAngleOff)
-        #     print('Making Accuracy Plot With:', modtitle, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
-        #     acc_bytes = make_accuracy_plot(modtitle, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff)
-        """
-        #THIS CAN GET DELETED ^
-        
-        print("key:", component_params['key'])
-
         im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
                    "new_angle": component_params['new_angle'], "savename": pjoin(self.im_dir, comp_type, f"{filesuffix}_heights"),
                    "mod_flat": metadata['Flatness'], "title": metadata['ComponentID']}
@@ -128,7 +107,7 @@ class SurveyProcessor():
             'flatness': metadata['Flatness'], 
             'thickness': np.round(np.mean(plotter.z_points),3), 
             'max_thickness': np.round(np.max(plotter.z_points),3),
-            'avg_thickness': np.round(np.mean(plotter.z_points),3),
+            'ave_thickness': np.round(np.mean(plotter.z_points),3),
             'x_points':(plotter.x_points).tolist(), 
             'y_points':(plotter.y_points).tolist(), 
             'z_points':(plotter.z_points).tolist(),
