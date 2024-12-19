@@ -125,6 +125,8 @@ class SurveyProcessor():
         db_upload.update({
             'flatness': metadata['Flatness'], 
             'thickness': np.round(np.mean(plotter.z_points),3), 
+            'max_thickness': np.round(np.max(plotter.z_points),3),
+            'avg_thickness': np.round(np.mean(plotter.z_points),3),
             'x_points':(plotter.x_points).tolist(), 
             'y_points':(plotter.y_points).tolist(), 
             'z_points':(plotter.z_points).tolist(),
