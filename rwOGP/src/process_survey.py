@@ -97,11 +97,9 @@ class SurveyProcessor():
 
         im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
                    "new_angle": component_params['new_angle'], "savename": pjoin(self.im_dir, comp_type, f"{filesuffix}_heights"),
-                   "mod_flat": metadata['Flatness'], "title": metadata['ComponentID']}
+                   "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": False}
         
         im_bytes = plotter(**im_args)
-
-        comment = ''
 
         db_upload.update({
             'flatness': metadata['Flatness'], 
@@ -113,7 +111,7 @@ class SurveyProcessor():
             'z_points':(plotter.z_points).tolist(),
             'hexplot':im_bytes, 
             'inspector': metadata['Operator'], 
-            'comment':comment})
+            'comment':metadata.get("Comment", None)})
         
         db_upload.update(self.getDateTime(metadata))
 

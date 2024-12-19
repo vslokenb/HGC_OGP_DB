@@ -38,7 +38,7 @@ class PlotTool:
         return (center_x, center_y)
 
     @staticmethod
-    def plot2d(x, y, zheight, centerxy, vmini, vmaxi, new_angle, title, savename, mod_flat, value = 1, rotate=0, show_plot = True):
+    def plot2d(x, y, zheight, centerxy, vmini, vmaxi, new_angle, title, savename, mod_flat, show_plot, value = 1, rotate=0):
         """Plot 2D height map of the given data.
         Parameters
         - `x`: x-coordinates
@@ -50,6 +50,7 @@ class PlotTool:
         - `rotate`: index of the fiducial to rotate the plot around
         - `new_angle`: angle to rotate the plot to
         - `title`: title of the plot
+        - `show_plot`: whether to show the plot. Imcompatible with saving the plot.
         - `value`: 1 for plotting height values, 0 for plotting deviation from mean"""
         mean_h = np.mean(zheight)
         std_h = np.std(zheight)
@@ -103,6 +104,7 @@ class PlotTool:
         axs.text(1.3, 1.0, textstr, transform=axs.transAxes, fontsize=10, verticalalignment='top', bbox=props)
 
         if show_plot:
+            print("Not saving the plot or the image bytes as show_plot is set to True.")
             plt.show(); 
             plt.close()
         
