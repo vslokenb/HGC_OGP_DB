@@ -5,6 +5,10 @@ This package is intended to be used to read and write data from the OGP to a loc
 
 ## Getting started
 Set the output template of all OGP survey programs to be [OGP_template.txt](https://github.com/cmu-hgc-mac/HGC_OGP_DB/blob/main/rwOGP/templates/OGP_template.txt) file.
+Make changes to the user input routine of every OGP survey program, as demonstrated below.
+![tojoy12198](https://github.com/user-attachments/assets/d897793d-df3a-48fc-a04e-fd160cbf312f)
+![tojoy12199](https://github.com/user-attachments/assets/eab83325-0726-4e05-b881-7defcc6751c2)
+![tojoy121910](https://github.com/user-attachments/assets/d5837b11-1ceb-4c6b-adc1-87542269f7a0)
 
 ### Method 1: Run Python directly
 Clone the repository and install the required packages:
