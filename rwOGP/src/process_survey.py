@@ -58,7 +58,7 @@ class SurveyProcessor():
         modtitle = metadata['ComponentID']
 
         df = pd.read_csv(ex_file)
-        plotter = PlotTool(metadata, df, self.tray_dir)
+        plotter = PlotTool(metadata, df, self.tray_dir, pjoin(self.im_dir, comp_type))
 
         filesuffix = pbase(ex_file).split('.')[0]
 
@@ -102,7 +102,6 @@ class SurveyProcessor():
                    "new_angle": component_params['new_angle'], "savename": pjoin(self.im_dir, comp_type, f"{filesuffix}_heights"),
                    "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": False}
         
-        plotter.save_dir = pjoin(self.im_dir, comp_type)
         im_bytes = plotter(**im_args)
 
         db_upload.update({
