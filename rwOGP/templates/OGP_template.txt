@@ -8,6 +8,7 @@ Geometry: {$Geometry}
 Density: {$Density}
 Sensor size: {$Sensorsize} 
 Flatness: {$Flatness}
+Thickness: {$Thickness}
 Position ID: {$PositionID}
 TrayNo: {$TrayNo}
 ---

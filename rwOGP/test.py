@@ -15,7 +15,6 @@ from src.param import protomodules_params as component_params
 if __name__ == '__main__':
     parser = DataParser(pjoin('rwOGP', 'templates', 'dummy4.txt'), 'tests')
     meta, features = parser()
-    print(meta, features)
 
     with open(meta[0], 'r') as f:
         metadata = yaml.safe_load(f)
@@ -25,7 +24,7 @@ if __name__ == '__main__':
     
     im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
             "new_angle": component_params['new_angle'], "savename": "ex_heights",
-            "mod_flat": metadata['Flatness'], "title": metadata['ComponentID']}
+            "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": False}
 
-    PT(**im_args)
+    PT.get_offsets()
 

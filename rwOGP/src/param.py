@@ -40,6 +40,7 @@ Geometry: {{ Geometry }}
 Density: {{ Density }}
 Sensor size: {{ SensorSize }}
 Flatness: {{ Flatness }}
+Thickness: {{Thickness}}
 Position ID: {{ PositionID }}
 TrayNo: {{ TrayNo }}
 """

@@ -35,6 +35,7 @@ class PlotTool:
         """Get the index of the fiducial center in the dataframe by taking the average of the x and y coordinates."""
         center_x = (max(self.x_points) + min(self.x_points)) / 2
         center_y = (max(self.y_points) + min(self.y_points)) / 2
+        print(f"Center of the sensor is at ({center_x:.3f}, {center_y:.3f}) mm")
         return (center_x, center_y)
 
     @staticmethod
@@ -148,8 +149,15 @@ class PlotTool:
 
         FD_points = self.features[self.features['FeatureName'].str.contains('FD')]
         FD_points = FD_points[['X_coordinate', 'Y_coordinate']].values
+
+        plotFD(FD_points, centerxy, centerxy, offsetxy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))        
     
         CenterOff, AngleOff, XOffset, YOffset = angle(centerxy, offsetxy, FD_points)    
+        print(f"Assembly Survey X Offset: {XOffset:.3f} mm")
+        print(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
+        print(f"Assembly Survey Rotational Offset is {AngleOff:.5f} degrees")
+        print(f"Assembly Survey Center Offset is {CenterOff:.3f} mm")
+
         return XOffset, YOffset, AngleOff
 
 def vec_angle(x,y):
@@ -169,14 +177,16 @@ def vec_rotate(old_x, old_y, old_angle, new_angle = 120):
     new_y = old_x*np.sin(rad)+old_y*np.cos(rad)
     return new_x, new_y
     
-def plotFD(FDpoints:np.array, FDCenter:tuple, CenterXY:tuple, OffXY:tuple) -> None:
+def plotFD(FDpoints:np.array, FDCenter:tuple, CenterXY:tuple, OffXY:tuple, save=False, save_name='') -> None:
     """Plot the fiducial points and the center of the sensor.
     
     Parameters
     - `FDpoints`: array of fiducial points
     - `FDCenter`: center of the fiducial points
     - `CenterXY`: center of the sensor
-    - `OffXY`: offset of the sensor"""
+    - `OffXY`: offset of the sensor
+    - `save`: whether to save the plot. Incompatible with showing the plot.
+    - `save_name`: name to save the plot as"""
     CenterX, CenterY = CenterXY
     OffX, OffY = OffXY
     x_values = np.append(FDpoints[:,0], [CenterX, OffX])
@@ -197,6 +207,9 @@ def plotFD(FDpoints:np.array, FDCenter:tuple, CenterXY:tuple, OffXY:tuple) -> No
     plt.ylabel("y [mm]")
 
     plt.title("Fiducial Points")
+    if save:
+        plt.savefig(save_name)
+        
 
 #! Messy part: serve as reference for future development
     # if FDpoints == 2:
