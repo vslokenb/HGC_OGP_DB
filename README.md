@@ -37,7 +37,7 @@ Running this command after will automatically postprocess and upload the OGP sur
 ## Troubleshooting
 ### Missing entries
 1. Check if OGP survey program is properly named. Spaces are very likely to cause parsing issues and therefore should be avoided. 
-Correct Example: CMU_OGP_module_survey_2024
+Correct Example: `CMU_OGP_module_survey_2024`
 
 ## How to use:
 This GUI contains two tabs: 'View Plots' and 'Upload Files'.
