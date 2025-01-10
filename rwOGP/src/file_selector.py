@@ -5,6 +5,11 @@ from io import BytesIO
 from PIL import Image, ImageTk
 from src.upload_inspect import DBClient, comptable
 
+nested_notebook = None
+image_lists = None
+image_label = None
+dbclient = None
+
 def select_files():
     """Open a file dialog to select files."""
     global file_paths_text, file_paths_scrollbar
@@ -65,7 +70,8 @@ def update_image_list(file_paths, image_list):
     """Update the image list with the selected files."""
     image_list.delete(0, tk.END)
     for file_path in file_paths:
-        image_list.insert(tk.END, os.path.basename(file_path))  # Display only the file name
+        name = os.path.basename(file_path) if file_path is not None else None
+        image_list.insert(tk.END, name)  # Display only the file name
     return image_list
 
 def display_selected_image(event):
@@ -90,7 +96,12 @@ def display_selected_image(event):
         image_label.config(image=None)
 
 def refresh_listbox(dbclient: DBClient, subtab_label, image_lists):
-    """Refresh the listbox with the updated image list."""
+    """Refresh the listbox with the updated image list.
+    
+    Parameters:
+    - dbclient (DBClient): Database client object.
+    - subtab_label (list): List of subtab labels.
+    - image_lists (list): List of image list objects."""
     for s in range(len(subtab_label)):
         re = asyncio.run(dbclient.request_PostgreSQL(subtab_label[s]))
         pe = [r[f"{comptable[subtab_label[s]]['prefix']}_name"] for r in re]
@@ -111,8 +122,12 @@ def refresh_listbox(dbclient: DBClient, subtab_label, image_lists):
 
 ##################################################################
         
-def fire_GUI(dbclient: DBClient):
+def fire_GUI(client: DBClient):
     """Fire up the GUI. Provide a way to select files and process them."""
+    global image_label, image_lists, nested_notebook, dbclient
+
+    dbclient = client
+
     root = tk.Tk()
     root.title('File Selection and Processing GUI')
     root.geometry('800x800')  # Adjusted window size

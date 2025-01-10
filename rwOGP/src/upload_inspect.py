@@ -43,6 +43,7 @@ class DBClient():
         return value
 
     async def request_PostgreSQL(self, component_type, bp_name = None):
+        """Request data from the database."""
         result = await self.fetch_PostgreSQL(get_query_read(component_type, bp_name ))
         return result
 
