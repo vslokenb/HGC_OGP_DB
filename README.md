@@ -6,9 +6,9 @@ This package is intended to be used to read and write data from the OGP to a loc
 ## Getting started
 Set the output template of all OGP survey programs to be [OGP_template.txt](https://github.com/cmu-hgc-mac/HGC_OGP_DB/blob/main/rwOGP/templates/OGP_template.txt) file.
 Make changes to the user input routine of every OGP survey program, as demonstrated below.
-![tojoy12198](https://github.com/user-attachments/assets/d897793d-df3a-48fc-a04e-fd160cbf312f)
-![tojoy12199](https://github.com/user-attachments/assets/eab83325-0726-4e05-b881-7defcc6751c2)
-![tojoy121910](https://github.com/user-attachments/assets/d5837b11-1ceb-4c6b-adc1-87542269f7a0)
+![OGP1](https://github.com/user-attachments/assets/d897793d-df3a-48fc-a04e-fd160cbf312f)
+![OGP2](https://github.com/user-attachments/assets/eab83325-0726-4e05-b881-7defcc6751c2)
+![OGP3](https://github.com/user-attachments/assets/d5837b11-1ceb-4c6b-adc1-87542269f7a0)
 
 ### Method 1: Run Python directly
 Clone the repository and install the required packages:
@@ -39,8 +39,8 @@ If run for the first time, this prompts user to enter a secure folder/directory 
 Running this command after will automatically postprocess and upload the OGP survey results to the database.
 
 ## How to use:
-This GUI contains two tabs: 'View Plots' and 'Upload Files'.
-- View plots shows plots data from the OGP. (TBD: Change limit on number of files)
+This GUI contains two tabs: 'View Plots' and 'Upload Files'. Run `python rwOGP/startGUI.py` to start the GUI.
+- View plots shows plots data from the OGP. (TBD: Change limit on number of files) 
 - Upload Files lets the user upload .XLS output files containing OGP meaurements to the local db.
   - The **watch directory** _must contain_ the following subdirectories for the GUI to work:
     - baseplates
