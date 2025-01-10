@@ -82,8 +82,7 @@ def display_selected_image(event):
     if selection:
         file_path = event.widget.get(selection[0])
         im = asyncio.run(dbclient.request_PostgreSQL(selected_subtab, file_path))
-        #image = Image.open(file_path)
-        if im != []:
+        if im != [] and im[0]['hexplot'] is not None:
             image = Image.open(BytesIO(im[0]['hexplot']))
             aspect_ratio = image.width / image.height
             new_width = 600  # Set the width of the image label
@@ -92,6 +91,8 @@ def display_selected_image(event):
             photo = ImageTk.PhotoImage(image)
             image_label.config(image=photo)
             image_label.image = photo  # Keep a reference to avoid garbage collection
+        else:
+            print(f"No image found for the selected item: {file_path} in {selected_subtab} of the database")
     else:
         image_label.config(image=None)
 

@@ -4,16 +4,23 @@ sys.path.append('../')
 
 comptable = {'baseplate':{'prefix': 'bp'},'hexaboard':{'prefix': 'hxb'},'protomodule':{'prefix': 'proto'},'module':{'prefix': 'module'}}
 
-def get_query_read(component_type, part_name = None, comptable=comptable):
-    """Get the query to read from the database."""
+def get_query_read(component_type, part_name = None, comptable=comptable, limit=15) -> str:
+    """Get the query to read from the database.
+
+    Returns:
+    - query (str): Formatted query string.
+    """
     if part_name is None:
-        query = f"""SELECT {comptable[component_type]['prefix']}_name FROM {comptable[component_type]['prefix']}_inspect ORDER BY {comptable[component_type]['prefix']}_row_no DESC LIMIT 10;"""
+        query = f"""SELECT {comptable[component_type]['prefix']}_name FROM {comptable[component_type]['prefix']}_inspect ORDER BY {comptable[component_type]['prefix']}_row_no DESC LIMIT {limit};"""
     else:
         query = f"""SELECT hexplot FROM {comptable[component_type]['prefix']}_inspect WHERE {comptable[component_type]['prefix']}_name = '{part_name}'"""
     return query
 
-def get_query_write(table_name, column_names):
-    """Get the query to write to the database."""
+def get_query_write(table_name, column_names) -> str:
+    """Get the query to write to the database.
+    
+    Returns:
+    - query (str): Formatted query string."""
     pre_query = f""" INSERT INTO {table_name} ({', '.join(column_names)}) VALUES """
     data_placeholder = ', '.join(['${}'.format(i) for i in range(1, len(column_names)+1)])
     query = f"""{pre_query} {'({})'.format(data_placeholder)}"""
