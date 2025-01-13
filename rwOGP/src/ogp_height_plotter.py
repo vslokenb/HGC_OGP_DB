@@ -129,6 +129,18 @@ class PlotTool:
             PositionID = 1
         else:
             PositionID = int(self.meta['PositionID'])
+        
+        if not self.meta.get('Density'): 
+            warnings.warn("Density not found in metadata. Default shape is LD.")
+            density = 'LD'
+        else:
+            density = str(self.meta['Density'])
+        
+        if not self.meta.get('Geometry'): 
+            warnings.warn("Geometry not found in metadata. Default Geometry is Full.")
+            Geometry = 'Full'
+        else:
+            Geometry = str(self.meta['Geometry'])
 
         if not self.meta.get('TrayNo'):
             warnings.warn("TrayNo not found in metadata. Default to Tray 1.")
