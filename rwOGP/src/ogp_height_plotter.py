@@ -5,7 +5,7 @@ import yaml
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
-from src.param import one_tray_param
+from src.param import one_tray_param, pin_mapping
 import warnings
 
 pjoin = os.path.join
@@ -155,16 +155,24 @@ class PlotTool:
         if PositionID == 1:
             pos = 'left'
         else: pos = 'right'
-        
-        centerxy = tuple(trayinfo[f'p{PositionID}_center_pin_xy'])
-        offsetxy = tuple(trayinfo[f'p{PositionID}_offcenter_pin_{pos}_xy'])
+
+        HolePin, SlotPin = pin_mapping.get(Geometry, {}).get(density, {}).get(PositionID, ('', ''))
+
+        if HolePin == '' or SlotPin == '':
+            print(f"Could not find the HolePin and SlotPin for the given Geometry: {Geometry} and Density: {density}.")
+
+        HolePin_xy = tuple(trayinfo[f'{HolePin}_xy'])  
+        SlotPin_xy = tuple(trayinfo[f'{SlotPin}_xy'])
 
         FD_points = self.features[self.features['FeatureName'].str.contains('FD')]
         FD_points = FD_points[['X_coordinate', 'Y_coordinate']].values
 
-        plotFD(FD_points, centerxy, centerxy, offsetxy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))        
-    
-        CenterOff, AngleOff, XOffset, YOffset = angle(centerxy, offsetxy, FD_points)    
+        #! plot the fiducial points (not urgent)
+        # plotFD(FD_points, centerxy, centerxy, offsetxy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))        
+
+        print(f' Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} ')
+        
+        CenterOff, AngleOff, XOffset, YOffset = angle(HolePin_xy, SlotPin_xy, FD_points, Geometry, density, PositionID)
         print(f"Assembly Survey X Offset: {XOffset:.3f} mm")
         print(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
         print(f"Assembly Survey Rotational Offset is {AngleOff:.5f} degrees")
