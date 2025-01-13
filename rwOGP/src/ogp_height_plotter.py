@@ -241,90 +241,113 @@ def plotFD(FDpoints:np.array, FDCenter:tuple, CenterXY:tuple, OffXY:tuple, save=
     #     plt.plot(FDCenter[0],FDCenter[1],'ro',label='FDCenter',ms=2)
     #     names = ['P1CenterPin','P1OffcenterPin','FD1','FD2','FD3','FD4']
 
-def angle(centerXY:tuple, offsetXY:tuple, FDPoints:np.array):
+def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, position):
     """Calculate the angle and offset of the sensor from the tray fiducials.
     
     Parameters
-    - `centerXY`: center of the sensor
-    - `offsetXY`: offset of the sensor
-    - `FDPoints`: array of fiducial points
-    
+    - `holeXY`: the location of the pin that corresponds to the HOLE in the base plate. the center pin for Full, LD.
+    - `slotXY`: the location of the pin that corresponds to the SLOT in the base plate. the offcenter pin for Full, LD
+    - `FDPoints`: array of fiducial points: 2, 4, 6, or 8, FD points are accepted
+    - `shape`: the shape of the module eg, Full/Five/Left/Right
+    - `desnity`: the desity of the module, HD or LD
+    - `position`: the position its assembled in, P1 or P2
+
     Return
     - `CenterOffset`: offset of the sensor from the tray center
     - `AngleOffset`: angle of the sensor from the tray fiducials
     - `XOffset`: x-offset of the sensor from the tray center
     - `YOffset`: y-offset of the sensor from the tray center"""
+
+    holeX, holeY = holeXY
+    slotX, slotY = slotXY
+
+    pinX = slotX - holeX     #X component of a vector pointing from hole to slot
+    pinY = slotY - holeY     #Y component "" ""
+
+    Hole = np.array([holeX, holeY])
+
+    assert len(FDPoints) == 2 or len(FDPoints) == 4 or len(FDPoints) == 6 or len(FDPoints) == 8, "The number of fiducial points must be 2,4,6 or 8."
+
+    print(f'pinY: {pinY}  &  pinX: {pinX}')
+
+    if shape == 'Full' or shape == 'Bottom' or shape == 'Top':
+        print('angle_Pin= (np.degrees(np.arctan2(-pinY, -pinX))')
+        print(f' arctan(x/y) : -{pinY}/-{pinX}')
+        angle_Pin = np.degrees(np.arctan2(-pinY, -pinX))
+        print(f' y/x : {pinY/pinX}')
+        print(f'{angle_Pin} & {np.arctan2(pinY,pinX)}')
+
+    elif shape == 'Left' or shape == 'Right' or shape == 'Five':
+        print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
+        angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
+        print(f' arctan(x/y) : -{pinY}/-{pinX}')
+    else: print('ogpheightplotter: angle: shape not recognized')
+
+    print(f'This is angle pin {angle_Pin}')
     
-    centerX, centerY = centerXY
-    offsetX, offsetY = offsetXY
-    pinX = abs(centerX - offsetX)
-    pinY = abs(centerY - offsetY)
+    if density == 'HD':   
+        if shape == 'Full':
+            FDCenter = np.mean(FDPoints, axis=0) #Average of ALl FDs
+        else:
+            FDCenter = np.mean(FDPoints[0,2], axis=0)  #Average of FD1 and FD3, this applies to modules except HD Full
+    if density == 'LD':
+        if shape == 'Full':
+            FDCenter = np.mean(FDPoints, axis=0) #Average of ALl FDs
+        else:
+            FDCenter = np.mean(FDPoints[0,2], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
 
-    assert len(FDPoints) == 2 or len(FDPoints) == 4, "The number of fiducial points must be either 2 or 4."
+     #   FDPoints[0] must be "FD1" and FDPoints[2] must be "FD3" , or else this system will not work.
+     #  It is up to the parsing system and the file output to assign the fiducials correctly  -PJ 1/9/25
+
+     #adjustmentX and adjustmentY is appropriate for all modules except Fulls, and the Five
+
+    if shape == 'Full' or shape == 'Five':
+        adjustmentX = 0; adjustmentY = 0;
+    # Waiting on Adjustment INFO, This needs to be filled out after measurements !!!!WORK IN PROGRESS!!!
     
-    PinCenter = np.array([centerX, centerY])
-    angle_Pin= np.degrees(np.arctan2(pinY, pinX))
+    XOffset = FDCenter[0]-Hole[0]-adjustmentX
+    YOffset = FDCenter[1]-Hole[1]-adjustmentY
 
-    FDCenter = np.mean(FDPoints, axis=0)
-
-    XOffset = FDCenter[0]-PinCenter[0]
-    YOffset = FDCenter[1]-PinCenter[1]
-
-    print(f"Assembly Survey Y Offset: {YOffset:.3f} mm. \n")
+    print(f"Assembly Survey X Offset: {XOffset:.3f} mm. \n")
     print(f"Assembly Survey Y Offset: {YOffset:.3f} mm. \n")
 
     CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
 
-    Pin = np.array([pinX, pinY])
-    u_Pin = Pin/np.linalg.norm(Pin)
-    angle_Pin= np.degrees(np.arctan2(Pin[1],Pin[0]))
+    for point in FDPoints:
+        print(point)
 
-    if len(FDPoints) == 2:
-        FD1 = FDPoints[0] - FDPoints[1]
-        angle_FD1= np.degrees(np.arctan2(FD1[1],FD1[0]))-90 if FD1[1] > 0 else np.degrees(np.arctan2(FD1[1],FD1[0]))+90
-        print(f"FD1-2 X'' axis is at angle {angle_FD1:.5f} degrees. \n")
-        print(f"FDCenter at x:{FDCenter[0]:.3f} mm, y:{FDCenter[1]:.3f} mm")
-        print(f"PinCenter at x:{PinCenter[0]:.3f} mm, y:{PinCenter[1]:.3f} mm")
-        
-        #! What's the purpose of these lines?
-        # AngleOffset = angle_FD1 - angle_Pin
-        # print(f"Assembly Survey Rotational Offset is {AngleOffset:.5f} degrees")
+    FD3to1 = FDPoints[0] - FDPoints[2]  #Vector from FD3 to FD1
     
-    if len(FDPoints) == 4:
-        FD1 = FDPoints[0] - FDPoints[2]
-        angle_FD1 = np.degrees(np.arctan2(FD1[1],FD1[0]))-90 if FD1[1] > 0 else np.degrees(np.arctan2(FD1[1],FD1[0]))+90
-        FD2 = FDPoints[1] - FDPoints[3]
-        angle_FD2 = np.degrees(np.arctan2(FD2[1],FD2[0]))-90 if FD2[1] > 0 else np.degrees(np.arctan2(FD2[1],FD2[0]))+90
-        FD = (FD1+FD2)/2
-        print(f"FD1-3 X'' axis is at angle {angle_FD1:.5f} degrees")
-        print(f"angle of FD1-3 X'' relative to Assembly Tray Pin X' is {angle_FD1 - angle_Pin:.5f} degrees")
-        print(f"FD2-4 X'' axis is at angle {angle_FD2:.5f} degrees")
-        print(f"angle of FD2-4 X'' relative to Assembly Tray Pin X' is {angle_FD2 - angle_Pin:.5f} degrees. \n")
-        print(f"FDCenter at x:{FDCenter[0]:.3f} mm, y:{FDCenter[1]:.3f} mm")
-        print(f"PinCenter at x:{PinCenter[0]:.3f} mm, y:{PinCenter[1]:.3f} mm. \n")
-        #! What's the purpose of these lines?
-        #print(f"Pin X' axis is at angle {angle_Pin:.3f} degrees. \n")
-        # u_FD = FD/np.linalg.norm(FD)
-        # angle_FD= np.degrees(np.arctan2(FD[1],FD[0]))-90
-        # print(f"Pin X' axis is at angle {angle_Pin:.5f} degrees. \n")
-        # print(f"FD1-4 X'' axis is at angle {angle_FD:.5f} degrees")
-        #print(f"Assembly Survey Rotational Offset is {angle_FD - angle_Pin:.5f} degrees. \n")
-        #angle_FD1= np.degrees(np.arctan2(FD1[1],FD1[0]))
-        #print(f"FD1-2 X'' axis is at angle {angle_FD1} degrees")
-
-
-    AngleOffset = angle_FD1 - angle_Pin
-    #! ADDED For Rotation if NEEDED
-    # if OffCenterPin == "Left":
-    #     NEWY = XOffset*-1;
-    #     NEWX = YOffset; 
-    # elif OffCenterPin == "Right":
-    #     NEWY = XOffset;
-    #     NEWX = YOffset*1; 
-    # print(f"Assembly Survey X Offset: {NEWX:.3f} mm (rotated)")
-    # print(f"Assembly Survey Y Offset: {NEWY:.3f} mm (rotated)")
     
-    # print(f"Assembly Survey Rotational Offset is {AngleOffset:.5f} degrees")
+    if shape == 'Bottom' or shape == 'Top':       #if shape is Top or bottom, FD3to1 will point either left or right
+        angle_FD3to1 = np.degrees(np.arctan2(FD3to1[1],FD3to1[0]))
+    elif shape == 'Left' or shape == 'Right' or shape == 'Five':     #if shape is Five, Right or Left, FD3to1 will point either up or down
+        angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+    elif shape == 'Full' and density == 'HD':
+        # in this case angle_FD3to1 is actually the angle of the line that goes from 1 to 2, this points up and down wrt tray
+        FD3to1 = FDPoints[1] - FDPoints[0]
+        angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+    elif shape == 'Full' and density == 'LD':
+        # in this case angle_FD3to1 is actually the angle of the line that goes from 6 to 3, this points up and down wrt tray
+        FD3to1 = FDPoints[2] - FDPoints[5]
+        angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+    else: print('ogpheightplotter: angle: shape not recognized')
+
+    #print(f' arctan(y/x) : {FD3to1[1]}/{FD3to1[0]}')
+    #print(f' y/x : {FD3to1[1]/FD3to1[0]}')
+    #print(FD3to1[0] , FD3to1[1])
+    #print(np.arctan2(FD3to1[0],FD3to1[1]))
+    #print(np.degrees(np.arctan2(FD3to1[0],FD3to1[1])))
+
+
+
+    #print(f"FD1-2 X'' axis is at angle {angle_FD3to1:.5f} degrees. \n")
+    #print(f"FDCenter at x:{FDCenter[0]:.3f} mm, y:{FDCenter[1]:.3f} mm")
+    #print(f"Pin&Hole at x:{holeX:.3f} mm, y:{holeY:.3f} mm")
+
+    AngleOffset = angle_FD3to1 - angle_Pin
+
+    print(f'Angle offset: {AngleOffset}, Angle FD1 to 3: {angle_FD3to1}, Pin Angle: {angle_Pin} ')
 
     return CenterOffset, AngleOffset, XOffset, YOffset
 
