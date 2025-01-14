@@ -83,6 +83,9 @@ class SurveyProcessor():
             # ! what is this block doing?
             try:
                 PMoffsets = asyncio.run(self.client.GrabSensorOffsets(modtitle))
+                SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
+                print('Making Accuracy Plot With:', modtitle, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
+                acc_bytes = make_accuracy_plot(modtitle, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff) 
             except Exception as e: 
                 print(f" Accruacy Plot: An error pulling PM offsets from pg occurred: {e}")
                 print("Accruacy Plot: PM offsets set to 0, 0, 0, due to failed data pull.")
@@ -91,12 +94,6 @@ class SurveyProcessor():
         else:
             raise ValueError("Component type not recognized. \
                 Currently only supports baseplates, hexaboards, and protomodules. Please change the directory this file belongs to or add customed component type.")
-        
-        # ! what is this block doing?
-        SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
-        print('Making Accuracy Plot With:', modtitle, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
-        acc_bytes = make_accuracy_plot(modtitle, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff) 
-        # ! ============================
 
         im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
                    "new_angle": component_params['new_angle'], "savename": pjoin(self.im_dir, comp_type, f"{filesuffix}_heights"),

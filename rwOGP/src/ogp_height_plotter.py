@@ -171,7 +171,12 @@ class PlotTool:
         # plotFD(FD_points, centerxy, centerxy, offsetxy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))        
 
         print(f' Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} ')
-        
+        print()
+        print("shape:", Geometry)
+        print("density:", density)
+        print("PositionID", PositionID)
+        print()
+
         CenterOff, AngleOff, XOffset, YOffset = angle(HolePin_xy, SlotPin_xy, FD_points, Geometry, density, PositionID)
         print(f"Assembly Survey X Offset: {XOffset:.3f} mm")
         print(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
@@ -264,6 +269,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
     pinX = slotX - holeX     #X component of a vector pointing from hole to slot
     pinY = slotY - holeY     #Y component "" ""
 
+
     Hole = np.array([holeX, holeY])
 
     assert len(FDPoints) == 2 or len(FDPoints) == 4 or len(FDPoints) == 6 or len(FDPoints) == 8, "The number of fiducial points must be 2,4,6 or 8."
@@ -271,11 +277,17 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
     print(f'pinY: {pinY}  &  pinX: {pinX}')
 
     if shape == 'Full' or shape == 'Bottom' or shape == 'Top':
-        print('angle_Pin= (np.degrees(np.arctan2(-pinY, -pinX))')
-        print(f' arctan(x/y) : -{pinY}/-{pinX}')
-        angle_Pin = np.degrees(np.arctan2(-pinY, -pinX))
-        print(f' y/x : {pinY/pinX}')
-        print(f'{angle_Pin} & {np.arctan2(pinY,pinX)}')
+        if position == 1:
+            print('np.degrees(np.arctan2(pinY,pinX))')
+            print(f' arctan(-y/x) : -{pinY}/-{pinX}')
+            angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+        if position == 2:
+            print('np.degrees(np.arctan2(pinY,pinX))')
+            print(f' arctan(-y/x) : -{pinY}/-{pinX}')
+            angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+        #print(f' y/x : {pinY/pinX}')
+        #print(f'{angle_Pin} & {np.arctan2(-pinY,-pinX)}')
+
 
     elif shape == 'Left' or shape == 'Right' or shape == 'Five':
         print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
@@ -318,21 +330,36 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
 
     FD3to1 = FDPoints[0] - FDPoints[2]  #Vector from FD3 to FD1
     
-    
     if shape == 'Bottom' or shape == 'Top':       #if shape is Top or bottom, FD3to1 will point either left or right
         angle_FD3to1 = np.degrees(np.arctan2(FD3to1[1],FD3to1[0]))
     elif shape == 'Left' or shape == 'Right' or shape == 'Five':     #if shape is Five, Right or Left, FD3to1 will point either up or down
         angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
     elif shape == 'Full' and density == 'HD':
         # in this case angle_FD3to1 is actually the angle of the line that goes from 1 to 2, this points up and down wrt tray
-        FD3to1 = FDPoints[1] - FDPoints[0]
-        angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+        if position == 1:
+            FD3to1 = FDPoints[1] - FDPoints[0]
+            print("Angle calculated with FD1 & FD2")
+            #print(FD3to1)
+            angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+        if position == 2:
+            FD3to1 = FDPoints[1] - FDPoints[0]
+            print("Angle calculated with FD1 & FD2")
+            #print(FD3to1)
+            angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+        
+        #print(FD3to1)
+        #print("angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))")
+        print("Current Angle:", angle_FD3to1)
+
     elif shape == 'Full' and density == 'LD':
         # in this case angle_FD3to1 is actually the angle of the line that goes from 6 to 3, this points up and down wrt tray
+        print("Angle calculated with FD6 & FD3")
         FD3to1 = FDPoints[2] - FDPoints[5]
         angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
     else: print('ogpheightplotter: angle: shape not recognized')
 
+    #print("Vector between selected fiducials", FD3to1)
+    #print('angle angle of selected fiducials:', angle_FD3to1)
     #print(f' arctan(y/x) : {FD3to1[1]}/{FD3to1[0]}')
     #print(f' y/x : {FD3to1[1]/FD3to1[0]}')
     #print(FD3to1[0] , FD3to1[1])
@@ -347,7 +374,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
 
     AngleOffset = angle_FD3to1 - angle_Pin
 
-    print(f'Angle offset: {AngleOffset}, Angle FD1 to 3: {angle_FD3to1}, Pin Angle: {angle_Pin} ')
+    print(f'Angle offset: {AngleOffset},  Pin Angle: {angle_Pin} ')
 
     return CenterOffset, AngleOffset, XOffset, YOffset
 
