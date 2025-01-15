@@ -1,8 +1,7 @@
-import sys, yaml, asyncpg
+import sys, asyncpg
 sys.path.append('../')
-## comptable = {'baseplate':{'prefix': 'bp', 'pkprefix': 'bp'},'hexaboard':{'prefix': 'hxb', 'pkprefix': 'hxb'},'protomodule':{'prefix': 'proto', 'pkprefix': 'proto'},'module':{'prefix': 'module', 'pkprefix': 'module'}}
 
-comptable = {'baseplate':{'prefix': 'bp'},'hexaboard':{'prefix': 'hxb'},'protomodule':{'prefix': 'proto'},'module':{'prefix': 'module'}}
+from src.param import comptable
 
 def get_query_read(component_type, part_name = None, comptable=comptable, limit=15) -> str:
     """Get the query to read from the database.
@@ -25,6 +24,9 @@ def get_query_write(table_name, column_names) -> str:
     data_placeholder = ', '.join(['${}'.format(i) for i in range(1, len(column_names)+1)])
     query = f"""{pre_query} {'({})'.format(data_placeholder)}"""
     return query
+
+
+
 
 class DBClient():
     """Client to interact with the PostgreSQL database."""
