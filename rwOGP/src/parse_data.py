@@ -75,12 +75,15 @@ class DataParser():
         - filename (str): Filename prefix of the metadata file."""
         header_dict = self.header_results
 
-        if required_keys - set(header_dict.keys()):
+        if set(required_keys) - set(header_dict.keys()):
             print("DataParser did not parse all the required keys due to mismatching in naming or missing data.")
-            raise ValueError(f"Missing required info: {required_keys - set(header_dict.keys())}")
-        if warning_keys - set(header_dict.keys()):
+            print("Parsed data: ", header_dict)
+            raise ValueError(f"Missing required info: {set(required_keys) - set(header_dict.keys())}")
+
+        if set(warning_keys) - set(header_dict.keys()):
+            print("Parsed data: ", header_dict)
             print("DataParser did not parse all the optional keys due to mismatching in naming or missing data.")
-            warnings.warn(f"Missing optional info: {warning_keys - set(header_dict.keys())}")
+            warnings.warn(f"Missing optional info: {set(warning_keys) - set(header_dict.keys())}")
 
         filename = f"{header_dict['ComponentID']}_{header_dict['Operator']}"
         meta_file = f'{filename}_meta.yaml'
