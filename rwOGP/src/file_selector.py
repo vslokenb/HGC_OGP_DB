@@ -3,7 +3,8 @@ from tkinter import filedialog, ttk
 import subprocess, os, asyncio
 from io import BytesIO
 from PIL import Image, ImageTk
-from src.upload_inspect import DBClient, comptable
+from src.upload_inspect import DBClient
+from src.param import comptable
 
 nested_notebook = None
 image_lists = None
