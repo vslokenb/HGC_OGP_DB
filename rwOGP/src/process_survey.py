@@ -128,10 +128,17 @@ class SurveyProcessor():
             db_upload, db_table_name, modtitle = self.__getArgs__(ex_file, meta_file, comp_type)
             mappings = np.array([None],dtype=object)
             self.print_db_msg(comp_type, modtitle)
-            # try:
-            asyncio.run(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
-            # except:
-                #(asyncio.get_event_loop()).run_until_complete(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.6
+            try:
+                asyncio.run(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
+            except:
+                try: 
+                    print("Warning: Using python 3.6")
+                    (asyncio.get_event_loop()).run_until_complete(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.6
+                except Exception as e:
+                    print("ERROR: Could not upload to database.")
+                    print(e)
+                    print("Check async code in upload_inspect.py")
+                    return
             print(modtitle, 'uploaded!')
             # if trash_file:
                 # send2trash.send2trash(ex_file)
