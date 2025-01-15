@@ -155,6 +155,8 @@ class PlotTool:
             TrayNo = int(self.meta['TrayNo'])
 
         TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
+        print("Loading TrayFile:", TrayFile)
+
         with open(TrayFile, 'r') as f:
             trayinfo = yaml.safe_load(f)
         

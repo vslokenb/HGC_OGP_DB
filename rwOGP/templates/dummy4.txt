@@ -8,7 +8,7 @@ Density: HD
 Sensor size: 8 
 Flatness: 1.243
 Position ID: 1
-TrayNo: 1
+TrayNo: 2
 ---
 Plane Pos1_MThickness1
 Point       133.83326434039      199.87746669916        3.16473251921
