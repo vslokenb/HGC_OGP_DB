@@ -5,7 +5,6 @@ protomodules_params = {"key":"Thick", "vmini": 1.37, "vmaxi": 1.79, "new_angle":
 modules_params = {"key":"Thick", "vmini": 2.75, "vmaxi": 4.0, "new_angle": 270, "db_table_name": 'module_inspect'}
 
 comptable = {'baseplate':{'prefix': 'bp'},'hexaboard':{'prefix': 'hxb'},'protomodule':{'prefix': 'proto'},'module':{'prefix': 'module'}}
-
 default_params = {"PositionID": 1, "Geometry": "Full", "Density": "LD", "TrayNo": 1}
 
 colorClassify = {'-1': Fore.MAGENTA + 'NO INFO' + Fore.BLACK, 
