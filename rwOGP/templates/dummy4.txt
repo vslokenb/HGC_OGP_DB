@@ -4,7 +4,7 @@ Runtime: 12:09:24 10:02:26
 Component ID: DummyPos1 
 Operator: pjordano   
 Geometry: full
-Density: HDFULL
+Density: HD
 Sensor size: 8 
 Flatness: 1.243
 Position ID: 1
