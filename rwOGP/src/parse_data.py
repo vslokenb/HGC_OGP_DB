@@ -2,8 +2,9 @@ import os, yaml
 from ttp import ttp
 import pandas as pd
 from io import StringIO
+import warnings
 
-from src.param import header_template, data_template
+from src.param import header_template, data_template, required_keys, warning_keys
 
 pjoin = os.path.join
 
@@ -73,7 +74,17 @@ class DataParser():
         Return 
         - filename (str): Filename prefix of the metadata file."""
         header_dict = self.header_results
-        print(header_dict)
+
+        if set(required_keys) - set(header_dict.keys()):
+            print("DataParser did not parse all the required keys due to mismatching in naming or missing data.")
+            print("Parsed data: ", header_dict)
+            raise ValueError(f"Missing required info: {set(required_keys) - set(header_dict.keys())}")
+
+        if set(warning_keys) - set(header_dict.keys()):
+            print("Parsed data: ", header_dict)
+            print("DataParser did not parse all the optional keys due to mismatching in naming or missing data.")
+            warnings.warn(f"Missing optional info: {set(warning_keys) - set(header_dict.keys())}")
+
         filename = f"{header_dict['ComponentID']}_{header_dict['Operator']}"
         meta_file = f'{filename}_meta.yaml'
         with open(f'{self.output_dir}/{meta_file}', 'w') as f:

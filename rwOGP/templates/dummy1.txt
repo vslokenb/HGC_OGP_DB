@@ -7,9 +7,8 @@ Geometry: Full
 Density: LD
 Sensor size:
 Flatness: 1.7
-PositionID: 1
-TrayNo:
-
+Position ID: 1
+TrayNo: 1
 ---
 
 Plane Pos2_plane 

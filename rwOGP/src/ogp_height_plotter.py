@@ -129,18 +129,24 @@ class PlotTool:
             PositionID = 1
         else:
             PositionID = int(self.meta['PositionID'])
+
+        if not self.meta.get('Geometry'): 
+            warnings.warn("Geometry not found in metadata. Default Geometry is Full.")
+            Geometry = 'Full'
+        else:
+            Geometry = str(self.meta['Geometry']).capitalize()
+            if pin_mapping.get(Geometry) is None:
+                warnings.warn(f"Geometry {Geometry} not recognized. Default to Full.")
+                Geometry = 'Full'
         
         if not self.meta.get('Density'): 
             warnings.warn("Density not found in metadata. Default shape is LD.")
             density = 'LD'
         else:
-            density = str(self.meta['Density'])
-        
-        if not self.meta.get('Geometry'): 
-            warnings.warn("Geometry not found in metadata. Default Geometry is Full.")
-            Geometry = 'Full'
-        else:
-            Geometry = str(self.meta['Geometry'])
+            density = str(self.meta['Density']).upper()
+            if pin_mapping.get(Geometry).get(density) is None:
+                warnings.warn(f"Density {density} not recognized. Default to LD.")
+                density = 'LD'
 
         if not self.meta.get('TrayNo'):
             warnings.warn("TrayNo not found in metadata. Default to Tray 1.")
@@ -149,6 +155,8 @@ class PlotTool:
             TrayNo = int(self.meta['TrayNo'])
 
         TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
+        print("Loading TrayFile:", TrayFile)
+
         with open(TrayFile, 'r') as f:
             trayinfo = yaml.safe_load(f)
         
