@@ -317,15 +317,17 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
     
     if density == 'HD':   
         if shape == 'Full':
-            FDCenter = np.mean(FDPoints, axis=0) #Average of ALl FDs
+            FDCenter = np.mean(FDPoints, axis=0) #Average of All FDs
         else:
-            FDCenter = np.mean(FDPoints[0,2], axis=0)  #Average of FD1 and FD3, this applies to modules except HD Full
+            FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to modules except HD Full
     if density == 'LD':
         if shape == 'Full':
-            FDCenter = np.mean(FDPoints, axis=0) #Average of ALl FDs
+            FDCenter = np.mean(FDPoints[[2, 5]], axis=0)
+            #FDCenter_B = np.concatenate((FDPoints[:2], FDPoints[3:4], FDPoints[5:]))
+            #FDCenter = np.mean(FDCenter_B, axis=0) #Average of All FDs
         else:
-            FDCenter = np.mean(FDPoints[0,2], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
-
+            FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
+    
      #   FDPoints[0] must be "FD1" and FDPoints[2] must be "FD3" , or else this system will not work.
      #  It is up to the parsing system and the file output to assign the fiducials correctly  -PJ 1/9/25
 
@@ -338,6 +340,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
     XOffset = FDCenter[0]-Hole[0]-adjustmentX
     YOffset = FDCenter[1]-Hole[1]-adjustmentY
     print()
+    print("Hole Vs FDCenter:")
     print(Hole)
     print(FDCenter)
 
