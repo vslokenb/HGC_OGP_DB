@@ -277,14 +277,24 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
     print(f'pinY: {pinY}  &  pinX: {pinX}')
 
     if shape == 'Full' or shape == 'Bottom' or shape == 'Top':
-        if position == 1:
-            print('np.degrees(np.arctan2(pinY,pinX))')
-            print(f' arctan(-y/x) : -{pinY}/-{pinX}')
-            angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-        if position == 2:
-            print('np.degrees(np.arctan2(pinY,pinX))')
-            print(f' arctan(-y/x) : -{pinY}/-{pinX}')
-            angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+        if density == 'HD':
+            if position == 1:
+                print('np.degrees(np.arctan2(pinY,pinX))')
+                print(f' arctan(-y/x) : -{pinY}/-{pinX}')
+                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+            if position == 2:
+                print('np.degrees(np.arctan2(pinY,pinX))')
+                print(f' arctan(-y/x) : -{pinY}/-{pinX}')
+                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+        if density == 'LD':
+            if position == 1:
+                print('np.degrees(np.arctan2(pinY,pinX))')
+                print(f' arctan(-y/x) : -{pinY}/-{pinX}')
+                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+            if position == 2:
+                print('np.degrees(np.arctan2(pinY,pinX))')
+                print(f' arctan(-y/x) : -{pinY}/-{pinX}')
+                angle_Pin = np.degrees(np.arctan2(pinY,pinX))
         #print(f' y/x : {pinY/pinX}')
         #print(f'{angle_Pin} & {np.arctan2(-pinY,-pinX)}')
 
@@ -319,6 +329,9 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
     
     XOffset = FDCenter[0]-Hole[0]-adjustmentX
     YOffset = FDCenter[1]-Hole[1]-adjustmentY
+    print()
+    print(Hole)
+    print(FDCenter)
 
     print(f"Assembly Survey X Offset: {XOffset:.3f} mm. \n")
     print(f"Assembly Survey Y Offset: {YOffset:.3f} mm. \n")
@@ -355,7 +368,16 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
         # in this case angle_FD3to1 is actually the angle of the line that goes from 6 to 3, this points up and down wrt tray
         print("Angle calculated with FD6 & FD3")
         FD3to1 = FDPoints[2] - FDPoints[5]
-        angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+        print("FD3", FDPoints[2], "FD6:", FDPoints[5])
+        if position == 1:
+            #print(FD3to1)
+            angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+        if position == 2:
+            #print(FD3to1)
+            #print(f'Marker -{FD3to1}-')
+            angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
+            #print(f'Marker -{FD3to1}-{np.arctan2(FD3to1[0],FD3to1[1])}-{FD3to1[0], FD3to1[1]}-')
+            #print(angle_FD3to1)
     else: print('ogpheightplotter: angle: shape not recognized')
 
     #print("Vector between selected fiducials", FD3to1)
