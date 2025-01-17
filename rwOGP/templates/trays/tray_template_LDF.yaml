@@ -1,0 +1,15 @@
+tray_no: 2
+tray_name: "Tray 2"
+module_geoms: ['LDR', 'HDT', 'LD5', 'LDL', 'LDT', 'LDB']
+# module_geoms: ['LD Right', 'HD Top', 'LD Five', 'LD Left', 'LD Top', 'LD Bottom']
+tray_fiducial_xy: [0.001, 406.377]
+# Assuming this ^ is  tray fiducial with respect to bottom tray feducial.
+p1O_xy: [67.337, 298.209]     
+p1_center_pin_xy: [142.333, 298.179]
+p2M_xy: [166.532, 107.694]
+p2_center_pin_xy: [91.532, 107.714]
+date_meas: 20241202
+time_meas: 140600
+inspector: Alethea
+institution: UCSB
+comment: Example Of LD Full Assembly Tray Yaml, Made by paolo 1/16/25
