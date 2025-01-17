@@ -1,10 +1,10 @@
-import os, yaml
+import os, yaml, sys
 from ttp import ttp
 import pandas as pd
 from io import StringIO
 import warnings
 
-from src.param import header_template, data_template, required_keys, warning_keys
+from src.param import header_template, data_template, required_keys, warning_keys, default_params, pin_mapping
 
 pjoin = os.path.join
 
@@ -55,10 +55,14 @@ class DataParser():
         parser.parse()
         feature_results = parser.result(format='csv', structure="flat_list")
 
-        self.header_results = header_results[0]
+        self.header_results = {}
+        for header in header_results:
+            self.header_results.update(header)
+
         self.feature_results = pd.read_csv(StringIO(feature_results[0])).drop_duplicates()
 
         if 'Flatness' not in self.header_results:
+            print(self.header_results)
             raise ValueError('Flatness not found in header. Please check the OGP template.')
         
         self.header_results['Flatness'] = float(self.header_results['Flatness'])
@@ -75,21 +79,72 @@ class DataParser():
         - filename (str): Filename prefix of the metadata file."""
         header_dict = self.header_results
 
-        if set(required_keys) - set(header_dict.keys()):
-            print("DataParser did not parse all the required keys due to mismatching in naming or missing data.")
-            print("Parsed data: ", header_dict)
-            raise ValueError(f"Missing required info: {set(required_keys) - set(header_dict.keys())}")
-
-        if set(warning_keys) - set(header_dict.keys()):
-            print("Parsed data: ", header_dict)
-            print("DataParser did not parse all the optional keys due to mismatching in naming or missing data.")
-            warnings.warn(f"Missing optional info: {set(warning_keys) - set(header_dict.keys())}")
+        header_dict = self.check_missing_keys(header_dict)
+        header_dict = self.check_types(header_dict)
+        header_dict = self.check_missing_mappings(header_dict)
 
         filename = f"{header_dict['ComponentID']}_{header_dict['Operator']}"
         meta_file = f'{filename}_meta.yaml'
         with open(f'{self.output_dir}/{meta_file}', 'w') as f:
             yaml.dump(header_dict, f, default_flow_style=False)
         return filename
+    
+    def check_missing_keys(self, header_dict):
+        """Check for missing keys in the parsed header. 
+        If missing, adopt default values for the missing keys or exit the program."""
+        if set(required_keys) - set(header_dict.keys()):
+            print("DataParser did not parse all the required keys due to mismatching in naming or missing data.")
+            print("Parsed data: ", header_dict)
+            warnings.warn(f"Missing required info: {set(required_keys) - set(header_dict.keys())}")
+            header_dict = self.adopt_default(header_dict)
+            user_input = input("Do you want to adopt the default values for the missing keys? (y/n): ")
+            if user_input.lower() != 'y':
+                print("Exiting...")
+                sys.exit()
+
+        if set(warning_keys) - set(header_dict.keys()):
+            print("DataParser did not parse all the optional keys due to mismatching in naming or missing data.")
+            print("Parsed data: ", header_dict)
+            warnings.warn(f"Missing optional info: {set(warning_keys) - set(header_dict.keys())}")
+        
+        return header_dict
+    
+    def check_missing_mappings(self, header_dict):
+        """Check for missing mappings in the parsed header. 
+        If unrecognized in pin mapping, adopt default values for the missing keys or exit the program."""
+        Geometry = header_dict['Geometry']
+        density = header_dict['Density']
+        if pin_mapping.get(Geometry) is None:
+            warnings.warn(f"Geometry {Geometry} not recognized. Default to Full.")
+            user_input = input("Do you want to adopt the default values for Geometry? (y/n): ")
+            if user_input.lower() != 'y':
+                print("Exiting... Please check the Geometry value or update the pin mapping in param.py.")
+                sys.exit()
+            header_dict['Geometry'] = 'Full'
+            Geometry = 'Full'
+        if pin_mapping.get(Geometry).get(density) is None:
+            warnings.warn(f"Density {density} not recognized. Default to LD.")
+            user_input = input("Do you want to adopt the default values for Density? (y/n): ")
+            if user_input.lower() != 'y':
+                print("Exiting... Please check the Density value or update the pin mapping in param.py.")
+                sys.exit()
+            header_dict['Density'] = 'LD'
+        return header_dict
+
+    def check_types(self, header_dict):
+        """If the data types in header_dict are not correct, convert the types to the correct ones."""
+        header_dict['PositionID'] = int(header_dict['PositionID'])
+        header_dict['TrayNo'] = int(header_dict['TrayNo'])
+        header_dict['Density'] = str(header_dict['Density']).upper()
+        header_dict['Geometry'] = str(header_dict['Geometry']).capitalize()
+        return header_dict
+        
+    def adopt_default(self, header_dict):
+        """Adopt default values for the missing keys."""
+        for key in set(required_keys) - set(header_dict.keys()):
+            print(f"Default value {default_params[key]} will be adopted for missing key: ", key)
+            header_dict[key] = default_params[key]
+        return header_dict
     
     @staticmethod
     def get_xyz(df: pd.DataFrame) -> pd.DataFrame:
@@ -109,3 +164,4 @@ class DataParser():
         else: filtered_df = df[df['FeatureType'] == filterType]
 
         return filtered_df[feature_name].dropna()
+    

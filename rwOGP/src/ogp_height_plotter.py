@@ -124,39 +124,11 @@ class PlotTool:
         - `XOffset`: x-offset of the sensor from the tray center
         - `YOffset`: y-offset of the sensor from the tray center
         - `AngleOff`: angle of the sensor from the tray fiducials"""
-        if not self.meta.get('PositionID'): 
-            warnings.warn("PositionID not found in metadata. Default to Position ID 1.")
-            PositionID = 1
-        else:
-            PositionID = int(self.meta['PositionID'])
-
-        if not self.meta.get('Geometry'): 
-            warnings.warn("Geometry not found in metadata. Default Geometry is Full.")
-            Geometry = 'Full'
-        else:
-            Geometry = str(self.meta['Geometry']).capitalize()
-            if pin_mapping.get(Geometry) is None:
-                warnings.warn(f"Geometry {Geometry} not recognized. Default to Full.")
-                Geometry = 'Full'
-        
-        if not self.meta.get('Density'): 
-            warnings.warn("Density not found in metadata. Default shape is LD.")
-            density = 'LD'
-        else:
-            density = str(self.meta['Density']).upper()
-            if pin_mapping.get(Geometry).get(density) is None:
-                warnings.warn(f"Density {density} not recognized. Default to LD.")
-                density = 'LD'
-
-        if not self.meta.get('TrayNo'):
-            warnings.warn("TrayNo not found in metadata. Default to Tray 1.")
-            TrayNo = 1
-        else:
-            TrayNo = int(self.meta['TrayNo'])
+        PositionID, Geometry, density, TrayNo = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo']
 
         TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
-        print("Loading TrayFile:", TrayFile)
 
+        print("Loading TrayFile:", TrayFile)
         with open(TrayFile, 'r') as f:
             trayinfo = yaml.safe_load(f)
         
@@ -177,9 +149,9 @@ class PlotTool:
 
         #! plot the fiducial points (not urgent)
         # plotFD(FD_points, centerxy, centerxy, offsetxy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))        
-
-        print(f' Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} ')
-        print()
+        
+        print("=" * 100)
+        print(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} \n')
         print("shape:", Geometry)
         print("density:", density)
         print("PositionID", PositionID)

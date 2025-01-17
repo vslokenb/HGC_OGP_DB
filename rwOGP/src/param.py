@@ -6,6 +6,8 @@ modules_params = {"key":"Thick", "vmini": 2.75, "vmaxi": 4.0, "new_angle": 270, 
 
 comptable = {'baseplate':{'prefix': 'bp'},'hexaboard':{'prefix': 'hxb'},'protomodule':{'prefix': 'proto'},'module':{'prefix': 'module'}}
 
+default_params = {"PositionID": 1, "Geometry": "Full", "Density": "LD", "TrayNo": 1}
+
 one_tray_param = {
             'P1Center.X': 142.648,
             'P1Center.Y': 298.465,
