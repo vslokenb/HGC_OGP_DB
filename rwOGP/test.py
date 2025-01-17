@@ -13,7 +13,7 @@ from src.ogp_height_plotter import PlotTool
 from src.param import protomodules_params as component_params
 
 if __name__ == '__main__':
-    parser = DataParser(pjoin('rwOGP', 'templates', 'dummy1.txt'), 'tests')
+    parser = DataParser(pjoin('rwOGP', 'templates', 'dummy4.txt'), 'tests')
     meta, features = parser()
 
     with open(meta[0], 'r') as f:

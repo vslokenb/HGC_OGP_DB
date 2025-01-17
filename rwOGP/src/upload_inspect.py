@@ -25,8 +25,33 @@ def get_query_write(table_name, column_names) -> str:
     query = f"""{pre_query} {'({})'.format(data_placeholder)}"""
     return query
 
+def get_query_write_link(component_type, column_names):
+    """Get the query to write to the database.
+    
+    Parameters:
+    - component_type (str): Type of component.
+    - column_names (list): List of column names to upload the data into."""
+    prefix = comptable[component_type]['prefix']
+    table_name = f"{prefix}_inspect"
+    mother_table = component_type.lower()
+    number_name = f"{prefix}_no"
+    comp_name = f"{prefix}_name"
 
+    if not comp_name in column_names:
+        print(f"Error encountered when uploading info for {component_type}.")
+        raise ValueError(f"Column names must contain {comp_name}.")
+    else:
+        comp_name_index = f"${column_names.index(comp_name) + 1}"
 
+    placeholders = [f"${i + 1}" for i in range(len(column_names))]
+    placeholder_str = ', '.join(placeholders)
+
+    pre_query = f"""INSERT INTO {table_name} ({number_name}, {', '.join(column_names)})
+    SELECT {mother_table}.{number_name}, {placeholder_str}
+    FROM {mother_table}
+    WHERE {mother_table}.{prefix}_name = {comp_name_index};"""
+
+    return pre_query
 
 class DBClient():
     """Client to interact with the PostgreSQL database."""
@@ -40,13 +65,14 @@ class DBClient():
         self.user = config['user']
         self.password = config['password']
 
+        self._connect_params = {
+            'host': self.host,
+            'database': self.database,
+            'user': self.user,
+            'password': self.password}
+
     async def fetch_PostgreSQL(self, query):
-        conn = await asyncpg.connect(
-            host=self.host,
-            database=self.database,
-            user=self.user,
-            password=self.password
-        )
+        conn = await asyncpg.connect(**self._connect_params)
         value = await conn.fetch(query)
         await conn.close()
         return value
@@ -62,11 +88,7 @@ class DBClient():
         Parameters:
         - table_name (str): Name of the table to upload data to.
         - db_upload_data (dict): Dictionary containing the data to upload."""
-        conn = await asyncpg.connect(
-            host=self.host,
-            database=self.database,
-            user=self.user,
-            password=self.password)
+        conn = await asyncpg.connect(**self._connect_params)
         
         print('Connection successful. \n')
 
@@ -87,14 +109,25 @@ class DBClient():
             print(f'Data successfully uploaded to the {table_name}!')
         else:
             print(f'Table {table_name} does not exist in the database.')
+            print("Please create the table before uploading data or double check the table name.")
         await conn.close()
 
+    async def link_and_update_table(self, comp_type, db_upload_data):
+        """Link the component to the mother table and update the database."""
+        conn = await asyncpg.connect(**self._connect_params)
+        try:
+            query = get_query_write_link(comp_type, db_upload_data.keys())
+            print(f'Executing query: {query}')
+            await conn.execute(query, *db_upload_data.values())
+            print(f'Data successfully uploaded and linked to the mother table!')
+        except:
+            print(f"Error encountered when linking {comp_type} to the mother table.")
+        
     @staticmethod
     async def GrabSensorOffsets(name):
         """Grab the sensor offsets from the database."""
         try:
             conn = await asyncpg.connect(
-                host='gut.physics.ucsb.edu',
                 database='hgcdb',
                 user='postgres',
                 password='hepuser',
