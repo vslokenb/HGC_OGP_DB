@@ -8,7 +8,7 @@ Density: LD
 Sensor size:
 Flatness: 1.7
 Position ID: 1
-TrayNo: 1
+TrayNo: 2
 ---
 
 Plane Pos2_plane 
