@@ -279,12 +279,12 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
 
     if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
         print('np.degrees(np.arctan2(pinY,pinX))')
-        print(f' arctan(-y/x) : {pinY}/{pinX}')
+        print(f' arctan(-y/x) : -{pinY}/-{pinX}')
         if density == 'HD':
             if position == 1:
                 angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
             if position == 2:
-                angle_Pin = np.degrees(np.arctan2(pinY,pinX))
+                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
         if density == 'LD':
             if position == 1:
                 angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
@@ -303,12 +303,12 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
     
     if density == 'HD':   
         if geometry == 'Full':
-            FDCenter = np.nanmean(FDPoints, axis=0) #Average of All FDs
+            FDCenter = np.mean(FDPoints, axis=0) #Average of All FDs
         else:
             FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to modules except HD Full
     if density == 'LD':
         if geometry == 'Full':
-            FDCenter = np.mean(FDPoints[[2,5]], axis=0)
+            FDCenter = np.mean(FDPoints[[2, 5]], axis=0)
             #FDCenter_B = np.concatenate((FDPoints[:2], FDPoints[3:4], FDPoints[5:]))
         else:
             FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
@@ -317,7 +317,6 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
 
      #adjustmentX and adjustmentY is appropriate for all modules except Fulls, and the Five
 
-    #! Waiting on Adjustment INFO, This needs to be filled out after measurements !!!!WORK IN PROGRESS!!!
     if geometry == 'Full' or geometry == 'Five':
         adjustmentX = 0; adjustmentY = 0;
     
@@ -392,39 +391,39 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
 
     return CenterOffset, AngleOffset, XOffset, YOffset
 
-def quality(Center, Rotation, position = "P1", details =0, note = 0):
-    '''
-    QC designation for different measurements
-    Measurement      |         GREEN          |        YELLOW         |          RED          |
-    _________________|________________________|_______________________|_______________________|
-    Angle of Plac.   |0 < abs(x - 90.) <= 0.03 |0.03 < abs(x - 90.) <= .06| 0.06 < abs(x - 90.)<90| 
-    Placement        |      0 < x <= 0.05     |    0.05 < x <= 0.1    |      0.1 < x <= 10.   | 
-    Height           |0 < abs(x - Nom) <= 0.05|0.05 <abs(x - Nom)<=0.1|0.1 < abs(x - Nom)<=10.| 
-    Max Hght from Nom|      0 < x <= 0.05     |    0.05 < x <= 0.1    |    0.1 < x <= 10.     | 
-    Min Hght ffrom Nom|      0 < x <= 0.05     |    0.05 < x <= 0.1    |    0.1 < x <= 10.     | 
+# def quality(Center, Rotation, position = "P1", details =0, note = 0):
+#     '''
+#     QC designation for different measurements
+#     Measurement      |         GREEN          |        YELLOW         |          RED          |
+#     _________________|________________________|_______________________|_______________________|
+#     Angle of Plac.   |0 < abs(x - 90.) <= 0.03 |0.03 < abs(x - 90.) <= .06| 0.06 < abs(x - 90.)<90| 
+#     Placement        |      0 < x <= 0.05     |    0.05 < x <= 0.1    |      0.1 < x <= 10.   | 
+#     Height           |0 < abs(x - Nom) <= 0.05|0.05 <abs(x - Nom)<=0.1|0.1 < abs(x - Nom)<=10.| 
+#     Max Hght from Nom|      0 < x <= 0.05     |    0.05 < x <= 0.1    |    0.1 < x <= 10.     | 
+#     Min Hght ffrom Nom|      0 < x <= 0.05     |    0.05 < x <= 0.1    |    0.1 < x <= 10.     | 
     
-    '''
-    if details == 1:
-        print(f"The Center Offset is {Center:.3f} mm")
-        print(f"The Rotational Offset is {Rotation:.5f} degrees ")
-        print()
+#     '''
+#     if details == 1:
+#         print(f"The Center Offset is {Center:.3f} mm")
+#         print(f"The Rotational Offset is {Rotation:.5f} degrees ")
+#         print()
         
-    for i, p in enumerate(centers):
-        if Center < p:
-            print(f"The placement in position {position} is {colorClassify[str(i)]}")
-            break
-        elif Center > centers[-1]:
-            print(f"The placement in position {position} is more than {centers[-1]} mm")
-            break
+#     for i, p in enumerate(centers):
+#         if Center < p:
+#             print(f"The placement in position {position} is {colorClassify[str(i)]}")
+#             break
+#         elif Center > centers[-1]:
+#             print(f"The placement in position {position} is more than {centers[-1]} mm")
+#             break
             
-    for j, d in enumerate(degrees):
-        if abs(Rotation) < d:
-            print(f"The angle in position {position} is {colorClassify[str(j)]}")
-            break
-        elif abs(Rotation) > degrees[-1]:
-            print(f"The angle in position {position} is more than {degrees[-1]} degree")
-            break
-    return colorClassify[str(i)], colorClassify[str(j)]
-    # if note == 1:
-    #     print()
-    #     help(QualityControl)
+#     for j, d in enumerate(degrees):
+#         if abs(Rotation) < d:
+#             print(f"The angle in position {position} is {colorClassify[str(j)]}")
+#             break
+#         elif abs(Rotation) > degrees[-1]:
+#             print(f"The angle in position {position} is more than {degrees[-1]} degree")
+#             break
+#     return colorClassify[str(i)], colorClassify[str(j)]
+#     # if note == 1:
+#     #     print()
+#     #     help(QualityControl)
