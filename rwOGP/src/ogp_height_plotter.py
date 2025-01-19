@@ -197,6 +197,8 @@ class PlotTool:
 
         Hole = np.array([holeX, holeY])
         print(f'pinY: {pinY}  &  pinX: {pinX}')
+        Hole = np.array([holeX, holeY])
+        print(f'pinY: {pinY}  &  pinX: {pinX}')
 
         if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
             print('np.degrees(np.arctan2(pinY,pinX))')
