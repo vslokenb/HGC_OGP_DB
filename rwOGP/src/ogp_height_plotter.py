@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import os
+import os, re
 import yaml
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
@@ -116,6 +116,21 @@ class PlotTool:
         buffer.seek(0)
         plt.close()
         return buffer.read()
+    
+    def get_FDs(self) -> np.array:
+        """Get the fiducial points from the features dataframe, ordered by the FD number."""
+        print("=" * 100)
+        print("Reading the fiducial points from the features dataframe.")
+        FD_points = self.features[self.features['FeatureName'].str.contains('FD')].copy()
+        FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(lambda x: int(re.search(r'\d+', x).group()) if re.search(r'\d+', x) else 0)
+        FD_names = FD_points['FeatureName'].values
+        num_FDs = len(FD_points)
+        assert num_FDs == 2 or num_FDs == 4 or num_FDs == 6 or num_FDs == 8, "The number of fiducial points measured must be 2,4,6 or 8."
+        FD_points = FD_points.sort_values(by='FD_number')
+        FD_points = FD_points[['X_coordinate', 'Y_coordinate']].values
+        print(f"Found {num_FDs} fiducial points: {FD_names}")
+
+        return FD_points
 
     def get_offsets(self):
         """Get the offsets of the sensor from the tray fiducials.
@@ -144,8 +159,7 @@ class PlotTool:
         HolePin_xy = tuple(trayinfo[f'{HolePin}_xy'])  
         SlotPin_xy = tuple(trayinfo[f'{SlotPin}_xy'])
 
-        FD_points = self.features[self.features['FeatureName'].str.contains('FD')]
-        FD_points = FD_points[['X_coordinate', 'Y_coordinate']].values
+        FD_points = self.get_FDs()
 
         #! plot the fiducial points (not urgent)
         # plotFD(FD_points, centerxy, centerxy, offsetxy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))        
@@ -230,8 +244,8 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
     """Calculate the angle and offset of the sensor from the tray fiducials.
     
     Parameters
-    - `holeXY`: the location of the pin that corresponds to the HOLE in the base plate. the center pin for Full, LD.
-    - `slotXY`: the location of the pin that corresponds to the SLOT in the base plate. the offcenter pin for Full, LD
+    - `holeXY`: the location of the pin that corresponds to the HOLE in the base plate. the center pin for Full, LD/HD.
+    - `slotXY`: the location of the pin that corresponds to the SLOT in the base plate. the offcenter pin for Full, LD/HD.
     - `FDPoints`: array of fiducial points: 2, 4, 6, or 8, FD points are accepted
     - `geometry`: the geometry of the module eg, Full/Five/Left/Right
     - `desnity`: the desity of the module, HD or LD
@@ -251,7 +265,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
 
     Hole = np.array([holeX, holeY])
 
-    assert len(FDPoints) == 2 or len(FDPoints) == 4 or len(FDPoints) == 6 or len(FDPoints) == 8, "The number of fiducial points must be 2,4,6 or 8."
+    
 
     print(f'pinY: {pinY}  &  pinX: {pinX}')
 
@@ -286,9 +300,11 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
             FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to modules except HD Full
     if density == 'LD':
         if geometry == 'Full':
-            FDCenter = np.mean(FDPoints[[2, 5]], axis=0)
+            if len(FDPoints) == 2:
+                FDCenter = np.mean(FDPoints[[0,2]], axis=0)
+            else:
+                FDCenter = np.mean(FDPoints[[2,5]], axis=0)
             #FDCenter_B = np.concatenate((FDPoints[:2], FDPoints[3:4], FDPoints[5:]))
-            #FDCenter = np.mean(FDCenter_B, axis=0) #Average of All FDs
         else:
             FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
     
@@ -297,9 +313,9 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
 
      #adjustmentX and adjustmentY is appropriate for all modules except Fulls, and the Five
 
+    #! Waiting on Adjustment INFO, This needs to be filled out after measurements !!!!WORK IN PROGRESS!!!
     if geometry == 'Full' or geometry == 'Five':
         adjustmentX = 0; adjustmentY = 0;
-    # Waiting on Adjustment INFO, This needs to be filled out after measurements !!!!WORK IN PROGRESS!!!
     
     XOffset = FDCenter[0]-Hole[0]-adjustmentX
     YOffset = FDCenter[1]-Hole[1]-adjustmentY
