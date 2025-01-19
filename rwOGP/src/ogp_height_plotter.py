@@ -152,7 +152,7 @@ class PlotTool:
         
         print("=" * 100)
         print(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} \n')
-        print("shape:", Geometry)
+        print("geometry:", Geometry)
         print("density:", density)
         print("PositionID", PositionID)
         print()
@@ -226,14 +226,14 @@ def plotFD(FDpoints:np.array, FDCenter:tuple, CenterXY:tuple, OffXY:tuple, save=
     #     plt.plot(FDCenter[0],FDCenter[1],'ro',label='FDCenter',ms=2)
     #     names = ['P1CenterPin','P1OffcenterPin','FD1','FD2','FD3','FD4']
 
-def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, position):
+def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, position):
     """Calculate the angle and offset of the sensor from the tray fiducials.
     
     Parameters
     - `holeXY`: the location of the pin that corresponds to the HOLE in the base plate. the center pin for Full, LD.
     - `slotXY`: the location of the pin that corresponds to the SLOT in the base plate. the offcenter pin for Full, LD
     - `FDPoints`: array of fiducial points: 2, 4, 6, or 8, FD points are accepted
-    - `shape`: the shape of the module eg, Full/Five/Left/Right
+    - `geometry`: the geometry of the module eg, Full/Five/Left/Right
     - `desnity`: the desity of the module, HD or LD
     - `position`: the position its assembled in, P1 or P2
 
@@ -249,51 +249,43 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
     pinX = slotX - holeX     #X component of a vector pointing from hole to slot
     pinY = slotY - holeY     #Y component "" ""
 
-
     Hole = np.array([holeX, holeY])
 
     assert len(FDPoints) == 2 or len(FDPoints) == 4 or len(FDPoints) == 6 or len(FDPoints) == 8, "The number of fiducial points must be 2,4,6 or 8."
 
     print(f'pinY: {pinY}  &  pinX: {pinX}')
 
-    if shape == 'Full' or shape == 'Bottom' or shape == 'Top':
+    if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
+        print('np.degrees(np.arctan2(pinY,pinX))')
+        print(f' arctan(-y/x) : -{pinY}/-{pinX}')
         if density == 'HD':
             if position == 1:
-                print('np.degrees(np.arctan2(pinY,pinX))')
-                print(f' arctan(-y/x) : -{pinY}/-{pinX}')
                 angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
             if position == 2:
-                print('np.degrees(np.arctan2(pinY,pinX))')
-                print(f' arctan(-y/x) : -{pinY}/-{pinX}')
                 angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
         if density == 'LD':
             if position == 1:
-                print('np.degrees(np.arctan2(pinY,pinX))')
-                print(f' arctan(-y/x) : -{pinY}/-{pinX}')
                 angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
             if position == 2:
-                print('np.degrees(np.arctan2(pinY,pinX))')
-                print(f' arctan(-y/x) : -{pinY}/-{pinX}')
                 angle_Pin = np.degrees(np.arctan2(pinY,pinX))
         #print(f' y/x : {pinY/pinX}')
         #print(f'{angle_Pin} & {np.arctan2(-pinY,-pinX)}')
 
-
-    elif shape == 'Left' or shape == 'Right' or shape == 'Five':
+    elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
         print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
         angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
         print(f' arctan(x/y) : -{pinY}/-{pinX}')
-    else: print('ogpheightplotter: angle: shape not recognized')
+    else: print('ogpheightplotter: angle: geometry not recognized')
 
     print(f'This is angle pin {angle_Pin}')
     
     if density == 'HD':   
-        if shape == 'Full':
+        if geometry == 'Full':
             FDCenter = np.mean(FDPoints, axis=0) #Average of All FDs
         else:
             FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to modules except HD Full
     if density == 'LD':
-        if shape == 'Full':
+        if geometry == 'Full':
             FDCenter = np.mean(FDPoints[[2, 5]], axis=0)
             #FDCenter_B = np.concatenate((FDPoints[:2], FDPoints[3:4], FDPoints[5:]))
             #FDCenter = np.mean(FDCenter_B, axis=0) #Average of All FDs
@@ -305,7 +297,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
 
      #adjustmentX and adjustmentY is appropriate for all modules except Fulls, and the Five
 
-    if shape == 'Full' or shape == 'Five':
+    if geometry == 'Full' or geometry == 'Five':
         adjustmentX = 0; adjustmentY = 0;
     # Waiting on Adjustment INFO, This needs to be filled out after measurements !!!!WORK IN PROGRESS!!!
     
@@ -326,11 +318,11 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
 
     FD3to1 = FDPoints[0] - FDPoints[2]  #Vector from FD3 to FD1
     
-    if shape == 'Bottom' or shape == 'Top':       #if shape is Top or bottom, FD3to1 will point either left or right
+    if geometry == 'Bottom' or geometry == 'Top':       #if geometry is Top or bottom, FD3to1 will point either left or right
         angle_FD3to1 = np.degrees(np.arctan2(FD3to1[1],FD3to1[0]))
-    elif shape == 'Left' or shape == 'Right' or shape == 'Five':     #if shape is Five, Right or Left, FD3to1 will point either up or down
+    elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':     #if geometry is Five, Right or Left, FD3to1 will point either up or down
         angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
-    elif shape == 'Full' and density == 'HD':
+    elif geometry == 'Full' and density == 'HD':
         # in this case angle_FD3to1 is actually the angle of the line that goes from 1 to 2, this points up and down wrt tray
         if position == 1:
             FD3to1 = FDPoints[1] - FDPoints[0]
@@ -347,7 +339,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
         #print("angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))")
         print("Current Angle:", angle_FD3to1)
 
-    elif shape == 'Full' and density == 'LD':
+    elif geometry == 'Full' and density == 'LD':
         # in this case angle_FD3to1 is actually the angle of the line that goes from 6 to 3, this points up and down wrt tray
         print("Angle calculated with FD6 & FD3")
         FD3to1 = FDPoints[2] - FDPoints[5]
@@ -361,7 +353,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, shape, density, positio
             angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
             #print(f'Marker -{FD3to1}-{np.arctan2(FD3to1[0],FD3to1[1])}-{FD3to1[0], FD3to1[1]}-')
             #print(angle_FD3to1)
-    else: print('ogpheightplotter: angle: shape not recognized')
+    else: print('ogpheightplotter: angle: geometry not recognized')
 
     #print("Vector between selected fiducials", FD3to1)
     #print('angle angle of selected fiducials:', angle_FD3to1)
