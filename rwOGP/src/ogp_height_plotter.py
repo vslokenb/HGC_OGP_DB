@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import os, re
+import os, re
 import yaml
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
@@ -118,28 +119,19 @@ class PlotTool:
         return buffer.read()
     
     def get_FDs(self) -> np.array:
-        """Get the fiducial points from the features dataframe, ordered by the FD number.
-        
-        Return 
-        - `FD_points`: 8 by 2 array of fiducial points, empty points are filled with np.nan"""
+        """Get the fiducial points from the features dataframe, ordered by the FD number."""
         print("=" * 100)
         print("Reading the fiducial points from the features dataframe.")
         FD_points = self.features[self.features['FeatureName'].str.contains('FD')].copy()
-        FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(lambda x: int(re.search(r'FD(\d+)', x).group(1)) if re.search(r'FD(\d+)', x) else 0)
-
+        FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(lambda x: int(re.search(r'\d+', x).group()) if re.search(r'\d+', x) else 0)
         FD_names = FD_points['FeatureName'].values
-        FD_numbers = FD_points['FD_number'].values
-        FD_points = FD_points[['X_coordinate', 'Y_coordinate']].values
         num_FDs = len(FD_points)
         assert num_FDs == 2 or num_FDs == 4 or num_FDs == 6 or num_FDs == 8, "The number of fiducial points measured must be 2,4,6 or 8."
+        FD_points = FD_points.sort_values(by='FD_number')
+        FD_points = FD_points[['X_coordinate', 'Y_coordinate']].values
         print(f"Found {num_FDs} fiducial points: {FD_names}")
 
-        FD_array = np.full((8,2), np.nan)
-        for i, (x,y) in zip(FD_numbers, FD_points):
-            print(f"FD{i}: ({x:.3f}, {y:.3f})")
-            FD_array[i-1] = [x,y]
-
-        return FD_array
+        return FD_points
 
     def get_offsets(self):
         """Get the offsets of the sensor from the tray fiducials.
@@ -275,6 +267,9 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
     pinY = slotY - holeY     #Y component "" ""
 
     Hole = np.array([holeX, holeY])
+
+    
+
     print(f'pinY: {pinY}  &  pinX: {pinX}')
 
     if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
@@ -308,7 +303,10 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
             FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to modules except HD Full
     if density == 'LD':
         if geometry == 'Full':
-            FDCenter = np.mean(FDPoints[[2, 5]], axis=0)
+            if len(FDPoints) == 2:
+                FDCenter = np.mean(FDPoints[[0,2]], axis=0)
+            else:
+                FDCenter = np.mean(FDPoints[[2,5]], axis=0)
             #FDCenter_B = np.concatenate((FDPoints[:2], FDPoints[3:4], FDPoints[5:]))
         else:
             FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
@@ -317,6 +315,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
 
      #adjustmentX and adjustmentY is appropriate for all modules except Fulls, and the Five
 
+    #! Waiting on Adjustment INFO, This needs to be filled out after measurements !!!!WORK IN PROGRESS!!!
     if geometry == 'Full' or geometry == 'Five':
         adjustmentX = 0; adjustmentY = 0;
     
