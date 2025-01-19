@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import os
+import os, re
 import yaml
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
@@ -172,42 +172,19 @@ class PlotTool:
         return PlotTool._save_plot_output(fig, savename)
 
     def get_FDs(self) -> np.array:
-        """Get the fiducial points from the features dataframe, ordered by the FD number.
-        
-        Returns
-        -------
-        np.array
-            8x2 array of fiducial points (x,y coordinates), with empty points filled with np.nan
-        """
+        """Get the fiducial points from the features dataframe, ordered by the FD number."""
         print("=" * 100)
         print("Reading the fiducial points from the features dataframe.")
-    
-        # Filter for FD features and extract FD numbers
-        fd_mask = self.features['FeatureName'].str.contains('FD')
-        fd_data = self.features[fd_mask].copy()
-        
-        # Extract FD numbers using regex
-        fd_data['FD_number'] = fd_data['FeatureName'].str.extract(r'FD(\d+)').astype(int)
-        
-        # Validate number of fiducial points
-        num_fds = len(fd_data)
-        valid_fd_counts = {2, 4, 6, 8}
-        if num_fds not in valid_fd_counts:
-            raise ValueError(f"Number of fiducial points must be one of {valid_fd_counts}, got {num_fds}")
-        
-        print(f"Found {num_fds} fiducial points: {fd_data['FeatureName'].values}")
-        
-        # Initialize output array with NaN
-        fd_array = np.full((8, 2), np.nan)
-        
-        # Fill array with coordinates
-        for _, row in fd_data.iterrows():
-            idx = row['FD_number'] - 1
-            coords = [row['X_coordinate'], row['Y_coordinate']]
-            fd_array[idx] = coords
-            print(f"FD{idx+1}: ({coords[0]:.3f}, {coords[1]:.3f})")
-        
-        return fd_array
+        FD_points = self.features[self.features['FeatureName'].str.contains('FD')].copy()
+        FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(lambda x: int(re.search(r'\d+', x).group()) if re.search(r'\d+', x) else 0)
+        FD_names = FD_points['FeatureName'].values
+        num_FDs = len(FD_points)
+        assert num_FDs in {2, 4, 6, 8}, "The number of fiducial points measured must be 2, 4, 6, or 8."
+        FD_points = FD_points.sort_values(by='FD_number')
+        FD_points = FD_points[['X_coordinate', 'Y_coordinate']].values
+        print(f"Found {num_FDs} fiducial points: {FD_names}")
+
+        return FD_points
 
     def get_offsets(self):
         """Get the offsets of the sensor from the tray fiducials.
