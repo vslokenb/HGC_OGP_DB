@@ -468,28 +468,28 @@ def quality(Center, Rotation, position = "P1", details =0, note = 0):
     Max Hght from Nom|      0 < x <= 0.05     |    0.05 < x <= 0.1    |    0.1 < x <= 10.     | 
     Min Hght ffrom Nom|      0 < x <= 0.05     |    0.05 < x <= 0.1    |    0.1 < x <= 10.     | 
     
-    '''
-    if details == 1:
-        print(f"The Center Offset is {Center:.3f} mm")
-        print(f"The Rotational Offset is {Rotation:.5f} degrees ")
-        print()
+#     '''
+#     if details == 1:
+#         print(f"The Center Offset is {Center:.3f} mm")
+#         print(f"The Rotational Offset is {Rotation:.5f} degrees ")
+#         print()
         
-    for i, p in enumerate(centers):
-        if Center < p:
-            print(f"The placement in position {position} is {colorClassify[str(i)]}")
-            break
-        elif Center > centers[-1]:
-            print(f"The placement in position {position} is more than {centers[-1]} mm")
-            break
+#     for i, p in enumerate(centers):
+#         if Center < p:
+#             print(f"The placement in position {position} is {colorClassify[str(i)]}")
+#             break
+#         elif Center > centers[-1]:
+#             print(f"The placement in position {position} is more than {centers[-1]} mm")
+#             break
             
-    for j, d in enumerate(degrees):
-        if abs(Rotation) < d:
-            print(f"The angle in position {position} is {colorClassify[str(j)]}")
-            break
-        elif abs(Rotation) > degrees[-1]:
-            print(f"The angle in position {position} is more than {degrees[-1]} degree")
-            break
-    return colorClassify[str(i)], colorClassify[str(j)]
-    # if note == 1:
-    #     print()
-    #     help(QualityControl)
+#     for j, d in enumerate(degrees):
+#         if abs(Rotation) < d:
+#             print(f"The angle in position {position} is {colorClassify[str(j)]}")
+#             break
+#         elif abs(Rotation) > degrees[-1]:
+#             print(f"The angle in position {position} is more than {degrees[-1]} degree")
+#             break
+#     return colorClassify[str(i)], colorClassify[str(j)]
+#     # if note == 1:
+#     #     print()
+#     #     help(QualityControl)
