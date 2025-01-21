@@ -265,6 +265,8 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
     - `AngleOffset`: angle of the sensor from the tray fiducials
     - `XOffset`: x-offset of the sensor from the tray center
     - `YOffset`: y-offset of the sensor from the tray center"""
+    for points in FDPoints:
+        print(points)
 
     holeX, holeY = holeXY
     slotX, slotY = slotXY
@@ -277,12 +279,12 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
 
     if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
         print('np.degrees(np.arctan2(pinY,pinX))')
-        print(f' arctan(-y/x) : -{pinY}/-{pinX}')
+        print(f' arctan(-y/x) : {pinY}/{pinX}')
         if density == 'HD':
             if position == 1:
                 angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
             if position == 2:
-                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+                angle_Pin = np.degrees(np.arctan2(pinY,pinX))
         if density == 'LD':
             if position == 1:
                 angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
@@ -348,7 +350,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
             FD3to1 = FDPoints[1] - FDPoints[0]
             print("Angle calculated with FD1 & FD2")
             #print(FD3to1)
-            angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+            angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
         
         #print(FD3to1)
         #print("angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))")
