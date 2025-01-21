@@ -130,14 +130,15 @@ class SurveyProcessor():
             self.print_db_msg(comp_type, modtitle)
             try:
                 asyncio.run(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
-            except:
+            except Exception as e:
+                print(f"Exception Encountered: {e}")
                 try: 
                     print("Warning: Using python 3.6")
                     (asyncio.get_event_loop()).run_until_complete(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.6
                 except Exception as e:
                     print("ERROR: Could not upload to database.")
                     print(e)
-                    print("Check async code in upload_inspect.py")
+                    print("Check async code in process_survey.py or upload_inspect.py")
                     return
             print(modtitle, 'uploaded!')
             # if trash_file:
