@@ -280,12 +280,12 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
 
     if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
         print('np.degrees(np.arctan2(pinY,pinX))')
-        print(f' arctan(-y/x) : -{pinY}/-{pinX}')
+        print(f' arctan(-y/x) : {pinY}/{pinX}')
         if density == 'HD':
             if position == 1:
                 angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
             if position == 2:
-                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+                angle_Pin = np.degrees(np.arctan2(pinY,pinX))
         if density == 'LD':
             if position == 1:
                 angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
