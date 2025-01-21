@@ -101,6 +101,7 @@ class DBClient():
             AND table_name = $2
         );
         """
+        print(f"Attempting to upload to Table {table_name}...")
         table_exists = await conn.fetchval(table_exists_query, schema_name, table_name)  ### Returns True/False
         if table_exists:
             query = get_query_write(table_name, db_upload_data.keys())
