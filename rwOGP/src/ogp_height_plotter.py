@@ -200,23 +200,25 @@ class PlotTool:
 
         if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
             print('np.degrees(np.arctan2(pinY,pinX))')
-            print(f' arctan(-y/x) : -{pinY}/-{pinX}')
+            print(f' arctan(-y/x) : {pinY}/{pinX}')
             if density == 'HD':
                 if position == 1:
                     angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
                 if position == 2:
-                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
             if density == 'LD':
                 if position == 1:
                     angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
                 if position == 2:
                     angle_Pin = np.degrees(np.arctan2(pinY,pinX))
+            #print(f' y/x : {pinY/pinX}')
+            #print(f'{angle_Pin} & {np.arctan2(-pinY,-pinX)}')
 
-            elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
-                print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
-                angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
-                print(f' arctan(x/y) : -{pinY}/-{pinX}')
-            else: print('PlotTool: angle: geometry not recognized')
+        elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
+            print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
+            angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
+            print(f' arctan(x/y) : -{pinY}/-{pinX}')
+        else: print('PlotTool: angle: geometry not recognized')
 
         print(f'This is angle pin {angle_Pin}')
         
@@ -243,7 +245,7 @@ class PlotTool:
         print(f"Assembly Survey X Offset: {XOffset:.3f} mm.")
         print(f"Assembly Survey Y Offset: {YOffset:.3f} mm. \n")
 
-            CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
+        CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
 
         FD3to1 = FDPoints[0] - FDPoints[2]  #Vector from FD3 to FD1
         
@@ -276,7 +278,7 @@ class PlotTool:
 
         AngleOffset = angle_FD3to1 - angle_Pin
 
-            return CenterOffset, AngleOffset, XOffset, YOffset
+        return CenterOffset, AngleOffset, XOffset, YOffset
 
     def get_FDs(self) -> np.array:
         """Get the fiducial points from the features dataframe, ordered by the FD number.
