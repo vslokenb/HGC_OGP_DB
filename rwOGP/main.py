@@ -1,4 +1,5 @@
 import os, yaml, sys, json
+import argparse
 
 pjoin = os.path.join
 
@@ -82,6 +83,7 @@ def main_func():
     updater()
 
 def invent_print():
+    """Print the current inventory."""
     settings = load_config()
     if settings is None:
         print("Program will now exit. Please run uploadOGPresults first!")
@@ -93,4 +95,10 @@ def invent_print():
         print(inventory)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run the rwOGP program.")
+    parser.add_argument("--print", action='store_true', help="Print the current inventory.")
+    args = parser.parse_args()
+    
+    if args.print:
+        invent_print()
     main_func()
