@@ -138,7 +138,4 @@ class InventoryUpdater():
             except json.JSONDecodeError:
                 print("!" * 90)
                 print(f"Corrupt json file: {json_path}")
-                userinput = input("Would you like to delete this file? (Y/N)")
-                if userinput.strip().lower() == 'y':
-                    os.remove(json_path)
-                    sys.exit()
+                print("Please remove the file and run the program again.")
