@@ -122,4 +122,7 @@ if __name__ == "__main__":
     
     if args.print:
         invent_print()
+    if args.clear:
+        clear_invent()
+
     main_func()
