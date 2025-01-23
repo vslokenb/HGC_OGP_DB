@@ -24,12 +24,19 @@ class PlotTool:
         self.x_points = self.features['X_coordinate']
         self.y_points = self.features['Y_coordinate']
         self.z_points = self.features['Z_coordinate']
+
+        self.__check_save_dir()
     
     def __call__(self, **args):
         """Plot the 2D height map of the given data."""
         centerxy = self.get_center()
         im_bytes = self.plot2d(self.x_points, self.y_points, self.z_points, centerxy, **args)
         return im_bytes
+     
+    def __check_save_dir(self):
+        if self.save_dir is None:
+            if not os.path.exists(self.save_dir):
+                os.makedirs(self.save_dir)
     
     def get_center(self) -> int:
         """Get the index of the fiducial center in the dataframe by taking the average of the x and y coordinates."""
