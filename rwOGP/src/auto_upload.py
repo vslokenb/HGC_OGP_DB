@@ -1,4 +1,4 @@
-import os, subprocess, json
+import os, subprocess, json, sys
 from .parse_data import DataParser
 from .process_survey import SurveyProcessor
 
@@ -124,3 +124,21 @@ class InventoryUpdater():
         - `files`: list of files to run the action on, without parent directory prefix."""
         for file in files:
             subprocess.Popen(['python', action, os.path.join(self.checkdir, file)])
+    
+    @staticmethod
+    def deal_corrupt(json_path):
+        """Deal with corrupt json files.
+        
+        Parameters
+        - `json_path`: path to the corrupt json file."""
+        with open(json_path, 'r') as f:
+            try:
+                data = json.load(f)
+                return data
+            except json.JSONDecodeError:
+                print("!" * 90)
+                print(f"Corrupt json file: {json_path}")
+                userinput = input("Would you like to delete this file? (Y/N)")
+                if userinput.strip().lower() == 'y':
+                    os.remove(json_path)
+                    sys.exit()

@@ -90,12 +90,11 @@ def invent_print():
     else:
         invent_path = settings['inventory_path']
         print(f"Printing the current inventory {invent_path}...")
-        with open(invent_path, 'r') as f:
-            inventory = json.load(f)
+        inventory = InventoryUpdater.deal_corrupt(invent_path)
         print(inventory)
 
 def clear_invent():
-    """Clear the current inventory."""
+    """Clear the current inventory file."""
     settings = load_config()
     if settings is None:
         print("Program will now exit. Please run uploadOGPresults first!")
