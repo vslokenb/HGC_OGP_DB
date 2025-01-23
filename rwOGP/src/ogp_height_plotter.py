@@ -35,8 +35,10 @@ class PlotTool:
         return im_bytes
      
     def __check_save_dir(self):
-        if self.save_dir is None:
+        if self.save_dir is not None:
             if not os.path.exists(self.save_dir):
+                print(f"Directory {self.save_dir} does not exist.")
+                print("Creating save directory:", self.save_dir)
                 os.makedirs(self.save_dir)
     
     def get_center(self) -> int:
