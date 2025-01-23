@@ -94,9 +94,24 @@ def invent_print():
             inventory = json.load(f)
         print(inventory)
 
+def clear_invent():
+    """Clear the current inventory."""
+    settings = load_config()
+    if settings is None:
+        print("Program will now exit. Please run uploadOGPresults first!")
+    else:
+        invent_path = settings['inventory_path']
+        userinput = input("Enter the component type you want to clear: (e.g. baseplates)")
+        print(f"Clearing the current inventory {invent_path}...")
+        with open(invent_path, 'w') as f:
+            inventory = json.load(f)
+            if userinput in inventory:
+                inventory[userinput] = []
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the rwOGP program.")
     parser.add_argument("--print", action='store_true', help="Print the current inventory.")
+    parser.add_argument("--clear", action='store_true', help="Clear the current inventory.")
     args = parser.parse_args()
     
     if args.print:
