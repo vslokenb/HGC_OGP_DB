@@ -104,8 +104,7 @@ def clear_invent():
         userinput = input("Enter the component type you want to clear: (e.g. baseplates) \n")
         print(f"Clearing the current inventory {invent_path}...")
 
-        with open(invent_path, 'r') as f:
-            inventory = json.load(f)
+        inventory = InventoryUpdater.deal_corrupt(invent_path)
 
         if userinput in inventory:
             inventory[userinput] = []
