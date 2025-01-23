@@ -106,7 +106,6 @@ class DataParser():
 
         if set(warning_keys) - set(header_dict.keys()):
             print("DataParser did not parse all the optional keys due to mismatching in naming or missing data.")
-            print("Parsed data: ", header_dict)
             warnings.warn(f"Missing optional info: {set(warning_keys) - set(header_dict.keys())}")
         
         return header_dict
