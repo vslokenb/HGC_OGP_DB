@@ -102,17 +102,23 @@ def clear_invent():
     else:
         invent_path = settings['inventory_path']
         print("=" * 90)
-        userinput = input("Enter the component type you want to clear: (e.g. baseplates)")
+        userinput = input("Enter the component type you want to clear: (e.g. baseplates) \n")
         print(f"Clearing the current inventory {invent_path}...")
-        with open(invent_path, 'w') as f:
+
+        with open(invent_path, 'r') as f:
             inventory = json.load(f)
-            if userinput in inventory:
-                inventory[userinput] = []
-            else:
-                print("Component type not found in inventory.")
-                print("The current component types are:")
-                print(inventory.keys())
-                sys.exit(1) 
+
+        if userinput in inventory:
+            inventory[userinput] = []
+        else:
+            print("Component type not found in inventory.")
+            print("The current component types are:")
+            print(inventory.keys())
+            sys.exit(1) 
+        
+        with open(invent_path, 'w') as f:
+            json.dump(inventory, f)
+        print(f"Inventory for {userinput} cleared.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the rwOGP program.")
