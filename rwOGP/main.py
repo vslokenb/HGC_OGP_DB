@@ -12,9 +12,8 @@ from src.auto_upload import InventoryUpdater
 
 SETTINGS_FILE = pjoin(os.path.expanduser('~'), ".my-cli-tool", "settings.yaml")
 
-def create_default_config():
-    """Create a default YAML configuration file and a SETTINGS file to keep track of program environment vars. Only needs to be set up once ideally."""
-
+def get_config_location():
+    """Get the configuration file location based on user preference."""
     print("Do you want to create the config file at a custom location? (y/n)")
     choice = input().strip().lower()
 
@@ -24,16 +23,16 @@ def create_default_config():
         print("Please enter the directory where you want to create the config file:")
         custom_path = os.path.expanduser(input().strip())
         if os.path.isdir(custom_path):
-            config_file = pjoin(custom_path, "rwOGP_DBconfig.yaml")
-    else:
-        print("Creating the config file in the default location...")
+            return pjoin(custom_path, "rwOGP_DBconfig.yaml")
+    
+    # Default location
         config_dir = pjoin(home_dir, '.config')
-        if not os.path.exists(config_dir):
-            os.makedirs(config_dir)
-        config_file = pjoin(config_dir, 'rwOGP_DBconfig.yaml')
+    os.makedirs(config_dir, exist_ok=True)
+    return pjoin(config_dir, 'rwOGP_DBconfig.yaml')
 
-    print("Creating default configuration file...")
-    default_config = {
+def get_default_config():
+    """Return the default configuration dictionary."""
+    return {
         'host': 'localhost',
         'database': 'hgcdb',
         'user': 'ogp_user',
@@ -45,24 +44,38 @@ def create_default_config():
         'ogp_tray_dir': '/path/to/ogp/tray/directory'
     }
 
+def create_settings_file(config_file):
+    """Create settings file with config and inventory paths."""
+    home_dir = os.path.expanduser('~')
+    settings_dir = pjoin(home_dir, '.my-cli-tool')
+    os.makedirs(settings_dir, exist_ok=True)
+    
+    inventory_path = pjoin(settings_dir, 'inventory.json')
+    settings = {
+        'config_path': config_file,
+        'inventory_path': inventory_path
+    }
+    with open(SETTINGS_FILE, 'w') as f:
+        yaml.dump(settings, f)
+
+def create_default_config():
+    """Create a default YAML configuration file and a SETTINGS file."""
+    config_file = get_config_location()
+    
+    print("Creating default configuration file...")
     with open(config_file, 'w') as f:
-        yaml.dump(default_config, f, default_flow_style=False)
+        yaml.dump(get_default_config(), f, default_flow_style=False)
 
     print(f"Configuration file created at {config_file}")
     print("Please update the configuration file with the correct database connection information!")
 
-    os.makedirs(pjoin(home_dir, '.my-cli-tool'), exist_ok=True)
-    inventory_path = pjoin(home_dir, '.my-cli-tool', 'inventory.json')
-
-    with open(SETTINGS_FILE, 'w') as f:
-        yaml.dump({'config_path': config_file, 'inventory_path': inventory_path}, f)
+    create_settings_file(config_file)
 
 def load_config():
     """Load the configuration file from the default location."""
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, 'r') as f:
-            settings = yaml.safe_load(f)
-        return settings
+            return yaml.safe_load(f)
     return None
 
 def main_func():
