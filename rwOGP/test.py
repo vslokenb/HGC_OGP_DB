@@ -24,7 +24,8 @@ if __name__ == '__main__':
     
     im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
             "new_angle": component_params['new_angle'], "savename": "ex_heights",
-            "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": False}
+            "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": True}
+        
+    PT(**im_args)
 
-    PT.get_offsets()
 

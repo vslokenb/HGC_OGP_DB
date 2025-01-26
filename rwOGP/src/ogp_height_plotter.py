@@ -160,6 +160,9 @@ class PlotTool:
         textstr = PlotTool._create_stats_text(mean_h, std_h, max_h, min_h, mod_flat)
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         axs.text(1.3, 1.0, textstr, transform=axs.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+
+        for xi, yi, zi in zip(x, y, zheight):
+            axs.text(xi, yi, f"{zi:.2f}", fontsize=8, color='black', ha='center', va='bottom')
         
         if show_plot:
             plt.show()
@@ -350,8 +353,6 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
                 angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
             if position == 2:
                 angle_Pin = np.degrees(np.arctan2(pinY,pinX))
-        #print(f' y/x : {pinY/pinX}')
-        #print(f'{angle_Pin} & {np.arctan2(-pinY,-pinX)}')
 
     elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
         print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
@@ -369,13 +370,9 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
     if density == 'LD':
         if geometry == 'Full':
             FDCenter = np.mean(FDPoints[[2,5]], axis=0)
-            #FDCenter_B = np.concatenate((FDPoints[:2], FDPoints[3:4], FDPoints[5:]))
         else:
             FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
     
-     #! It is up to the parsing system and the file output to assign the fiducials correctly  -PJ 1/9/25
-
-     #adjustmentX and adjustmentY is appropriate for all modules except Fulls, and the Five
 
     #! Waiting on Adjustment INFO, This needs to be filled out after measurements !!!!WORK IN PROGRESS!!!
     if geometry == 'Full' or geometry == 'Five':
