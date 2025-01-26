@@ -139,7 +139,6 @@ class SurveyProcessor():
                     print(e)
                     print("Check async code in process_survey.py or upload_inspect.py")
                     return
-            print(modtitle, 'uploaded!')
             # if trash_file:
                 # send2trash.send2trash(ex_file)
             # print(f'Moved {ex_file} to recycle bin.')
