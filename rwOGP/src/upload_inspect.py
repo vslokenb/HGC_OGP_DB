@@ -51,6 +51,8 @@ def get_query_write_link(component_type, column_names):
     FROM {mother_table}
     WHERE {mother_table}.{prefix}_name = {comp_name_index};"""
 
+    print(f"Query to link and update table: {pre_query}")
+
     return pre_query
 
 class DBClient():
@@ -117,7 +119,6 @@ class DBClient():
         conn = await asyncpg.connect(**self._connect_params)
         try:
             query = get_query_write_link(comp_type, db_upload_data.keys())
-            print(f'Executing query: {query}')
             await conn.execute(query, *db_upload_data.values())
             print(f'Data for {comp_type} successfully uploaded and linked to the mother table!')
             return True
