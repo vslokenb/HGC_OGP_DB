@@ -25,6 +25,9 @@ To inspect data from database
 python rwOGP/startGUI.py
 ```
 
+For more information on how to use the CLI tool, run:
+```python rwOGP/main.py --help```
+
 ### Method 2: Install as a package (Under Development)
 In Python 3.6 or greater on the OGP computer: 
 ```

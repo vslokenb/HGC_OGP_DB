@@ -46,57 +46,109 @@ class PlotTool:
         center_y = (max(self.y_points) + min(self.y_points)) / 2
         print(f"Center of the sensor is at ({center_x:.3f}, {center_y:.3f}) mm")
         return (center_x, center_y)
-
+    
     @staticmethod
-    def plot2d(x, y, zheight, centerxy, vmini, vmaxi, new_angle, title, savename, mod_flat, show_plot, value = 1, rotate=0):
-        """Plot 2D height map of the given data.
-        Parameters
-        - `x`: x-coordinates
-        - `y`: y-coordinates
-        - `zheight`: height values
-        - `centerxy`: tuple of the center coordinates (x,y)
-        - `vmini`: minimum height value
-        - `vmaxi`: maximum height value
-        - `rotate`: index of the fiducial to rotate the plot around
-        - `new_angle`: angle to rotate the plot to
-        - `title`: title of the plot
-        - `show_plot`: whether to show the plot. Imcompatible with saving the plot.
-        - `value`: 1 for plotting height values, 0 for plotting deviation from mean"""
+    def _calculate_height_stats(zheight):
+        """Calculate basic height statistics."""
         mean_h = np.mean(zheight)
         std_h = np.std(zheight)
         max_h = max(zheight)
         min_h = min(zheight)
+        
         print(f"Average Height is {mean_h:.3f} mm")
         print(f"Maximum Height is {max_h:.3f} mm")
         print(f"Minimum Height is {min_h:.3f} mm")
         print(f"Height --> {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm. \n")
         
+        return mean_h, std_h, max_h, min_h
+    
+    @staticmethod
+    def _prepare_coordinates(x, y, centerxy, rotate, new_angle):
+        """Prepare and transform coordinates."""
         center_x, center_y = centerxy
-
-        x = x- center_x
-        y = y- center_y
+        x = x - center_x
+        y = y - center_y
 
         assert rotate >= 0 and rotate < len(x), "The specified index for rotation has to be within the range of the data."
         if rotate != 0:
             rotate_angle = vec_angle(x[rotate-1], y[rotate-1]) if rotate != 0 else 0
             for i in range(len(x)):
-                x[i], y[i] = vec_rotate(x[i],y[i],rotate_angle, new_angle)
-
-        fig=plt.figure(dpi=150, figsize=(9,5))
-        axs=fig.add_subplot(111); axs.set_aspect('equal')
+                x[i], y[i] = vec_rotate(x[i], y[i], rotate_angle, new_angle)
         
-        axs.hexbin(x,y,zheight,gridsize=20, vmin = vmini, vmax = vmaxi, cmap=plt.cm.coolwarm)
+        return x, y
+    
+    @staticmethod
+    def _create_stats_text(mean_h, std_h, max_h, min_h, mod_flat=None):
+        """Create statistics text for the plot."""
+        base_stats = [
+            f'mean: {mean_h:.3f} mm',
+            f'std:     {std_h:.3f} mm',
+            '',
+            f'height: {mean_h:.3f} mm',
+            f'       $+$ ({max_h - mean_h:.3f}) mm',
+            f'       $-$ ({mean_h - min_h:.3f}) mm',
+            '',
+            f'$\Delta$H = {max_h - min_h:.3f} mm',
+            '',
+            f'maxH: {max_h:.3f} mm',
+            f'minH:  {min_h:.3f} mm'
+        ]
+        
+        if mod_flat is not None:
+            base_stats.extend(['', f'flatness: {mod_flat:.3f}'])
+        
+        return '\n'.join(base_stats)
+    
+    @staticmethod
+    def _save_plot_output(fig, savename):
+        """Save plot to file and return bytes.
+        
+        Parameters
+        ----------
+        fig : matplotlib.figure.Figure
+            The figure object to save
+        savename : str
+            Path where to save the figure
+            
+        Returns
+        -------
+        bytes
+            The figure data in bytes format
+        """
+        from io import BytesIO
+        buffer = BytesIO()
+        fig.savefig(savename, bbox_inches='tight')
+        fig.savefig(buffer, format='png', bbox_inches='tight')
+        buffer.seek(0)
+        image_bytes = buffer.read()
+        buffer.close()
+        plt.close(fig)
+        return image_bytes
+    
+    @staticmethod
+    def plot2d(x, y, zheight, centerxy, vmini, vmaxi, new_angle, title, savename, mod_flat, show_plot, value=1, rotate=0):
+        """Plot 2D height map of the given data.
+        [... existing docstring ...]
+        """
+        # Calculate statistics
+        mean_h, std_h, max_h, min_h = PlotTool._calculate_height_stats(zheight)
+        
+        # Prepare coordinates
+        x, y = PlotTool._prepare_coordinates(x, y, centerxy, rotate, new_angle)
+        
+        # Create plot
+        fig = plt.figure(dpi=150, figsize=(9,5))
+        axs = fig.add_subplot(111)
+        axs.set_aspect('equal')
+        
+        # Plot data
+        axs.hexbin(x, y, zheight, gridsize=20, vmin=vmini, vmax=vmaxi, cmap=plt.cm.coolwarm)
         norm = cls.Normalize(vmin=vmini, vmax=vmaxi)
         sm = plt.cm.ScalarMappable(norm=norm, cmap=plt.cm.coolwarm)
-        cb=plt.colorbar(sm, ax= axs); cb.minorticks_on()
-        # else:
-        #     if title == '815 PCB fiducials':
-        #         thickness = np.array([10,11,12,13,14,15,16,17,18,1,2,3,4,5,6,7,8,9,19,20,21,22,23,24,25])
-        #         axs.annotate(f"{thickness[i]}",(x[i],y[i]),color="black")
-        # #axs.annotate(f"{i+1}",(temp[0][i],temp[1][i]),color="black")
-        #     else:
-        #         axs.annotate(f"{i+1}",(x[i],y[i]),color="black")
-
+        cb = plt.colorbar(sm, ax=axs)
+        cb.minorticks_on()
+        
+        # Set plot properties
         axs.set_xlabel("x (mm)")
         axs.set_ylabel("y (mm)")
         axs.minorticks_on()
@@ -104,51 +156,56 @@ class PlotTool:
         axs.set_ylim(bottom=-100, top=100)
         cb.set_label("Height (mm)")
         axs.set_title(title)
-        if mod_flat is not None:
-            textstr = '\n'.join((f'mean: {mean_h:.3f} mm',f'std:     {std_h:.3f} mm','', f'height: {mean_h:.3f} mm', f'       $+$ ({max_h - mean_h:.3f}) mm', f'       $-$ ({mean_h - min_h:.3f}) mm',
-                                '',f'$\Delta$H = {max_h - min_h:.3f} mm','', f'maxH: {max_h:.3f} mm', f'minH:  {min_h:.3f} mm','', f'flatness: {mod_flat:.3f}'))
-        else:
-            textstr = '\n'.join((f'mean: {mean_h:.3f} mm',f'std:     {std_h:.3f} mm','', f'height: {mean_h:.3f} mm', f'       $+$ ({max_h - mean_h:.3f}) mm', f'       $-$ ({mean_h - min_h:.3f}) mm',
-                            '',f'$\Delta$H = {max_h - min_h:.3f} mm','', f'maxH: {max_h:.3f} mm', f'minH:  {min_h:.3f} mm',''))
+        
+        # Add statistics text
+        textstr = PlotTool._create_stats_text(mean_h, std_h, max_h, min_h, mod_flat)
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         axs.text(1.3, 1.0, textstr, transform=axs.transAxes, fontsize=10, verticalalignment='top', bbox=props)
-
-        if show_plot:
-            print("Not saving the plot or the image bytes as show_plot is set to True.")
-            plt.show(); 
-            plt.close()
         
-        from io import BytesIO  
-        buffer = BytesIO()
-        plt.savefig(savename, bbox_inches='tight')
-        plt.savefig(buffer, format='png', bbox_inches='tight')
-        buffer.seek(0)
-        plt.close()
-        return buffer.read()
-    
+        if show_plot:
+            plt.show()
+            plt.close(fig)
+            return None
+            
+        return PlotTool._save_plot_output(fig, savename)
+
     def get_FDs(self) -> np.array:
         """Get the fiducial points from the features dataframe, ordered by the FD number.
         
-        Return 
-        - `FD_points`: 8 by 2 array of fiducial points, empty points are filled with np.nan"""
+        Returns
+        -------
+        np.array
+            8x2 array of fiducial points (x,y coordinates), with empty points filled with np.nan
+        """
         print("=" * 100)
         print("Reading the fiducial points from the features dataframe.")
-        FD_points = self.features[self.features['FeatureName'].str.contains('FD')].copy()
-        FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(lambda x: int(re.search(r'FD(\d+)', x).group(1)) if re.search(r'FD(\d+)', x) else 0)
-
-        FD_names = FD_points['FeatureName'].values
-        FD_numbers = FD_points['FD_number'].values
-        FD_points = FD_points[['X_coordinate', 'Y_coordinate']].values
-        num_FDs = len(FD_points)
-        assert num_FDs == 2 or num_FDs == 4 or num_FDs == 6 or num_FDs == 8, "The number of fiducial points measured must be 2,4,6 or 8."
-        print(f"Found {num_FDs} fiducial points: {FD_names}")
-
-        FD_array = np.full((8,2), np.nan)
-        for i, (x,y) in zip(FD_numbers, FD_points):
-            print(f"FD{i}: ({x:.3f}, {y:.3f})")
-            FD_array[i-1] = [x,y]
-
-        return FD_array
+    
+        # Filter for FD features and extract FD numbers
+        fd_mask = self.features['FeatureName'].str.contains('FD')
+        fd_data = self.features[fd_mask].copy()
+        
+        # Extract FD numbers using regex
+        fd_data['FD_number'] = fd_data['FeatureName'].str.extract(r'FD(\d+)').astype(int)
+        
+        # Validate number of fiducial points
+        num_fds = len(fd_data)
+        valid_fd_counts = {2, 4, 6, 8}
+        if num_fds not in valid_fd_counts:
+            raise ValueError(f"Number of fiducial points must be one of {valid_fd_counts}, got {num_fds}")
+        
+        print(f"Found {num_fds} fiducial points: {fd_data['FeatureName'].values}")
+        
+        # Initialize output array with NaN
+        fd_array = np.full((8, 2), np.nan)
+        
+        # Fill array with coordinates
+        for _, row in fd_data.iterrows():
+            idx = row['FD_number'] - 1
+            coords = [row['X_coordinate'], row['Y_coordinate']]
+            fd_array[idx] = coords
+            print(f"FD{idx+1}: ({coords[0]:.3f}, {coords[1]:.3f})")
+        
+        return fd_array
 
     def get_offsets(self):
         """Get the offsets of the sensor from the tray fiducials.
@@ -306,7 +363,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
         print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
         angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
         print(f' arctan(x/y) : -{pinY}/-{pinX}')
-    else: print('ogpheightplotter: angle: geometry not recognized')
+    else: print('PlotTool: angle: geometry not recognized')
 
     print(f'This is angle pin {angle_Pin}')
     
@@ -379,7 +436,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
             angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
             #print(f'Marker -{FD3to1}-{np.arctan2(FD3to1[0],FD3to1[1])}-{FD3to1[0], FD3to1[1]}-')
             #print(angle_FD3to1)
-    else: print('ogpheightplotter: angle: geometry not recognized')
+    else: print('PlotTool: angle: geometry not recognized')
 
     #print("Vector between selected fiducials", FD3to1)
     #print('angle angle of selected fiducials:', angle_FD3to1)
