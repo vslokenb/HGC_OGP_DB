@@ -106,7 +106,6 @@ class DBClient():
         if table_exists:
             query = get_query_write(table_name, db_upload_data.keys())
             await conn.execute(query, *db_upload_data.values())
-            print(f'Executing query: {query}')
             print(f'Data successfully uploaded to the {table_name}!')
         else:
             print(f'Table {table_name} does not exist in the database.')
