@@ -119,8 +119,7 @@ class DBClient():
         """Link the component to the mother table and update the database."""
         conn = await asyncpg.connect(**self._connect_params)
         try:
-            query = get_query_write_link(comp_type, db_upload_data.keys())
-            print(query)
+            query = get_query_write_link(comp_type, list(db_upload_data.keys()))
             await conn.execute(query, *db_upload_data.values())
             print(f'Data for {comp_type} successfully uploaded and linked to the mother table!')
             return True
