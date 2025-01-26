@@ -112,7 +112,7 @@ class DBClient():
             print("Please create the table before uploading data or double check the table name.")
         await conn.close()
 
-    async def link_and_update_table(self, comp_type, db_upload_data):
+    async def link_and_update_table(self, comp_type, db_upload_data) -> bool:
         """Link the component to the mother table and update the database."""
         conn = await asyncpg.connect(**self._connect_params)
         try:
@@ -120,8 +120,12 @@ class DBClient():
             print(f'Executing query: {query}')
             await conn.execute(query, *db_upload_data.values())
             print(f'Data for {comp_type} successfully uploaded and linked to the mother table!')
-        except:
+            return True
+        except Exception as e:
+            print("!" * 90)
             print(f"Error encountered when linking {comp_type} to the mother table.")
+            print(e)
+            return False
         
     @staticmethod
     async def GrabSensorOffsets(name):
