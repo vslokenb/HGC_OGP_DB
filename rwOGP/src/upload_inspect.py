@@ -25,18 +25,29 @@ def get_query_write(table_name, column_names) -> str:
     query = f"""{pre_query} {'({})'.format(data_placeholder)}"""
     return query
 
-def get_query_write_link(component_type, column_names):
-    """Get the query to write to the database.
+def get_query_write_link(component_type, db_dict) -> tuple[str, str, str, list]:
+    """Get the query to write to the database and link the component to the mother table.
     
     Parameters:
     - component_type (str): Type of component.
-    - column_names (list): List of column names to upload the data into."""
+    - db_dict (dict): Dictionary containing the data to upload.
+    
+    Returns: 
+    - pre_query (str): Pre-query to check if component exists in mother table.
+    - query (str): Formatted query string.
+    - column_values (list): List of values to upload."""
+
+    column_names = list(db_dict.keys())
+    column_values = [db_dict[key] for key in column_names]
+
     prefix = comptable[component_type]['prefix']
     table_name = f"{prefix}_inspect"
     mother_table = component_type.lower()
     number_name = f"{prefix}_no"
     comp_name = f"{prefix}_name"
 
+    comp_name_val = column_values[column_names.index(comp_name)]
+    
     if not comp_name in column_names:
         print("!" * 90)
         print("Component ID not provided in the data.")
@@ -44,17 +55,25 @@ def get_query_write_link(component_type, column_names):
     else:
         comp_name_index = f"${column_names.index(comp_name) + 1}"
 
+    # Pre-query to check if component exists in mother table
+    pre_query = f"""
+    SELECT CASE 
+        WHEN EXISTS (
+            SELECT 1 FROM {mother_table} 
+            WHERE {comp_name} = $1
+        ) THEN TRUE
+        ELSE FALSE
+    """
+
     placeholders = [f"${i + 1}" for i in range(len(column_names))]
     placeholder_str = ', '.join(placeholders)
 
-    pre_query = f"""INSERT INTO {table_name} ({number_name}, {', '.join(column_names)})
+    query = f"""INSERT INTO {table_name} ({number_name}, {', '.join(column_names)})
     SELECT {mother_table}.{number_name}, {placeholder_str}
     FROM {mother_table}
     WHERE {mother_table}.{prefix}_name = {comp_name_index};"""
 
-    print(f"Query to link and update table: {pre_query}")
-
-    return pre_query
+    return pre_query, comp_name_val, query, column_values
 
 class DBClient():
     """Client to interact with the PostgreSQL database."""
@@ -119,8 +138,9 @@ class DBClient():
         """Link the component to the mother table and update the database."""
         conn = await asyncpg.connect(**self._connect_params)
         try:
-            query = get_query_write_link(comp_type, list(db_upload_data.keys()))
-            await conn.execute(query, *db_upload_data.values())
+            prequery, name, query, values = get_query_write_link(comp_type, db_upload_data)
+            await conn.execute(prequery, name)
+            await conn.execute(query, *values)
             print(f'Data for {comp_type} successfully uploaded and linked to the mother table!')
             return True
         except Exception as e:
