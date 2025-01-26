@@ -1,4 +1,4 @@
-import os, yaml, sys, json
+import os, yaml, sys
 import pandas as pd
 
 pjoin = os.path.join

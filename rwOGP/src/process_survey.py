@@ -129,7 +129,8 @@ class SurveyProcessor():
             mappings = np.array([None],dtype=object)
             self.print_db_msg(comp_type, modtitle)
             try:
-                asyncio.run(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
+                asyncio.run(self.client.link_and_update_table(comp_type, db_upload)) ## python 3.7
+                # asyncio.run(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
             except Exception as e:
                 print(f"Exception Encountered: {e}")
                 try: 
