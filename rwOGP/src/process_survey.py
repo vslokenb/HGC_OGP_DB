@@ -50,13 +50,13 @@ class SurveyProcessor():
         Return 
         - db_upload (dict): Dictionary of data to upload to database.
         - db_table_name (str): Name of the table in the database to upload to.
-        - modtitle (str): Title of the module."""
+        - compID (str): Title of the module."""
         db_upload = {}
 
         with open(meta_file, 'r') as f:
             metadata = yaml.safe_load(f)
 
-        modtitle = metadata['ComponentID']
+        compID = metadata['ComponentID']
 
         df = pd.read_csv(ex_file)
         plotter = PlotTool(metadata, comp_type, df, self.tray_dir, pjoin(self.im_dir, comp_type))
@@ -64,29 +64,29 @@ class SurveyProcessor():
         filesuffix = pbase(ex_file).split('.')[0]
 
         if comp_type == 'baseplates':
-            db_upload.update({'bp_name': modtitle})
+            db_upload.update({'bp_name': compID})
             component_params = baseplates_params
         elif comp_type == 'hexaboards':
-            db_upload.update({'hxb_name':modtitle})
+            db_upload.update({'hxb_name':compID})
             component_params = hexaboards_params
         elif comp_type == 'protomodules':
             component_params = protomodules_params
             XOffset, YOffset, AngleOff = plotter.get_offsets()
-            db_upload.update({'proto_name': modtitle, 'x_offset_mu':np.round(XOffset*1000), 
+            db_upload.update({'proto_name': compID, 'x_offset_mu':np.round(XOffset*1000), 
                               'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
                               "weight": metadata.get('Weight', None)})
         elif comp_type == 'modules':
             component_params = modules_params
             XOffset, YOffset, AngleOff = plotter.get_offsets()
-            db_upload.update({'module_name': modtitle, 'x_offset_mu':np.round(XOffset*1000), 
+            db_upload.update({'module_name': compID, 'x_offset_mu':np.round(XOffset*1000), 
                               'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
                               'weight': metadata.get('Weight', None)})
             # ! what is this block doing?
             try:
-                PMoffsets = asyncio.run(self.client.GrabSensorOffsets(modtitle))
+                PMoffsets = asyncio.run(self.client.GrabSensorOffsets(compID))
                 SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
-                print('Making Accuracy Plot With:', modtitle, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
-                acc_bytes = make_accuracy_plot(modtitle, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff) 
+                print('Making Accuracy Plot With:', compID, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
+                acc_bytes = make_accuracy_plot(compID, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff) 
             except Exception as e: 
                 print(f" Accruacy Plot: An error pulling PM offsets from pg occurred: {e}")
                 print("Accruacy Plot: PM offsets set to 0, 0, 0, due to failed data pull.")
@@ -115,8 +115,9 @@ class SurveyProcessor():
         db_upload.update(self.getDateTime(metadata))
 
         db_table_name = component_params['db_table_name']
+        mother_table = component_params['mother_table']
 
-        return db_upload, db_table_name, modtitle  
+        return db_upload, db_table_name, mother_table, compID  
     
     def process_and_upload(self, comp_type) -> tuple[bool, int]:
         """Process all OGP Survey files and upload to database.
@@ -130,11 +131,11 @@ class SurveyProcessor():
             - int: Index of the last successfully processed file (-1 if no files were processed)"""
         last_successful_index = -1
         for idx, (ex_file, meta_file) in enumerate(zip(self.OGPSurveyFile, self.MetaFile)):
-            db_upload, db_table_name, modtitle = self.__getArgs__(ex_file, meta_file, comp_type)
+            db_upload, db_table_name, mother_tab, compID = self.__getArgs__(ex_file, meta_file, comp_type)
             mappings = np.array([None],dtype=object)
-            self.print_db_msg(comp_type, modtitle)
+            self.print_db_msg(mother_tab, compID)
             try:
-                status = asyncio.run(self.client.link_and_update_table(comp_type, db_upload)) ## python 3.7
+                status = asyncio.run(self.client.link_and_update_table(mother_tab, db_upload)) ## python 3.7
                 # asyncio.run(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
                 if status == False:
                     return False, last_successful_index
