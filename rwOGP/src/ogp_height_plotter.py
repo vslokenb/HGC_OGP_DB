@@ -160,6 +160,9 @@ class PlotTool:
         textstr = PlotTool._create_stats_text(mean_h, std_h, max_h, min_h, mod_flat)
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         axs.text(1.3, 1.0, textstr, transform=axs.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+
+        for xi, yi, zi in zip(x, y, zheight):
+            axs.text(xi, yi, f"{zi:.2f}", fontsize=8, color='black', ha='center', va='bottom')
         
         if show_plot:
             plt.show()
