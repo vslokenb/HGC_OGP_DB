@@ -1,13 +1,11 @@
 import numpy as np
 import pandas as pd
-import os, re
-import os, re
+import os
 import yaml
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
 from src.param import one_tray_param, pin_mapping
-import warnings
 
 pjoin = os.path.join
 
