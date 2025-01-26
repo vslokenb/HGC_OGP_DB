@@ -39,7 +39,9 @@ def invent_print():
     """Print the current inventory."""
     settings = load_config()
     if settings is None:
-        print("Program will now exit. Please run uploadOGPresults first!")
+        print("=" * 90)
+        print("No configuration file found.")
+        print("Program will now exit. Please run without arguments first!")
     else:
         invent_path = settings['inventory_path']
         print(f"Printing the current inventory {invent_path}...")
@@ -50,7 +52,7 @@ def clear_invent():
     """Clear the current inventory file."""
     settings = load_config()
     if settings is None:
-        print("Program will now exit. Please run uploadOGPresults first!")
+        print("Program will now exit. Please run without arguments first!")
     else:
         invent_path = settings['inventory_path']
         print("=" * 90)
@@ -80,13 +82,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     if args.print:
+        print("Printing the current inventory...")
         invent_print()
         sys.exit(0)
     if args.clear:
+        print("Clearing the current inventory...")
         clear_invent()
         sys.exit(0)
     if args.update:
-        asyncio.run(update_credentials())
+        print("Updating credentials...")
+        result = asyncio.run(update_credentials())
         sys.exit(0)
 
     main_func()
