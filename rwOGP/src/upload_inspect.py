@@ -142,6 +142,8 @@ class DBClient():
             prequery, name, query, values = get_query_write_link(comp_type, db_upload_data)
             print("Executing pre-query...")
             status = await conn.execute(prequery, name)
+            print(f"{prequery} executed.")
+            print(f"Pre-query status: {status}")
             if not status:
                 print(f"Component {name} not found in the mother table.")
                 return False
