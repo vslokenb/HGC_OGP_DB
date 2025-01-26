@@ -245,9 +245,7 @@ class PlotTool:
         print("PositionID", PositionID)
         print()
 
-        CenterOff, AngleOff, XOffset, YOffset = self.angle(HolePin_xy, SlotPin_xy, FD_points)
-        print(f"Assembly Survey X Offset: {XOffset:.3f} mm")
-        print(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
+        CenterOff, AngleOff, XOffset, YOffset = angle(HolePin_xy, SlotPin_xy, FD_points, Geometry, density, PositionID)
         print(f"Assembly Survey Rotational Offset is {AngleOff:.5f} degrees")
         print(f"Assembly Survey Center Offset is {CenterOff:.3f} mm")
 
