@@ -119,7 +119,7 @@ class DBClient():
             query = get_query_write_link(comp_type, db_upload_data.keys())
             print(f'Executing query: {query}')
             await conn.execute(query, *db_upload_data.values())
-            print(f'Data successfully uploaded and linked to the mother table!')
+            print(f'Data for {comp_type} successfully uploaded and linked to the mother table!')
         except:
             print(f"Error encountered when linking {comp_type} to the mother table.")
         
