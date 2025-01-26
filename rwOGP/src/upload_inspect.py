@@ -38,7 +38,8 @@ def get_query_write_link(component_type, column_names):
     comp_name = f"{prefix}_name"
 
     if not comp_name in column_names:
-        print(f"Error encountered when uploading info for {component_type}.")
+        print("!" * 90)
+        print("Component ID not provided in the data.")
         raise ValueError(f"Column names must contain {comp_name}.")
     else:
         comp_name_index = f"${column_names.index(comp_name) + 1}"
@@ -119,6 +120,7 @@ class DBClient():
         conn = await asyncpg.connect(**self._connect_params)
         try:
             query = get_query_write_link(comp_type, db_upload_data.keys())
+            print(query)
             await conn.execute(query, *db_upload_data.values())
             print(f'Data for {comp_type} successfully uploaded and linked to the mother table!')
             return True
