@@ -25,12 +25,28 @@ class InventoryUpdater():
         with open(self.inventory_p, 'r') as f:
             self.inventory = json.load(f)
         
-        new_files = self.__update_inventory()
-        self.upload_files(new_files)
+        new_files = self.__check_inventory()
+        success_invent = self.upload_files(new_files)
+        self.__update_inven(success_invent)
 
-        with open(self.inventory_p, 'w') as f:
-            json.dump(self.__create_new(), f)
     
+    def __update_inven(self, success_invent):
+        """Update the inventory with the successfully uploaded files."""
+        for subdir, files in success_invent.items():
+            if subdir not in self.inventory:
+                self.inventory[subdir] = files
+            else:
+                self.inventory[subdir].extend(files)
+                # Remove duplicates while preserving order
+                self.inventory[subdir] = list(dict.fromkeys(self.inventory[subdir]))
+        
+        # Save updated inventory
+        with open(self.inventory_p, 'w') as f:
+            json.dump(self.inventory, f)
+        
+        print("\n=== Inventory Update Summary ===")
+        print(f"Successfully updated inventory with {sum(len(files) for files in success_invent.values())} new files")
+
     def __create_new(self) -> dict:
         """Create a new inventory dictionary. 
         With structure like {subdir:[files]} 
@@ -72,8 +88,8 @@ class InventoryUpdater():
             print("Exiting...")
             return False
     
-    def __update_inventory(self) -> dict:
-        """Update the inventory of OGP results and identify changes.
+    def __check_inventory(self) -> dict:
+        """Check for changes in the inventory of OGP results.
         Returns:
         - dict: Subdirectories and their corresponding new files to be processed.
         """
@@ -115,10 +131,6 @@ class InventoryUpdater():
             print(f"New subdirectories detected: {', '.join(new_subdirs)}")
         print(f"Total new files to process: {total_new_files}")
         print(f"Total files removed: {total_removed_files}")
-        
-        # Update inventory file
-        with open(self.inventory_p, 'w') as f:
-            json.dump(new_inventory, f)
                     
         return changed_inventory
     
@@ -126,7 +138,13 @@ class InventoryUpdater():
         """Parse, postprocess and upload files to the database.
         
         Parameters
-        - `invent`: dictionary of {subdir:[files]} to be uploaded. subdir should be names of components, e.g. baseplate, modules, etc."""
+        - `invent`: dictionary of {subdir:[files]} to be uploaded. subdir should be names of components, e.g. baseplate, modules, etc.
+        
+        Returns
+        - dict: inventory of successfully uploaded files in the same format as input {subdir:[files]}
+        """
+        successful_uploads = {}
+        
         for subdir, files in invent.items():
             inputs = [pjoin(self.checkdir, subdir, file) for file in files]
             if inputs:
@@ -134,9 +152,21 @@ class InventoryUpdater():
                 gen_meta, gen_features = dp()
                 
                 uploader = SurveyProcessor(gen_features, gen_meta, self.config)
-                uploader(subdir)
+                success, indx = uploader(subdir)
+                if success:
+                    successful_uploads[subdir] = files
+                elif indx != -1:
+                    # Some files were uploaded successfully (up to the index that failed)
+                    successful_files = files[:indx+1]
+                    if successful_files:  # Only add if there were successful uploads
+                        successful_uploads[subdir] = successful_files
+                    print(f"Failed to upload file: {inputs[indx + 1]}")
+                else:
+                        print(f"Failed to upload files from {subdir}")
             else:
                 print(f"No files from {subdir} to process/upload to database.")
+        
+        return successful_uploads
         
     def run_on_new_files(self, files, action):
         """Run the action on each file in the list of files

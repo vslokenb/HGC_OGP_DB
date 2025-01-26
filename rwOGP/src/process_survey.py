@@ -39,9 +39,10 @@ class SurveyProcessor():
         self.client = DBClient(yamlconfig)
         pass
 
-    def __call__(self, component_type):
+    def __call__(self, component_type) -> tuple[bool, int]:
         """Process and upload OGP Survey files."""
-        self.process_and_upload(component_type)
+        status, index = self.process_and_upload(component_type)
+        return status, index
  
     def __getArgs__(self, ex_file, meta_file, comp_type):
         """Get arguments for uploading to database, including the necessary meta data to upload and the image bytes.
@@ -119,29 +120,39 @@ class SurveyProcessor():
 
         return db_upload, db_table_name, modtitle  
     
-    def process_and_upload(self, comp_type):
+    def process_and_upload(self, comp_type) -> tuple[bool, int]:
         """Process all OGP Survey files and upload to database.
         
         Parameters:
-        - `comp_type` (str): Type of component to process."""
-        for ex_file, meta_file in zip(self.OGPSurveyFile, self.MetaFile):
+        - `comp_type` (str): Type of component to process.
+        
+        Returns:
+        - tuple[bool, int]: 
+            - bool: True if all files were successfully uploaded, False if any file fails
+            - int: Index of the last successfully processed file (-1 if no files were processed)"""
+        last_successful_index = -1
+        for idx, (ex_file, meta_file) in enumerate(zip(self.OGPSurveyFile, self.MetaFile)):
             db_upload, db_table_name, modtitle = self.__getArgs__(ex_file, meta_file, comp_type)
             mappings = np.array([None],dtype=object)
             self.print_db_msg(comp_type, modtitle)
             try:
-                asyncio.run(self.client.link_and_update_table(comp_type, db_upload)) ## python 3.7
+                status = asyncio.run(self.client.link_and_update_table(comp_type, db_upload)) ## python 3.7
                 # asyncio.run(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
+                if status == False:
+                    return False, last_successful_index
+                last_successful_index = idx
             except Exception as e:
                 print(f"Exception Encountered: {e}")
                 try: 
                     print("Warning: Using python 3.6")
                     (asyncio.get_event_loop()).run_until_complete(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.6
+                    last_successful_index = idx
                 except Exception as e:
                     print("ERROR: Could not upload to database.")
                     print(e)
                     print("Check async code in process_survey.py or upload_inspect.py")
-                    return
-            # if trash_file:
+                    return False, last_successful_index
+        return True, last_successful_index  # Return True and last index if all files were processed successfully
                 # send2trash.send2trash(ex_file)
             # print(f'Moved {ex_file} to recycle bin.')
         
