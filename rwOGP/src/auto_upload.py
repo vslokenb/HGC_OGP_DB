@@ -73,29 +73,50 @@ class InventoryUpdater():
             return False
     
     def __update_inventory(self) -> dict:
-        """Update the inventory of OGP results and return the changed files in inventory structure. Write the updated inventory to the inventory file.
-        
-        Return 
-        - changed_inventory: dictionary of subdirectories and their corresponding changed files."""
+        """Update the inventory of OGP results and identify changes.
+        Returns:
+        - dict: Subdirectories and their corresponding new files to be processed.
+        """
+        print("\n=== Checking for OGP Survey File Changes ===")
         new_inventory = self.__create_new()
-
         old_inventory = self.inventory.copy()
-
         changed_inventory = {}
+
+        # Track overall statistics
+        total_new_files = 0
+        total_removed_files = 0
+        new_subdirs = []
 
         for subdir, files in new_inventory.items():
             if subdir not in old_inventory:
-                print(f"New subdirectory detected: {subdir}")
+                # Handle new subdirectories
+                new_subdirs.append(subdir)
                 changed_inventory[subdir] = files
+                total_new_files += len(files)
             else:
+                # Compare files in existing subdirectories
                 new_files = set(files) - set(old_inventory[subdir])
                 removed_files = set(old_inventory[subdir]) - set(files)
+                if new_files or removed_files:
+                    print(f"\nChanges in subdirectory '{subdir}':")
+                    if new_files:
+                        print(f"  + Added: {', '.join(sorted(new_files))}")
+                        total_new_files += len(new_files)
+                    if removed_files:
+                        print(f"  - Removed: {', '.join(sorted(removed_files))}")
+                        total_removed_files += len(removed_files)
+                
                 if new_files:
-                    print(f"New files in {subdir}: {new_files}")
-                if removed_files:
-                    print(f"Removed files in {subdir}: {removed_files}")
-                changed_inventory[subdir] = new_files
+                    changed_inventory[subdir] = new_files
         
+        # Print summary
+        print("\n=== Summary of Changes ===")
+        if new_subdirs:
+            print(f"New subdirectories detected: {', '.join(new_subdirs)}")
+        print(f"Total new files to process: {total_new_files}")
+        print(f"Total files removed: {total_removed_files}")
+        
+        # Update inventory file
         with open(self.inventory_p, 'w') as f:
             json.dump(new_inventory, f)
                     
