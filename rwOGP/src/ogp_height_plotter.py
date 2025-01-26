@@ -246,8 +246,6 @@ class PlotTool:
         print()
 
         CenterOff, AngleOff, XOffset, YOffset = angle(HolePin_xy, SlotPin_xy, FD_points, Geometry, density, PositionID)
-        print(f"Assembly Survey X Offset: {XOffset:.3f} mm")
-        print(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
         print(f"Assembly Survey Rotational Offset is {AngleOff:.5f} degrees")
         print(f"Assembly Survey Center Offset is {CenterOff:.3f} mm")
 
@@ -330,9 +328,6 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
     - `AngleOffset`: angle of the sensor from the tray fiducials
     - `XOffset`: x-offset of the sensor from the tray center
     - `YOffset`: y-offset of the sensor from the tray center"""
-    for points in FDPoints:
-        print(points)
-
     holeX, holeY = holeXY
     slotX, slotY = slotXY
 
@@ -393,7 +388,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
     print(Hole)
     print(FDCenter)
 
-    print(f"Assembly Survey X Offset: {XOffset:.3f} mm. \n")
+    print(f"Assembly Survey X Offset: {XOffset:.3f} mm.")
     print(f"Assembly Survey Y Offset: {YOffset:.3f} mm. \n")
 
     CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
@@ -409,16 +404,12 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
         if position == 1:
             FD3to1 = FDPoints[1] - FDPoints[0]
             print("Angle calculated with FD1 & FD2")
-            #print(FD3to1)
             angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
         if position == 2:
             FD3to1 = FDPoints[1] - FDPoints[0]
             print("Angle calculated with FD1 & FD2")
-            #print(FD3to1)
             angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
         
-        #print(FD3to1)
-        #print("angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))")
         print("Current Angle:", angle_FD3to1)
 
     elif geometry == 'Full' and density == 'LD':
@@ -427,33 +418,12 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
         FD3to1 = FDPoints[2] - FDPoints[5]
         print("FD3", FDPoints[2], "FD6:", FDPoints[5])
         if position == 1:
-            #print(FD3to1)
             angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
         if position == 2:
-            #print(FD3to1)
-            #print(f'Marker -{FD3to1}-')
             angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
-            #print(f'Marker -{FD3to1}-{np.arctan2(FD3to1[0],FD3to1[1])}-{FD3to1[0], FD3to1[1]}-')
-            #print(angle_FD3to1)
     else: print('PlotTool: angle: geometry not recognized')
 
-    #print("Vector between selected fiducials", FD3to1)
-    #print('angle angle of selected fiducials:', angle_FD3to1)
-    #print(f' arctan(y/x) : {FD3to1[1]}/{FD3to1[0]}')
-    #print(f' y/x : {FD3to1[1]/FD3to1[0]}')
-    #print(FD3to1[0] , FD3to1[1])
-    #print(np.arctan2(FD3to1[0],FD3to1[1]))
-    #print(np.degrees(np.arctan2(FD3to1[0],FD3to1[1])))
-
-
-
-    #print(f"FD1-2 X'' axis is at angle {angle_FD3to1:.5f} degrees. \n")
-    #print(f"FDCenter at x:{FDCenter[0]:.3f} mm, y:{FDCenter[1]:.3f} mm")
-    #print(f"Pin&Hole at x:{holeX:.3f} mm, y:{holeY:.3f} mm")
-
     AngleOffset = angle_FD3to1 - angle_Pin
-
-    print(f'Angle offset: {AngleOffset},  Pin Angle: {angle_Pin} ')
 
     return CenterOffset, AngleOffset, XOffset, YOffset
 
