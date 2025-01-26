@@ -139,10 +139,15 @@ class DBClient():
         conn = await asyncpg.connect(**self._connect_params)
         try:
             prequery, name, query, values = get_query_write_link(comp_type, db_upload_data)
-            await conn.execute(prequery, name)
-            await conn.execute(query, *values)
-            print(f'Data for {comp_type} successfully uploaded and linked to the mother table!')
-            return True
+            print("Executing pre-query...")
+            status = await conn.execute(prequery, name)
+            if not status:
+                print(f"Component {name} not found in the mother table.")
+                return False
+            else:
+                await conn.execute(query, *values)
+                print(f'Data for {comp_type} successfully uploaded and linked to the mother table!')
+                return True
         except Exception as e:
             print("!" * 90)
             print(f"Error encountered when linking {comp_type} to the mother table.")
