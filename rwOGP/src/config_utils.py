@@ -35,32 +35,38 @@ def get_default_config():
         'ogp_tray_dir': '/path/to/ogp/tray/directory'
     }
 
-def update_credentials():
+async def update_credentials():
     """Update database credentials after authenticating with current ones."""
     import getpass
-    import psycopg2
-    from psycopg2 import sql
+    import asyncpg
 
-    with open(SETTINGS_FILE, 'r') as f:
-        settings = yaml.safe_load(f)
-        config_file = settings['config_path']
+    # Load settings and config files with error handling
+    try:
+        with open(SETTINGS_FILE, 'r') as f:
+            settings = yaml.safe_load(f)
+            config_file = settings['config_path']
 
-    # Load current configuration
-    with open(config_file, 'r') as f:
-        current_config = yaml.safe_load(f)
+        with open(config_file, 'r') as f:
+            current_config = yaml.safe_load(f)
+    except (FileNotFoundError, yaml.YAMLError) as e:
+        print(f"Error reading configuration files: {e}")
+        return False
 
     # Verify current credentials
+    conn = None
     try:
-        conn = psycopg2.connect(
+        conn = await asyncpg.connect(
             host=current_config['host'],
             database=current_config['database'],
             user=current_config['user'],
             password=current_config['password']
         )
-        conn.close()
-    except psycopg2.Error as e:
-        print("Authentication failed with current credentials.")
+    except Exception as e:
+        print(f"Authentication failed with current credentials: {e}")
         return False
+    finally:
+        if conn is not None:
+            await conn.close()
 
     # Get new credentials
     print("\nEnter new credentials:")
@@ -73,24 +79,30 @@ def update_credentials():
         return False
 
     # Verify new credentials
+    conn = None
     try:
-        conn = psycopg2.connect(
+        conn = await asyncpg.connect(
             host=current_config['host'],
             database=current_config['database'],
             user=new_user,
             password=new_password
         )
-        conn.close()
-    except psycopg2.Error as e:
-        print("New credentials are invalid!")
+    except Exception as e:
+        print(f"New credentials are invalid: {e}")
         return False
+    finally:
+        if conn is not None:
+            await conn.close()
 
     # Update configuration file
-    current_config['user'] = new_user
-    current_config['password'] = new_password
-
-    with open(config_file, 'w') as f:
-        yaml.dump(current_config, f, default_flow_style=False)
+    try:
+        current_config['user'] = new_user
+        current_config['password'] = new_password
+        with open(config_file, 'w') as f:
+            yaml.dump(current_config, f, default_flow_style=False)
+    except (IOError, yaml.YAMLError) as e:
+        print(f"Error updating configuration file: {e}")
+        return False
 
     print("Credentials updated successfully!")
     return True

@@ -1,4 +1,4 @@
-import os, yaml, sys, json
+import os, yaml, sys, json, asyncio
 import argparse
 
 pjoin = os.path.join
@@ -14,7 +14,9 @@ from src.config_utils import load_config, create_default_config, SETTINGS_FILE, 
 program_descriptions = """This program is used to automatically upload results to the OGP database. 
 It is designed to be run from the command line.  
 The program will read the configuration file and use the information to connect to the OGP database and upload the results. 
-The program will also update the inventory file to reflect the results that have been uploaded."""
+The program will also update the inventory file to reflect the results that have been uploaded.
+
+Running without any arguments will process and upload all new surveys to the OGP database."""
 
 def main_func():
     """Main function to run the program."""
@@ -70,19 +72,21 @@ def clear_invent():
         print(f"Inventory for {userinput} cleared.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run the rwOGP program.")
+    parser = argparse.ArgumentParser(description=program_descriptions)
     parser.add_argument("--print", action='store_true', help="Print the current inventory.")
     parser.add_argument("--clear", action='store_true', help="Clear the current inventory.")
     parser.add_argument("--update", action='store_true', help="Update the credentials in the configuration file.")
-    parser.add_argument("--help", action='store_true', help="Print the program description.")
 
     args = parser.parse_args()
     
     if args.print:
         invent_print()
+        sys.exit(0)
     if args.clear:
         clear_invent()
+        sys.exit(0)
     if args.update:
-        update_credentials()
+        asyncio.run(update_credentials())
+        sys.exit(0)
 
     main_func()
