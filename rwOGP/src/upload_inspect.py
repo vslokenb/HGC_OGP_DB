@@ -63,6 +63,7 @@ def get_query_write_link(component_type, db_dict) -> tuple[str, str, str, list]:
             WHERE {comp_name} = $1
         ) THEN TRUE
         ELSE FALSE
+    END
     """
 
     placeholders = [f"${i + 1}" for i in range(len(column_names))]
