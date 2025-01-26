@@ -198,21 +198,19 @@ class PlotTool:
         Hole = np.array([holeX, holeY])
         print(f'pinY: {pinY}  &  pinX: {pinX}')
 
-        if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
-            print('np.degrees(np.arctan2(pinY,pinX))')
-            print(f' arctan(-y/x) : {pinY}/{pinX}')
-            if density == 'HD':
-                if position == 1:
-                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-                if position == 2:
-                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
-            if density == 'LD':
-                if position == 1:
-                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-                if position == 2:
-                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
-            #print(f' y/x : {pinY/pinX}')
-            #print(f'{angle_Pin} & {np.arctan2(-pinY,-pinX)}')
+    if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
+        print('np.degrees(np.arctan2(pinY,pinX))')
+        print(f' arctan(-y/x) : {pinY}/{pinX}')
+        if density == 'HD':
+            if position == 1:
+                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+            if position == 2:
+                angle_Pin = np.degrees(np.arctan2(pinY,pinX))
+        if density == 'LD':
+            if position == 1:
+                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+            if position == 2:
+                angle_Pin = np.degrees(np.arctan2(pinY,pinX))
 
         elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
             print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
