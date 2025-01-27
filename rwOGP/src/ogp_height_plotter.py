@@ -199,28 +199,28 @@ class PlotTool:
         Hole = np.array([holeX, holeY])
         print(f'pinY: {pinY}  &  pinX: {pinX}')
 
-    if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
-        print('np.degrees(np.arctan2(pinY,pinX))')
-        print(f' arctan(-y/x) : {pinY}/{pinX}')
-        if density == 'HD':
-            if position == 1:
-                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-            if position == 2:
-                angle_Pin = np.degrees(np.arctan2(pinY,pinX))
-        if density == 'LD':
-            if position == 1:
-                angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-            if position == 2:
-                angle_Pin = np.degrees(np.arctan2(pinY,pinX))
+        if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
+            print('np.degrees(np.arctan2(pinY,pinX))')
+            print(f' arctan(-y/x) : {pinY}/{pinX}')
+            if density == 'HD':
+                if position == 1:
+                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+                if position == 2:
+                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
+            if density == 'LD':
+                if position == 1:
+                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+                if position == 2:
+                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
 
-        elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
-            print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
-            angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
-            print(f' arctan(x/y) : -{pinY}/-{pinX}')
-        else: print('PlotTool: angle: geometry not recognized')
+            elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
+                print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
+                angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
+                print(f' arctan(x/y) : -{pinY}/-{pinX}')
+            else: print('PlotTool: angle: geometry not recognized')
 
         print(f'This is angle pin {angle_Pin}')
-        
+    
         if density == 'HD':   
             if geometry == 'Full':
                 FDCenter = np.nanmean(FDPoints, axis=0) #Average of All FDs
@@ -232,7 +232,6 @@ class PlotTool:
             else:
                 FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
         
-        #! It is up to the parsing system and the file output to assign the fiducials correctly  -PJ 1/9/25
 
         #adjustmentX and adjustmentY is appropriate for all modules except Fulls, and the Five
         adjustmentX, adjustmentY = ADJUSTMENTS[CompType][geometry][density][position]
