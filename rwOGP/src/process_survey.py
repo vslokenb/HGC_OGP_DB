@@ -74,13 +74,15 @@ class SurveyProcessor():
             XOffset, YOffset, AngleOff = plotter.get_offsets()
             db_upload.update({'proto_name': compID, 'x_offset_mu':np.round(XOffset*1000), 
                               'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
-                              "weight": metadata.get('Weight', None)})
+                              "weight": metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3),
+                             'ave_thickness': np.round(np.mean(plotter.z_points),3)})
         elif comp_type == 'modules':
             component_params = modules_params
             XOffset, YOffset, AngleOff = plotter.get_offsets()
             db_upload.update({'module_name': compID, 'x_offset_mu':np.round(XOffset*1000), 
                               'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
-                              'weight': metadata.get('Weight', None)})
+                              'weight': metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3),
+                             'ave_thickness': np.round(np.mean(plotter.z_points),3)})
             # ! what is this block doing?
             try:
                 PMoffsets = asyncio.run(self.client.GrabSensorOffsets(compID))

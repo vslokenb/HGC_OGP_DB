@@ -155,28 +155,31 @@ class DBClient():
             print(e)
             return False
         
-    @staticmethod
-    async def GrabSensorOffsets(name):
-        """Grab the sensor offsets from the database."""
+    async def GrabSensorOffsets(self, name: str) -> list:
+        """Grab the sensor offsets from the database.
+        
+        Parameters:
+        - name (str): Name of the prototype module.
+        
+        Returns:
+        - list: List of tuples containing (x_offset, y_offset, angle_offset) for matching modules."""
         try:
-            conn = await asyncpg.connect(
-                database='hgcdb',
-                user='postgres',
-                password='hepuser',
-                port=5432
-            )
-            query = "SELECT proto_name, x_offset_mu, y_offset_mu, ang_offset_deg FROM proto_inspect"
-            rows = await conn.fetch(query)
-            #print(rows)
-            matching_offsets = []
-            for pmodule in rows:
-                if pmodule['proto_name'] == name.replace('M','P'):
-                    xoffsets, yoffsets, angoffsets = pmodule['x_offset_mu'], pmodule['y_offset_mu'], pmodule['ang_offset_deg']
-                    matching_offsets.append((xoffsets, yoffsets, angoffsets))
-
+            conn = await asyncpg.connect(**self._connect_params)
+            query = """SELECT proto_name, x_offset_mu, y_offset_mu, ang_offset_deg 
+                      FROM proto_inspect 
+                      WHERE proto_name = $1;"""
+            rows = await conn.fetch(query, name.replace('M', 'P'))
+            
+            matching_offsets = [(row['x_offset_mu'], row['y_offset_mu'], row['ang_offset_deg']) 
+                              for row in rows]
+            
             return matching_offsets
-        except asyncpg.PostgresError as e:
-            print(f"Error connecting to the database: {e}")
-            return None
+            
+        except Exception as e:
+            print("!" * 90)
+            print("Error encountered when grabbing sensor offsets from database.")
+            print(e)
+            return []
         finally:
-            await conn.close()
+            if conn:
+                await conn.close()
