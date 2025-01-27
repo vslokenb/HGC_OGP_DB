@@ -25,11 +25,11 @@ def get_query_write(table_name, column_names) -> str:
     query = f"""{pre_query} {'({})'.format(data_placeholder)}"""
     return query
 
-def get_query_write_link(component_type, db_dict) -> tuple[str, str, str, list]:
+def get_query_write_link(comp_params, db_dict) -> tuple[str, str, str, list]:
     """Get the query to write to the database and link the component to the mother table.
     
     Parameters:
-    - component_type (str): Type of component.
+    - comp_params (dict): Dictionary containing the parameters of the component.
     - db_dict (dict): Dictionary containing the data to upload.
     
     Returns: 
@@ -40,9 +40,9 @@ def get_query_write_link(component_type, db_dict) -> tuple[str, str, str, list]:
     column_names = list(db_dict.keys())
     column_values = [db_dict[key] for key in column_names]
 
-    prefix = comptable[component_type]['prefix']
+    prefix = comp_params['prefix']
+    mother_table = comp_params['mother_table']
     table_name = f"{prefix}_inspect"
-    mother_table = component_type.lower()
     number_name = f"{prefix}_no"
     comp_name = f"{prefix}_name"
 
@@ -105,7 +105,7 @@ class DBClient():
         result = await self.fetch_PostgreSQL(get_query_read(component_type, bp_name ))
         return result
 
-    async def upload_PostgreSQL(self, table_name, db_upload_data):
+    async def upload_PostgreSQL(self, comp_params, db_upload_data):
         """Upload data to the database.
         
         Parameters:
@@ -114,6 +114,7 @@ class DBClient():
         conn = await asyncpg.connect(**self._connect_params)
         
         print('Connection successful. \n')
+        table_name = comp_params['db_table_name']
 
         schema_name = 'public'
         table_exists_query = """
