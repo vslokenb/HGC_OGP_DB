@@ -116,10 +116,9 @@ class SurveyProcessor():
         
         db_upload.update(self.getDateTime(metadata))
 
-        db_table_name = component_params['db_table_name']
-        mother_table = component_params['mother_table']
+        # mother_table = component_params['mother_table']
 
-        return db_upload, db_table_name, mother_table, compID  
+        return db_upload, component_params, compID  
     
     def process_and_upload(self, comp_type) -> tuple[bool, int]:
         """Process all OGP Survey files and upload to database.
@@ -133,12 +132,12 @@ class SurveyProcessor():
             - int: Index of the last successfully processed file (-1 if no files were processed)"""
         last_successful_index = -1
         for idx, (ex_file, meta_file) in enumerate(zip(self.OGPSurveyFile, self.MetaFile)):
-            db_upload, db_table_name, mother_tab, compID = self.__getArgs__(ex_file, meta_file, comp_type)
+            db_upload, comp_params, compID = self.__getArgs__(ex_file, meta_file, comp_type)
             mappings = np.array([None],dtype=object)
+            mother_tab = comp_params['mother_table']
             self.print_db_msg(mother_tab, compID)
             try:
-                status = asyncio.run(self.client.link_and_update_table(mother_tab, db_upload)) ## python 3.7
-                # asyncio.run(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.7
+                status = self.upload_request(comp_type)(comp_params, db_upload) ## python 3.7
                 if status == False:
                     return False, last_successful_index
                 last_successful_index = idx
@@ -146,6 +145,7 @@ class SurveyProcessor():
                 print(f"Exception Encountered: {e}")
                 try: 
                     print("Warning: Using python 3.6")
+                    db_table_name = comp_params['db_table_name']
                     (asyncio.get_event_loop()).run_until_complete(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.6
                     last_successful_index = idx
                 except Exception as e:
@@ -156,6 +156,13 @@ class SurveyProcessor():
         return True, last_successful_index  # Return True and last index if all files were processed successfully
                 # send2trash.send2trash(ex_file)
             # print(f'Moved {ex_file} to recycle bin.')
+    
+    #! This is now a hack
+    def upload_request(self, comp_type):
+        if comp_type == 'modules':
+            return self.client.upload_PostgreSQL
+        else:
+            return self.client.link_and_update_table
         
     @staticmethod
     def print_db_msg(comp_type, modname):
