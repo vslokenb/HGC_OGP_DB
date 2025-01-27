@@ -115,6 +115,7 @@ Flatness: {{ Flatness }}
 Thickness: {{Thickness}}
 Position ID: {{ PositionID }}
 TrayNo: {{ TrayNo }}
+Comment: {{ Comment }}
 """
 
 data_template = """
