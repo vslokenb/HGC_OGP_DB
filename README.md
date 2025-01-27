@@ -60,7 +60,7 @@ This GUI contains two tabs: 'View Plots' and 'Upload Files'. Run `python rwOGP/s
 ### Missing entries (data or header)
 1. Check if OGP survey program is properly named. Spaces are very likely to cause parsing issues and therefore should be avoided. 
 Correct Example: `CMU_OGP_module_survey_2024`
-2. Check if the routines are reporting results to Files. Turn Results for (X, Y, Z) on, and change the system setting to Link Results to Files.
+2. Check if the routines are reporting results to Files. Turn Results for (X, Y, Z) on, and change the system setting to Link Results to Files. Do this for user input variables as well.
 3. Check if the file output routine has filter applied. Uncheck the option.
 
 ### Template change
