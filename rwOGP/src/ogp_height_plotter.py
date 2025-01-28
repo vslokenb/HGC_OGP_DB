@@ -180,14 +180,15 @@ class PlotTool:
         print("Reading the fiducial points from the features dataframe.")
         FD_points = self.features[self.features['FeatureName'].str.contains('FD')].copy()
         FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(lambda x: int(re.search(r'FD(\d+)', x).group(1)) if re.search(r'FD(\d+)', x) else 0)
-
         FD_names = FD_points['FeatureName'].values
         FD_numbers = FD_points['FD_number'].values
-        FD_points = FD_points[['X_coordinate', 'Y_coordinate']].values
-        num_FDs = len(FD_points)
+        x_y_coords = FD_points[['X_coordinate', 'Y_coordinate']].values
+        num_FDs = len(x_y_coords)
         assert num_FDs in {2, 4, 6, 8}, "The number of fiducial points measured must be 2, 4, 6, or 8."
-        FD_points = FD_points.sort_values(by='FD_number')
-        FD_points = FD_points[['X_coordinate', 'Y_coordinate']].values
+        
+        # Sort points based on FD numbers
+        sort_indices = np.argsort(FD_numbers)
+        FD_points = x_y_coords[sort_indices]
         print(f"Found {num_FDs} fiducial points: {FD_names}")
 
         FD_array = np.full((8,2), np.nan)
