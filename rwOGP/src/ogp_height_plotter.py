@@ -231,10 +231,7 @@ class PlotTool:
         
         print("=" * 100)
         print(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} \n')
-        print("geometry:", Geometry)
-        print("density:", density)
-        print("PositionID", PositionID)
-        print()
+        print(f"Geometry: {Geometry}; Density: {density}; PositionID: {PositionID}")
 
         CenterOff, AngleOff, XOffset, YOffset = angle(HolePin_xy, SlotPin_xy, FD_points, Geometry, density, PositionID)
         print(f"Assembly Survey Rotational Offset is {AngleOff:.5f} degrees")
@@ -368,10 +365,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
     
     XOffset = FDCenter[0]-Hole[0]-adjustmentX
     YOffset = FDCenter[1]-Hole[1]-adjustmentY
-    print()
-    print("Hole Vs FDCenter:")
-    print(Hole)
-    print(FDCenter)
+    print(f"Hole Vs FDCenter: {Hole} vs {FDCenter}")
 
     print(f"Assembly Survey X Offset: {XOffset:.3f} mm.")
     print(f"Assembly Survey Y Offset: {YOffset:.3f} mm. \n")
