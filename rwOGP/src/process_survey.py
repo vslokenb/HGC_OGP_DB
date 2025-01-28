@@ -39,9 +39,9 @@ class SurveyProcessor():
         self.client = DBClient(yamlconfig)
         pass
 
-    def __call__(self, component_type) -> tuple[bool, int]:
+    async def __call__(self, component_type) -> tuple[bool, int]:
         """Process and upload OGP Survey files."""
-        status, index = asyncio.run(self.process_and_upload(component_type))
+        status, index = await self.process_and_upload(component_type)
         return status, index
  
     async def __getArgs__(self, ex_file, meta_file, comp_type):

@@ -17,7 +17,7 @@ class InventoryUpdater():
         self.checkdir = self.config.get('ogp_survey_dir')
         self.parsed_dir = self.config.get('ogp_parsed_dir')
     
-    def __call__(self):
+    async def __call__(self):
         if not pexist(self.inventory_p):
             self.__deal_empty()
             return
@@ -26,7 +26,7 @@ class InventoryUpdater():
             self.inventory = json.load(f)
         
         new_files = self.__check_inventory()
-        success_invent = self.upload_files(new_files)
+        success_invent = await self.upload_files(new_files)
         self.__update_inven(success_invent)
 
     
@@ -67,7 +67,7 @@ class InventoryUpdater():
 
         return txt_files_by_subdir
     
-    def __deal_empty(self) -> bool:
+    async def __deal_empty(self) -> bool:
         """Check if inventory is empty and prompt user to upload all existing OGP results to database.
         
         Return 
@@ -82,7 +82,7 @@ class InventoryUpdater():
 
         if choice == 'y':
             print("Uploading all existing OGP results to database...")
-            self.upload_files(txt_files_by_subdir)
+            await self.upload_files(txt_files_by_subdir)
             return True
         else:
             print("Exiting...")
@@ -134,7 +134,7 @@ class InventoryUpdater():
                     
         return changed_inventory
     
-    def upload_files(self, invent):
+    async def upload_files(self, invent):
         """Parse, postprocess and upload files to the database.
         
         Parameters
@@ -152,7 +152,7 @@ class InventoryUpdater():
                 gen_meta, gen_features = dp()
                 
                 uploader = SurveyProcessor(gen_features, gen_meta, self.config)
-                success, indx = uploader(subdir)
+                success, indx = await uploader(subdir)
                 if success:
                     successful_uploads[subdir] = files
                 elif indx != -1:
