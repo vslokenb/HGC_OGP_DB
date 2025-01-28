@@ -40,7 +40,7 @@ def main_func():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=program_descriptions)
     parser.add_argument("--print", action='store_true', help="Print the current inventory.")
-    parser.add_argument("--clear", action='store_true', help="Clear the current inventory.")
+    parser.add_argument("--clear", action='store_true', help="Clear the current inventory. Note that these do not delete the OGP output files. They only remove the files from being marked as uploaded in the inventory.")
     parser.add_argument("--update", action='store_true', help="Update the credentials in the configuration file.")
 
     args = parser.parse_args()
