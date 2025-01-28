@@ -29,6 +29,7 @@ class PlotTool:
     def __call__(self, **args):
         """Plot the 2D height map of the given data."""
         centerxy = self.get_center()
+        self.get_offsets()
         im_bytes = self.plot2d(self.x_points, self.y_points, self.z_points, centerxy, **args)
         return im_bytes
      
@@ -226,8 +227,7 @@ class PlotTool:
 
         FD_points = self.get_FDs()
 
-        #! plot the fiducial points (not urgent)
-        # plotFD(FD_points, centerxy, centerxy, offsetxy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))        
+        plotFD(FD_points, HolePin_xy, SlotPin_xy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))
         
         print("=" * 100)
         print(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} \n')
@@ -256,38 +256,39 @@ def vec_rotate(old_x, old_y, old_angle, new_angle = 120):
     new_y = old_x*np.sin(rad)+old_y*np.cos(rad)
     return new_x, new_y
     
-def plotFD(FDpoints:np.array, FDCenter:tuple, CenterXY:tuple, OffXY:tuple, save=False, save_name='') -> None:
+def plotFD(FDpoints:np.array, holeXY:tuple, slotXY:tuple, save=False, save_name='') -> None:
     """Plot the fiducial points and the center of the sensor.
     
     Parameters
     - `FDpoints`: array of fiducial points
-    - `FDCenter`: center of the fiducial points
-    - `CenterXY`: center of the sensor
-    - `OffXY`: offset of the sensor
+    - `holeXY`: HOLE in the BP. The center pin for Full, LD/HD.
+    - `slotXY`: SLOT in the BP. The offcenter pin for Full, LD/HD.
     - `save`: whether to save the plot. Incompatible with showing the plot.
     - `save_name`: name to save the plot as"""
-    CenterX, CenterY = CenterXY
-    OffX, OffY = OffXY
-    x_values = np.append(FDpoints[:,0], [CenterX, OffX])
-    y_values = np.append(FDpoints[:,1], [CenterY, OffY])
-    names = [f'FD{no}' for no in range(1, len(FDpoints)+1)]
-    names.extend(['Center', 'Offcenter'])
+    CenterX, CenterY = holeXY
+    OffX, OffY = slotXY
 
-    plt.figure(dpi=250)
-    plt.plot(x_values,y_values,'o',ms=2)
+    plt.figure()
+    FDnames = ['FD1', 'FD2', 'FD3', 'FD4', 'FD5', 'FD6', 'FD7', 'FD8']
+    plt.plot(FDpoints[:,0], FDpoints[:,1], 'ro', ms=2)
+    plt.plot(CenterX, CenterY, 'ro', ms=2)
+    plt.annotate('CenterPin', (CenterX, CenterY))
+    plt.plot(OffX, OffY, 'bo', ms=2)
+    plt.annotate('OffcenterPin', (OffX, OffY))
     plt.arrow(OffX, OffY, CenterX-OffX, CenterY-OffY, lw=0.5, color='g')
-    plt.plot(FDCenter[0], FDCenter[1], 'ro', label='FDCenter', ms=2)
-    for i in range(len(x_values)):
-        plt.annotate(names[i], (x_values[i], y_values[i]))
+    for i, (x, y) in enumerate(FDpoints):
+        if not np.isnan(x) and not np.isnan(y):
+            plt.annotate(FDnames[i], (x, y))
     
     plt.legend()
-    plt.xlim(60,160)
+    plt.xlim(50,190)
     plt.xlabel("x [mm]")
     plt.ylabel("y [mm]")
 
     plt.title("Fiducial Points")
-    if save:
-        plt.savefig(save_name)
+    if save: plt.savefig(save_name)
+    else: plt.show()
+    plt.close()
         
 
 #! Messy part: serve as reference for future development

@@ -1,0 +1,101 @@
+Step4_2_module_constrained_survey
+LastModified: 01:28:25 13:38:26		
+Runtime: 01:28:25 12:34:24
+Component ID: 320MLF3W2CM0110 
+Operator: jestein   
+Geometry: Full
+Density: ld
+Sensor size:  
+Flatness: 0.303
+Thickness: 3.626
+Position ID: 2
+TrayNo: 1
+Comment: 
+---
+Plane Pos2_MThickness1
+Point        98.27091900260      185.89160107926        3.71952811058
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness2
+Point        82.31622281862      185.56318698981        3.72251637583
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness3
+Point        53.33610060137      166.08296145719        3.63168684760
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness4
+Point        21.70764681593      145.77505111258        3.66077437029
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness5
+Point        11.27044273546      135.46207185991        3.66135949623
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness6
+Point        14.19201622816       99.92188776618        3.66332953285
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness7
+Point        12.47019842431       58.46365078739        3.60836631452
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness8
+Point        21.01734522509       44.79157250855        3.59861176627
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness9
+Point        53.68295559795       26.54301853699        3.54695830276
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness10
+Point        84.39010255136        8.37221396100        3.67339605830
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness11
+Point        99.05582548400        9.32152133923        3.63670466390
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness12
+Point       132.41437038739       29.18171799874        3.61131157493
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness13
+Point       160.31900102967       45.99226020947        3.57688809968
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness14
+Point       170.36500127675       60.35015426819        3.52923884118
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness15
+Point       170.22074028134       96.18647729548        3.51075998421
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness16
+Point       170.06244270956      137.28222650681        3.58713297599
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness17
+Point       166.62450957329      143.92850899708        3.60971201602
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness18
+Point       130.56500902320      164.23343875751        3.63971298102
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness19
+Point       115.31152325929      131.27056458628        3.70177761745
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness20
+Point        71.71937655399      131.10211733685        3.66040912555
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness21
+Point        53.72099142880       98.39627602644        3.69998648779
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness22
+Point        69.31049288536       63.62111687512        3.63423415722
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness23
+Point       115.68944076726       63.80424870837        3.57855225771
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness24
+Point       128.23834212836       95.45403012399        3.64874543391
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+Plane Pos2_MThickness25
+Point        87.68422230782       94.45018689202        3.69494363113
+direction cosine:        0.00143456367       -0.00121287772        0.99999823548
+BestfitPlane Pos2_ModuleThickness
+Point        91.75820956388       96.85768247922        3.63226548092
+direction cosine:       -0.00042827591        0.00047641175       -0.99999979481
+Circle Pos2_FD3
+Point        91.28964992439       17.58012765267        3.55983555690
+direction cosine:        0.00143443260       -0.00120822472        0.99999824130
+Radius                0.2109
+Circle Pos2_FD6
+Point        90.73420337782      177.54935151836        3.65363547136
+direction cosine:        0.00123233719       -0.00144098057        0.99999820246
+Radius                0.2106
+     
