@@ -2,7 +2,6 @@ import os, yaml, sys
 from ttp import ttp
 import pandas as pd
 from io import StringIO
-import warnings
 
 from src.param import header_template, data_template, required_keys, warning_keys, default_params, pin_mapping
 
@@ -97,7 +96,7 @@ class DataParser():
         if set(required_keys) - set(header_dict.keys()):
             print("DataParser did not parse all the required keys due to mismatching in naming or missing data.")
             print("Parsed data: ", header_dict)
-            warnings.warn(f"Missing required info: {set(required_keys) - set(header_dict.keys())}")
+            print("Missing keys: ", set(required_keys) - set(header_dict.keys()))
             header_dict = self.adopt_default(header_dict)
             user_input = input("Do you want to adopt the default values for the missing keys? (y/n): ")
             if user_input.lower() != 'y':
@@ -106,7 +105,7 @@ class DataParser():
 
         if set(warning_keys) - set(header_dict.keys()):
             print("DataParser did not parse all the optional keys due to mismatching in naming or missing data.")
-            warnings.warn(f"Missing optional info: {set(warning_keys) - set(header_dict.keys())}")
+            print("Missing keys: ", set(warning_keys) - set(header_dict.keys()))
         
         return header_dict
     
@@ -116,7 +115,7 @@ class DataParser():
         Geometry = header_dict['Geometry']
         density = header_dict['Density']
         if pin_mapping.get(Geometry) is None:
-            warnings.warn(f"Geometry {Geometry} not recognized. Default to Full.")
+            print(f"Geometry {Geometry} not recognized. Default to Full.")
             user_input = input("Do you want to adopt the default values for Geometry? (y/n): ")
             if user_input.lower() != 'y':
                 print("Exiting... Please check the Geometry value or update the pin mapping in param.py.")
@@ -124,7 +123,7 @@ class DataParser():
             header_dict['Geometry'] = 'Full'
             Geometry = 'Full'
         if pin_mapping.get(Geometry).get(density) is None:
-            warnings.warn(f"Density {density} not recognized. Default to LD.")
+            print(f"Density {density} not recognized for Geometry {Geometry}. Default to LD.")
             user_input = input("Do you want to adopt the default values for Density? (y/n): ")
             if user_input.lower() != 'y':
                 print("Exiting... Please check the Density value or update the pin mapping in param.py.")

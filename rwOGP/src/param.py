@@ -104,7 +104,7 @@ pin_mapping = {
 # If the following keys are missing from the header, an error will be raised
 required_keys = ['TrayNo', 'ComponentID', 'Operator', 'Geometry', 'Density', 'Flatness', 'PositionID']
 # If the following keys are missing from the header, a warning will be raised
-warning_keys = ['Thickness', 'SensorSize']
+warning_keys = ['Thickness', 'SensorSize', 'Comment']
 
 header_template = """
 {{ ProjectName }}
