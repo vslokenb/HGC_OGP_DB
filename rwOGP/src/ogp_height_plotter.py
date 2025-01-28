@@ -205,7 +205,7 @@ class PlotTool:
         - `XOffset`: x-offset of the sensor from the tray center
         - `YOffset`: y-offset of the sensor from the tray center
         - `AngleOff`: angle of the sensor from the tray fiducials"""
-        PositionID, Geometry, density, TrayNo = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo']
+        PositionID, Geometry, density, TrayNo, CompType = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo'], self.meta['comp_type']
 
         TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
 
@@ -307,7 +307,7 @@ def plotFD(FDpoints:np.array, holeXY:tuple, slotXY:tuple, save=False, save_name=
     #     plt.plot(FDCenter[0],FDCenter[1],'ro',label='FDCenter',ms=2)
     #     names = ['P1CenterPin','P1OffcenterPin','FD1','FD2','FD3','FD4']
 
-def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, position):
+def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, position, CompType):
     """Calculate the angle and offset of the sensor from the tray fiducials.
     
     Parameters
@@ -332,7 +332,7 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
     Hole = np.array([holeX, holeY])
     print(f'pinY: {pinY}  &  pinX: {pinX}')
 
-    if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
+    if geometry == 'Full' or geometry == 'Top':    
         print('np.degrees(np.arctan2(pinY,pinX))')
         print(f' arctan(-y/x) : {pinY}/{pinX}')
         if density == 'HD':
@@ -367,8 +367,104 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
     
 
     #! Waiting on Adjustment INFO, This needs to be filled out after measurements !!!!WORK IN PROGRESS!!!
-    if geometry == 'Full' or geometry == 'Five':
-        adjustmentX = 0; adjustmentY = 0;
+    if CompType == 'protomodules':       
+        if geometry == 'Full' or geometry == 'Five':
+            adjustmentX = 0; adjustmentY = 0;
+        elif geometry == 'Top':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = -9.72; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = 9.72; adjustmentY = 0;
+            elif density == 'HD':
+                if position == 1: 
+                    adjustmentX = -8.44; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = 8.44; adjustmentY = 0;
+        elif geometry == 'Bottom':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = 9.72; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = -9.72; 0; adjustmentY = 0;
+            elif density == 'HD':
+                if position == 1: 
+                    adjustmentX = -16; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = 16; adjustmentY =0;
+        elif geometry == 'Right':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = 9.72;
+                elif position == 2: 
+                    adjustmentX = 0; adjustmentY = -9.72;
+            elif density == 'HD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = 6.52 ;
+                elif position == 2: 
+                    adjustmentX = 0; adjustmentY = -6.52;    
+        elif geometry == 'Left':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = -9.72;
+                elif position == 2: 
+                    adjustmentX = 0; 0; adjustmentY = 9.72;
+            elif density == 'HD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = -6.52 ;
+                elif position == 2: 
+                    adjustmentX = 0; adjustmentY = 6.52;   
+            
+
+   
+    elif CompType == 'modules':   
+        if geometry == 'Full' or geometry == 'Five':
+            adjustmentX = 0; adjustmentY = 0;
+        elif geometry == 'Top':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = -8; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = 8; adjustmentY = 8;
+            if density == 'HD':
+                if position == 1: 
+                    adjustmentX = -4; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = 4; adjustmentY = 8;
+        elif geometry == 'Bottom':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = 9; adjustmentY = 8;
+                elif position == 2: 
+                    adjustmentX = -9; adjustmentY = 8;
+            if density == 'HD':
+                if position == 1: 
+                    adjustmentX = -15; adjustmentY = 0;
+                elif position == 2: 
+                    adjustmentX = 15; adjustmentY = 0;
+        elif geometry == 'Right':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = 18;
+                elif position == 2: 
+                    adjustmentX = 0; adjustmentY = -18;
+            if density == 'HD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = 5;
+                elif position == 2: 
+                    adjustmentX = 0; adjustmentY = -5;
+        elif geometry == 'Left':
+            if density == 'LD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = -18;
+                elif position == 2: 
+                    adjustmentX = 0; 0; adjustmentY = 18;
+            if density == 'HD':
+                if position == 1: 
+                    adjustmentX = 0; adjustmentY = -5;
+                elif position == 2: 
+                    adjustmentX = 0; adjustmentY = 5;
+    
     
     XOffset = FDCenter[0]-Hole[0]-adjustmentX
     YOffset = FDCenter[1]-Hole[1]-adjustmentY
