@@ -62,6 +62,7 @@ class SurveyProcessor():
         plotter = PlotTool(metadata, comp_type, df, self.tray_dir, pjoin(self.im_dir, comp_type))
 
         filesuffix = pbase(ex_file).split('.')[0]
+        print(f"Calculating offsets for {compID} ...")
 
         if comp_type == 'baseplates':
             db_upload.update({'bp_name': compID})
@@ -137,6 +138,7 @@ class SurveyProcessor():
             mother_tab = comp_params['mother_table']
             self.print_db_msg(mother_tab, compID)
             try:
+                print(f"Uploading {compID} to database")
                 status = self.upload_request(comp_type)(comp_params, db_upload) ## python 3.7
                 if status == False:
                     return False, last_successful_index
