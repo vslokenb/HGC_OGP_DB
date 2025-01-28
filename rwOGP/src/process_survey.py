@@ -5,6 +5,7 @@ import matplotlib
 matplotlib.use('Agg')
 from src.ogp_height_plotter import PlotTool
 from src.upload_inspect import DBClient
+import asyncio
 from src.make_accuracy_plot import make_accuracy_plot
 from src.param import *
 from datetime import datetime
@@ -41,7 +42,7 @@ class SurveyProcessor():
 
     def __call__(self, component_type) -> tuple[bool, int]:
         """Process and upload OGP Survey files."""
-        status, index = self.process_and_upload(component_type)
+        status, index = asyncio.run(self.process_and_upload(component_type))
         return status, index
  
     def __getArgs__(self, ex_file, meta_file, comp_type):
@@ -122,7 +123,7 @@ class SurveyProcessor():
 
         return db_upload, component_params, compID  
     
-    def process_and_upload(self, comp_type) -> tuple[bool, int]:
+    async def process_and_upload(self, comp_type) -> tuple[bool, int]:
         """Process all OGP Survey files and upload to database.
         
         Parameters:
@@ -140,7 +141,7 @@ class SurveyProcessor():
             self.print_db_msg(mother_tab, compID)
             try:
                 print(f"Uploading {compID} to database")
-                status = self.upload_request(comp_type)(comp_params, db_upload) ## python 3.7
+                status = await self.upload_request(comp_type)(comp_params, db_upload) ## python 3.7
                 if status == False:
                     return False, last_successful_index
                 last_successful_index = idx
@@ -163,6 +164,7 @@ class SurveyProcessor():
     #! This is now a hack
     def upload_request(self, comp_type):
         if comp_type == 'modules':
+            print("Upload without linking to mother table")
             return self.client.upload_PostgreSQL
         else:
             return self.client.link_and_update_table
