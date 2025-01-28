@@ -31,7 +31,6 @@ class PlotTool:
     def __call__(self, **args):
         """Plot the 2D height map of the given data."""
         centerxy = self.get_center()
-        self.get_offsets()
         im_bytes = self.plot2d(self.x_points, self.y_points, self.z_points, centerxy, **args)
         return im_bytes
      
@@ -44,6 +43,7 @@ class PlotTool:
     
     def get_center(self) -> int:
         """Get the index of the fiducial center in the dataframe by taking the average of the x and y coordinates."""
+        # ! The plot2d function is not centered. Check validity of this function
         center_x = (max(self.x_points) + min(self.x_points)) / 2
         center_y = (max(self.y_points) + min(self.y_points)) / 2
         print(f"Center of the sensor is at ({center_x:.3f}, {center_y:.3f}) mm")
