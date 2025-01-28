@@ -88,8 +88,9 @@ class SurveyProcessor():
             try:
                 PMoffsets = asyncio.run(self.client.GrabSensorOffsets(compID))
                 SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
-                print('Making Accuracy Plot With:', compID, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
-                acc_bytes = make_accuracy_plot(compID, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff) 
+                # ! This needs to be fixed
+                # print('Making Accuracy Plot With:', compID, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
+                # acc_bytes = make_accuracy_plot(compID, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff) 
             except Exception as e: 
                 print(f" Accruacy Plot: An error pulling PM offsets from pg occurred: {e}")
                 print("Accruacy Plot: PM offsets set to 0, 0, 0, due to failed data pull.")
