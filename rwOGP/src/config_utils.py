@@ -15,11 +15,10 @@ def get_config_location():
         custom_path = os.path.expanduser(input().strip())
         if os.path.isdir(custom_path):
             return pjoin(custom_path, "rwOGP_DBconfig.yaml")
-    
-    # Default location
+    else:
         config_dir = pjoin(home_dir, '.config')
-    os.makedirs(config_dir, exist_ok=True)
-    return pjoin(config_dir, 'rwOGP_DBconfig.yaml')
+        os.makedirs(config_dir, exist_ok=True)
+        return pjoin(config_dir, 'rwOGP_DBconfig.yaml')
 
 def get_default_config():
     """Return the default configuration dictionary."""
