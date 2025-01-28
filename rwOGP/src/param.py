@@ -59,7 +59,8 @@ ADJUSTMENTS = {
 
 # DataParser looks for these keys in the metadata
 required_keys = ['TrayNo', 'ComponentID', 'Operator', 'Geometry', 'Density', 'Flatness', 'PositionID']
-warning_keys = ['Thickness', 'SensorSize']
+# If the following keys are missing from the header, a warning will be raised
+warning_keys = ['Thickness', 'SensorSize', 'Comment']
 
 header_template = """
 {{ ProjectName }}
