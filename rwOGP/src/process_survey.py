@@ -36,7 +36,6 @@ class SurveyProcessor():
         self.im_dir = im_dir
         self.tray_dir = yamlconfig.get('ogp_tray_dir')
 
-        print(f'filename to process/upload: {self.OGPSurveyFile}')
         self.client = DBClient(yamlconfig)
         pass
 
@@ -63,6 +62,7 @@ class SurveyProcessor():
         plotter = PlotTool(metadata, df, self.tray_dir, pjoin(self.im_dir, comp_type))
 
         filesuffix = pbase(ex_file).split('.')[0]
+        print("=" * 100)
         print(f"Calculating offsets for {compID} ...")
 
         if comp_type == 'baseplates':
@@ -87,7 +87,8 @@ class SurveyProcessor():
                              'ave_thickness': np.round(np.mean(plotter.z_points),3)})
             # ! what is this block doing?
             try:
-                PMoffsets = asyncio.run(self.client.GrabSensorOffsets(compID))
+                loop = asyncio.get_event_loop()
+                PMoffsets = loop.run_until_complete(self.client.GrabSensorOffsets(compID))
                 SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
                 # ! This needs to be fixed
                 # print('Making Accuracy Plot With:', compID, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)

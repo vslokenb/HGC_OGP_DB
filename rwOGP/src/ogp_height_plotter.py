@@ -176,7 +176,6 @@ class PlotTool:
         
         Return 
         - `FD_points`: 8 by 2 array of fiducial points, empty points are filled with np.nan"""
-        print("=" * 100)
         print("Reading the fiducial points from the features dataframe.")
         FD_points = self.features[self.features['FeatureName'].str.contains('FD')].copy()
         FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(lambda x: int(re.search(r'FD(\d+)', x).group(1)) if re.search(r'FD(\d+)', x) else 0)
@@ -396,7 +395,6 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
         # in this case angle_FD3to1 is actually the angle of the line that goes from 6 to 3, this points up and down wrt tray
         print("Angle calculated with FD6 & FD3")
         FD3to1 = FDPoints[2] - FDPoints[5]
-        print("FD3", FDPoints[2], "FD6:", FDPoints[5])
         if position == 1:
             angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
         if position == 2:
