@@ -19,7 +19,7 @@ The program will also update the inventory file to reflect the results that have
 
 Running without any arguments will process and upload all new surveys to the OGP database."""
 
-def main_func():
+async def main_func():
     """Main function to run the program."""
     settings = load_config()
     if settings is None:
@@ -34,8 +34,7 @@ def main_func():
             config = yaml.safe_load(f)
     
     updater = InventoryUpdater(invent_path, config)
-    updater()
-
+    await updater()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=program_descriptions)
@@ -58,4 +57,4 @@ if __name__ == "__main__":
         result = asyncio.run(update_credentials())
         sys.exit(0)
 
-    main_func()
+    asyncio.run(main_func())
