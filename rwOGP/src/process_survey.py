@@ -44,7 +44,7 @@ class SurveyProcessor():
         status, index = asyncio.run(self.process_and_upload(component_type))
         return status, index
  
-    def __getArgs__(self, ex_file, meta_file, comp_type):
+    async def __getArgs__(self, ex_file, meta_file, comp_type):
         """Get arguments for uploading to database, including the necessary meta data to upload and the image bytes.
         
         Return 
@@ -87,16 +87,15 @@ class SurveyProcessor():
                              'ave_thickness': np.round(np.mean(plotter.z_points),3)})
             # ! what is this block doing?
             try:
-                loop = asyncio.get_event_loop()
-                PMoffsets = loop.run_until_complete(self.client.GrabSensorOffsets(compID))
+                PMoffsets = await self.client.GrabSensorOffsets(compID)
                 SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
                 # ! This needs to be fixed
                 # print('Making Accuracy Plot With:', compID, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
                 # acc_bytes = make_accuracy_plot(compID, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff) 
             except Exception as e: 
-                print(f" Accruacy Plot: An error pulling PM offsets from pg occurred: {e}")
-                print("Accruacy Plot: PM offsets set to 0, 0, 0, due to failed data pull.")
-                PMoffsets = [0, 0, 0];
+                print(f" Accuracy Plot: An error pulling PM offsets from pg occurred: {e}")
+                print("Accuracy Plot: PM offsets set to 0, 0, 0, due to failed data pull.")
+                PMoffsets = [0, 0, 0]
             # ! ============================
         else:
             raise ValueError("Component type not recognized. \
@@ -136,7 +135,7 @@ class SurveyProcessor():
             - int: Index of the last successfully processed file (-1 if no files were processed)"""
         last_successful_index = -1
         for idx, (ex_file, meta_file) in enumerate(zip(self.OGPSurveyFile, self.MetaFile)):
-            db_upload, comp_params, compID = self.__getArgs__(ex_file, meta_file, comp_type)
+            db_upload, comp_params, compID = await self.__getArgs__(ex_file, meta_file, comp_type)
             mappings = np.array([None],dtype=object)
             mother_tab = comp_params['mother_table']
             self.print_db_msg(mother_tab, compID)
