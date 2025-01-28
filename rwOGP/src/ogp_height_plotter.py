@@ -176,7 +176,6 @@ class PlotTool:
         
         Return 
         - `FD_points`: 8 by 2 array of fiducial points, empty points are filled with np.nan"""
-        print("=" * 100)
         print("Reading the fiducial points from the features dataframe.")
         FD_points = self.features[self.features['FeatureName'].str.contains('FD')].copy()
         FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(lambda x: int(re.search(r'FD(\d+)', x).group(1)) if re.search(r'FD(\d+)', x) else 0)

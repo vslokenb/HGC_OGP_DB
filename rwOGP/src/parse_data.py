@@ -36,7 +36,7 @@ class DataParser():
         for filename in self.data_file:
             self.data = open(filename, 'r').read()
             print("=" * 100)
-            print("Parsing data")
+            print("Parsing data for file: ", filename)
             self.read_temp_sep()
             filename = self.output_meta()
             self.output_features(f'{filename}.csv')
