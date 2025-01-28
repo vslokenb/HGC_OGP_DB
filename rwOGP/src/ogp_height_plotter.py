@@ -206,7 +206,7 @@ class PlotTool:
         - `XOffset`: x-offset of the sensor from the tray center
         - `YOffset`: y-offset of the sensor from the tray center
         - `AngleOff`: angle of the sensor from the tray fiducials"""
-        PositionID, Geometry, density, TrayNo = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo']
+        PositionID, Geometry, density, TrayNo, CompType = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo'], self.meta['comp_type']
 
         TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
 
