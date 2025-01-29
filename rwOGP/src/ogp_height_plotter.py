@@ -5,7 +5,7 @@ import yaml
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
-from src.param import pin_mapping, ADJUSTMENTS
+from src.param import pin_mapping, plot2d_dim
 
 pjoin = os.path.join
 
@@ -21,7 +21,8 @@ class PlotTool:
         self.meta = meta
         self.comp_type = component_type
         self.tray_dir = tray_dir
-        self.features = DataParser.get_xyz(features)
+        #! this is a hack
+        self.features = DataParser.get_xyz(features, ['Tray'])
         self.x_points = self.features['X_coordinate']
         self.y_points = self.features['Y_coordinate']
         self.z_points = self.features['Z_coordinate']
@@ -152,8 +153,8 @@ class PlotTool:
         axs.set_xlabel("x (mm)")
         axs.set_ylabel("y (mm)")
         axs.minorticks_on()
-        axs.set_xlim(left=-100, right=100)
-        axs.set_ylim(bottom=-100, top=100)
+        axs.set_xlim(plot2d_dim)
+        axs.set_ylim(plot2d_dim)
         cb.set_label("Height (mm)")
         axs.set_title(title)
         

@@ -11,6 +11,9 @@ modules_params = {"key":"Thick", "vmini": 2.75, "vmaxi": 4.0, "new_angle": 270, 
 comptable = {'baseplate':{'prefix': 'bp'},'hexaboard':{'prefix': 'hxb'},'protomodule':{'prefix': 'proto'},'module':{'prefix': 'module'}}
 default_params = {"PositionID": 1, "Geometry": "Full", "Density": "LD", "TrayNo": 1}
 
+plot2d_dim = (-100, 100)
+
+
 colorClassify = {'-1': Fore.MAGENTA + 'NO INFO' + Fore.BLACK, 
                        '0': Fore.GREEN + 'GREEN' + Fore.BLACK,
                        '1': Fore.YELLOW + 'YELLOW' + Fore.BLACK, 
