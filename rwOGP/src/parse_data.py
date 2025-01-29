@@ -147,12 +147,14 @@ class DataParser():
         return header_dict
     
     @staticmethod
-    def get_xyz(df: pd.DataFrame) -> pd.DataFrame:
+    def get_xyz(df: pd.DataFrame, filterKwd=[]) -> pd.DataFrame:
         """Get X, Y, Z coordinates from the dataframe."""
+        if filterKwd: regex_pattern = '|'.join(filterKwd)
+        df = df[~df['FeatureName'].str.contains(regex_pattern, case=False, na=False)]
         return df.dropna(subset=['X_coordinate', 'Y_coordinate', 'Z_coordinate'])
     
     @staticmethod
-    def get_feature_from_df(df: 'pd.DataFrame', feature_name, filterType=None) -> pd.Series:
+    def get_feature_from_df(df: 'pd.DataFrame', feature_name, filterType=None, filterKwd=[]) -> pd.Series:
         """Get feature from the dataframe.
         
         Parameters:
