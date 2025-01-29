@@ -131,7 +131,6 @@ class PlotTool:
         """Plot 2D height map of the given data.
         [... existing docstring ...]
         """
-        # Calculate statistics
         mean_h, std_h, max_h, min_h = PlotTool._calculate_height_stats(zheight)
         
         # Prepare coordinates
