@@ -235,8 +235,14 @@ class PlotTool:
         print(f"Geometry: {Geometry}; Density: {density}; PositionID: {PositionID}")
 
         CenterOff, AngleOff, XOffset, YOffset = angle(HolePin_xy, SlotPin_xy, FD_points, Geometry, density, PositionID)
+
         print(f"Assembly Survey Rotational Offset is {AngleOff:.5f} degrees")
         print(f"Assembly Survey Center Offset is {CenterOff:.3f} mm")
+
+        if abs(AngleOff) > 20:
+            raise ValueError("The calculated angle offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
+        if abs(XOffset) > 1 or abs(YOffset) > 1:
+            raise ValueError("The calculated offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
 
         return XOffset, YOffset, AngleOff
 
