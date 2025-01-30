@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import os, re
+import os
 import yaml
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
@@ -10,14 +10,16 @@ from src.param import pin_mapping, plot2d_dim
 pjoin = os.path.join
 
 class PlotTool:
-    def __init__(self, meta, features: 'pd.DataFrame', tray_dir, save_dir=None):
+    def __init__(self, meta, component_type, features: 'pd.DataFrame', tray_dir, save_dir=None):
         """
         Parameters
         - `meta`: metadata of the features, including Tray ID, Operator, and Component ID
+        - `component_type`: type of the component, either 'protomodules' or 'modules'
         - `features`: dataframe of features to plot
         - `save_dir`: directory to save the plots to"""
         self.save_dir = save_dir
         self.meta = meta
+        self.comp_type = component_type
         self.tray_dir = tray_dir
         #! this is a hack
         self.features = DataParser.get_xyz(features, ['Tray'])
@@ -133,7 +135,6 @@ class PlotTool:
         """
         mean_h, std_h, max_h, min_h = PlotTool._calculate_height_stats(zheight)
         
-        # Prepare coordinates
         x, y = PlotTool._prepare_coordinates(x, y, centerxy, rotate, new_angle)
         
         # Create plot
@@ -205,7 +206,7 @@ class PlotTool:
         - `XOffset`: x-offset of the sensor from the tray center
         - `YOffset`: y-offset of the sensor from the tray center
         - `AngleOff`: angle of the sensor from the tray fiducials"""
-        PositionID, Geometry, density, TrayNo, CompType = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo'], self.meta['comp_type']
+        PositionID, Geometry, density, TrayNo = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo']
 
         TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
 
@@ -233,8 +234,9 @@ class PlotTool:
         print(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} \n')
         print(f"Geometry: {Geometry}; Density: {density}; PositionID: {PositionID}")
 
-        CenterOff, AngleOff, XOffset, YOffset = angle(HolePin_xy, SlotPin_xy, FD_points, Geometry, density, PositionID)
-
+        CenterOff, AngleOff, XOffset, YOffset = self.angle(HolePin_xy, SlotPin_xy, FD_points)
+        print(f"Assembly Survey X Offset: {XOffset:.3f} mm")
+        print(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
         print(f"Assembly Survey Rotational Offset is {AngleOff:.5f} degrees")
         print(f"Assembly Survey Center Offset is {CenterOff:.3f} mm")
 
@@ -306,23 +308,23 @@ def plotFD(FDpoints:np.array, holeXY:tuple, slotXY:tuple, save=False, save_name=
     #     plt.arrow(Xp[3],Yp[3],Xp[5]-Xp[3],Yp[5]-Yp[3],lw=0.5,color='orange')
     #     plt.plot(FDCenter[0],FDCenter[1],'ro',label='FDCenter',ms=2)
     #     names = ['P1CenterPin','P1OffcenterPin','FD1','FD2','FD3','FD4']
-
-def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, position, CompType):
+    
+def angle(self, holeXY:tuple, slotXY:tuple, FDPoints:np.array):
     """Calculate the angle and offset of the sensor from the tray fiducials.
     
     Parameters
     - `holeXY`: the location of the pin that corresponds to the HOLE in the base plate. the center pin for Full, LD/HD.
     - `slotXY`: the location of the pin that corresponds to the SLOT in the base plate. the offcenter pin for Full, LD/HD.
     - `FDPoints`: array of fiducial points: 2, 4, 6, or 8, FD points are accepted
-    - `geometry`: the geometry of the module eg, Full/Five/Left/Right
-    - `desnity`: the desity of the module, HD or LD
-    - `position`: the position its assembled in, P1 or P2
 
     Return
     - `CenterOffset`: offset of the sensor from the tray center
     - `AngleOffset`: angle of the sensor from the tray fiducials
     - `XOffset`: x-offset of the sensor from the tray center
     - `YOffset`: y-offset of the sensor from the tray center"""
+
+    geometry, density, position, CompType = self.meta['Geometry'], self.meta['Density'], self.meta['PositionID'], self.comp_type
+
     holeX, holeY = holeXY
     slotX, slotY = slotXY
 
@@ -414,8 +416,6 @@ def angle(holeXY:tuple, slotXY:tuple, FDPoints:np.array, geometry, density, posi
                     adjustmentX = 0; adjustmentY = -6.52 ;
                 elif position == 2: 
                     adjustmentX = 0; adjustmentY = 6.52;   
-            
-
    
     elif CompType == 'modules':   
         if geometry == 'Full' or geometry == 'Five':
