@@ -231,6 +231,10 @@ class PlotTool:
             else:
                 FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
         
+        #! It is up to the parsing system and the file output to assign the fiducials correctly  -PJ 1/9/25
+
+        #adjustmentX and adjustmentY is appropriate for all modules except Fulls, and the Five
+        adjustmentX, adjustmentY = ADJUSTMENTS[CompType][geometry][density][position]
         
         XOffset = FDCenter[0]-Hole[0]-adjustmentX
         YOffset = FDCenter[1]-Hole[1]-adjustmentY
