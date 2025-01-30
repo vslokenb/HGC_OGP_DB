@@ -26,7 +26,7 @@ if __name__ == '__main__':
             "new_angle": component_params['new_angle'], "savename": "ex_heights",
             "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": True}
 
-    PT.get_offsets()
+    # PT.get_offsets()
     PT(**im_args)
 
 

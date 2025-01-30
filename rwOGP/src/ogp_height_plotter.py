@@ -197,13 +197,9 @@ class PlotTool:
         pinY = slotY - holeY     #Y component "" ""
 
         Hole = np.array([holeX, holeY])
-        print(f'pinY: {pinY}  &  pinX: {pinX}')
-        Hole = np.array([holeX, holeY])
-        print(f'pinY: {pinY}  &  pinX: {pinX}')
+        print(f'pinX: {pinX}  &  pinY: {pinY}')
 
         if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
-            print('np.degrees(np.arctan2(pinY,pinX))')
-            print(f' arctan(-y/x) : {pinY}/{pinX}')
             if density == 'HD':
                 if position == 1:
                     angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
@@ -216,12 +212,10 @@ class PlotTool:
                     angle_Pin = np.degrees(np.arctan2(pinY,pinX))
 
             elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
-                print('angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))')
                 angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
-                print(f' arctan(x/y) : -{pinY}/-{pinX}')
             else: print('PlotTool: angle: geometry not recognized')
 
-        print(f'This is angle pin {angle_Pin}')
+        print(f'Angle pin: {angle_Pin}')
     
         if density == 'HD':   
             if geometry == 'Full':
@@ -599,7 +593,6 @@ def plotFD(FDpoints:np.array, holeXY:tuple, slotXY:tuple, save=False, save_name=
         if not np.isnan(x) and not np.isnan(y):
             plt.annotate(FDnames[i], (x, y))
     
-    plt.legend()
     plt.xlim(50,190)
     plt.xlabel("x [mm]")
     plt.ylabel("y [mm]")
