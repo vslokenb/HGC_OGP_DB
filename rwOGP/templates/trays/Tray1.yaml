@@ -1,7 +1,7 @@
 tray_no: 1
 tray_name: "Tray 1"
 module_geoms: ['LDR', 'HDT', 'LD5', 'LDL', 'LDT', 'LDB']
-tray_fiducial_xy: [0.000, 392.81221]
+tray_fiducial_xy: [0.000, 392.80827]
 p1A_xy: 
 p1B_xy: 
 p1C_xy: 
@@ -16,9 +16,9 @@ p1K_xy:
 p1L_xy:
 p1M_xy: 
 p1N_xy: 
-p1O_xy: [66.19010, 287.98146] 
+p1O_xy: [66.13457, 287.90542] 
 p1P_xy:
-p1_center_pin_xy: [141.14502, 288.25081]
+p1_center_pin_xy: [141.07676, 288.22566]
 p2A_xy: 
 p2B_xy: 
 p2C_xy: 
@@ -31,11 +31,11 @@ p2I_xy:
 p2J_xy:
 p2K_xy:
 p2L_xy:
-p2M_xy: [165.98480, 97.83884] 
+p2M_xy: [165.91464, 97.80248] 
 p2N_xy: 
 p2O_xy: 
 p2P_xy:
-p2_center_pin_xy: [91.02989, 97.56949]
+p2_center_pin_xy: [90.95831, 97.53110]
 date_meas: 20241029
 time_meas: 140600
 inspector: Jessica
