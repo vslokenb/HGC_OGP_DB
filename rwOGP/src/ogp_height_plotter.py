@@ -5,7 +5,7 @@ import yaml
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
-from src.param import pin_mapping, plot2d_dim
+from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS
 
 pjoin = os.path.join
 
@@ -206,7 +206,7 @@ class PlotTool:
         - `XOffset`: x-offset of the sensor from the tray center
         - `YOffset`: y-offset of the sensor from the tray center
         - `AngleOff`: angle of the sensor from the tray fiducials"""
-        PositionID, Geometry, density, TrayNo, CompType = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo'], self.meta['comp_type']
+        PositionID, Geometry, density, TrayNo = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo']
 
         TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
 
@@ -234,8 +234,9 @@ class PlotTool:
         print(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} \n')
         print(f"Geometry: {Geometry}; Density: {density}; PositionID: {PositionID}")
 
-        CenterOff, AngleOff, XOffset, YOffset = angle(HolePin_xy, SlotPin_xy, FD_points, Geometry, density, PositionID)
-
+        CenterOff, AngleOff, XOffset, YOffset = self.angle(HolePin_xy, SlotPin_xy, FD_points)
+        print(f"Assembly Survey X Offset: {XOffset:.3f} mm")
+        print(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
         print(f"Assembly Survey Rotational Offset is {AngleOff:.5f} degrees")
         print(f"Assembly Survey Center Offset is {CenterOff:.3f} mm")
 

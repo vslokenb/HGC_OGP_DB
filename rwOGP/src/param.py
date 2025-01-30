@@ -13,7 +13,6 @@ default_params = {"PositionID": 1, "Geometry": "Full", "Density": "LD", "TrayNo"
 
 plot2d_dim = (-100, 100)
 
-
 colorClassify = {'-1': Fore.MAGENTA + 'NO INFO' + Fore.BLACK, 
                        '0': Fore.GREEN + 'GREEN' + Fore.BLACK,
                        '1': Fore.YELLOW + 'YELLOW' + Fore.BLACK, 
