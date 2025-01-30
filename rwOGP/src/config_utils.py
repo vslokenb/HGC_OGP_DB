@@ -51,21 +51,39 @@ async def update_credentials():
         print(f"Error reading configuration files: {e}")
         return False
 
+    async def verify_credentials(user, password):
+        """Helper function to verify database credentials."""
+        conn = None
+        try:
+            conn = await asyncpg.connect(
+                host=current_config['host'],
+                database=current_config['database'],
+                user=user,
+                password=password
+            )
+            return True
+        except Exception as e:
+            print(f"Authentication failed: {e}")
+            return False
+        finally:
+            if conn is not None:
+                await conn.close()
+
+    def update_config_file(user, password):
+        """Helper function to update configuration file."""
+        try:
+            current_config['user'] = user
+            current_config['password'] = password
+            with open(config_file, 'w') as f:
+                yaml.dump(current_config, f, default_flow_style=False)
+            return True
+        except (IOError, yaml.YAMLError) as e:
+            print(f"Error updating configuration file: {e}")
+            return False
+
     # Verify current credentials
-    conn = None
-    try:
-        conn = await asyncpg.connect(
-            host=current_config['host'],
-            database=current_config['database'],
-            user=current_config['user'],
-            password=current_config['password']
-        )
-    except Exception as e:
-        print(f"Authentication failed with current credentials: {e}")
+    if not await verify_credentials(current_config['user'], current_config['password']):
         return False
-    finally:
-        if conn is not None:
-            await conn.close()
 
     # Get new credentials
     print("\nEnter new credentials:")
@@ -78,33 +96,16 @@ async def update_credentials():
         return False
 
     # Verify new credentials
-    conn = None
-    try:
-        conn = await asyncpg.connect(
-            host=current_config['host'],
-            database=current_config['database'],
-            user=new_user,
-            password=new_password
-        )
-    except Exception as e:
-        print(f"New credentials are invalid: {e}")
+    if not await verify_credentials(new_user, new_password):
         return False
-    finally:
-        if conn is not None:
-            await conn.close()
 
     # Update configuration file
-    try:
-        current_config['user'] = new_user
-        current_config['password'] = new_password
-        with open(config_file, 'w') as f:
-            yaml.dump(current_config, f, default_flow_style=False)
-    except (IOError, yaml.YAMLError) as e:
-        print(f"Error updating configuration file: {e}")
+    if not update_config_file(new_user, new_password):
         return False
 
     print("Credentials updated successfully!")
-    return True
+    return
+
 
 def create_settings_file(config_file):
     """Create settings file with config and inventory paths."""
@@ -152,4 +153,5 @@ def load_config():
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, 'r') as f:
             return yaml.safe_load(f)
+    return None
     return None
