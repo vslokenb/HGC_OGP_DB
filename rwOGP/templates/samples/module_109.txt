@@ -13,10 +13,6 @@ Position ID: 1
 TrayNo: 1
 Comment: 
 ---
-Circle TrayFiducial2
-Point        -0.00000012498      392.80921910393       -8.85033361239
-direction cosine:        0.00206462688       -0.00135696233        0.99999694798
-Radius                0.0470
 Circle Pos1_FD3
 Point       140.79101462878      368.30735734641        3.72691883224
 direction cosine:        0.00126015355       -0.00045128248        0.99999910418
