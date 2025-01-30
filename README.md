@@ -27,6 +27,7 @@ python rwOGP/startGUI.py
 
 For more information on how to use the CLI tool, run:
 ```python rwOGP/main.py --help```
+The following options are available: to clear the database, to upload a specific file, to upload all files, and to view the database.
 
 ### Method 2: Install as a package (Under Development)
 In Python 3.6 or greater on the OGP computer: 

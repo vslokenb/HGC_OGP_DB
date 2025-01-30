@@ -569,39 +569,7 @@ def vec_rotate(old_x, old_y, old_angle, new_angle = 120):
     new_x = old_x*np.cos(rad)-old_y*np.sin(rad)
     new_y = old_x*np.sin(rad)+old_y*np.cos(rad)
     return new_x, new_y
-    
-def plotFD(FDpoints:np.array, holeXY:tuple, slotXY:tuple, save=False, save_name='') -> None:
-    """Plot the fiducial points and the center of the sensor.
-    
-    Parameters
-    - `FDpoints`: array of fiducial points
-    - `holeXY`: HOLE in the BP. The center pin for Full, LD/HD.
-    - `slotXY`: SLOT in the BP. The offcenter pin for Full, LD/HD.
-    - `save`: whether to save the plot. Incompatible with showing the plot.
-    - `save_name`: name to save the plot as"""
-    CenterX, CenterY = holeXY
-    OffX, OffY = slotXY
 
-    plt.figure()
-    FDnames = ['FD1', 'FD2', 'FD3', 'FD4', 'FD5', 'FD6', 'FD7', 'FD8']
-    plt.plot(FDpoints[:,0], FDpoints[:,1], 'ro', ms=2)
-    plt.plot(CenterX, CenterY, 'ro', ms=2)
-    plt.annotate('CenterPin', (CenterX, CenterY))
-    plt.plot(OffX, OffY, 'bo', ms=2)
-    plt.annotate('OffcenterPin', (OffX, OffY))
-    plt.arrow(OffX, OffY, CenterX-OffX, CenterY-OffY, lw=0.5, color='g')
-    for i, (x, y) in enumerate(FDpoints):
-        if not np.isnan(x) and not np.isnan(y):
-            plt.annotate(FDnames[i], (x, y))
-    
-    plt.xlim(50,190)
-    plt.xlabel("x [mm]")
-    plt.ylabel("y [mm]")
-
-    plt.title("Fiducial Points")
-    if save: plt.savefig(save_name)
-    else: plt.show()
-    plt.close()
         
 def quality(Center, Rotation, position = "P1", details =0, note = 0):
     '''
