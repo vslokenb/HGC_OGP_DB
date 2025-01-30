@@ -32,7 +32,6 @@ class PlotTool:
     def __call__(self, **args):
         """Plot the 2D height map of the given data."""
         centerxy = self.get_center()
-        self.get_offsets()
         im_bytes = self.plot2d(self.x_points, self.y_points, self.z_points, centerxy, **args)
         return im_bytes
      
@@ -543,7 +542,6 @@ def plotFD(FDpoints:np.array, holeXY:tuple, slotXY:tuple, save=False, save_name=
         if not np.isnan(x) and not np.isnan(y):
             plt.annotate(FDnames[i], (x, y))
     
-    plt.legend()
     plt.xlim(50,190)
     plt.xlabel("x [mm]")
     plt.ylabel("y [mm]")

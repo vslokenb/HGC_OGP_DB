@@ -49,7 +49,7 @@ class SurveyProcessor():
         
         Return 
         - db_upload (dict): Dictionary of data to upload to database.
-        - db_table_name (str): Name of the table in the database to upload to.
+        - component_params (dict): Dictionary of parameters for the component type.
         - compID (str): Title of the module."""
         db_upload = {}
 
@@ -136,7 +136,6 @@ class SurveyProcessor():
         last_successful_index = -1
         for idx, (ex_file, meta_file) in enumerate(zip(self.OGPSurveyFile, self.MetaFile)):
             db_upload, comp_params, compID = await self.__getArgs__(ex_file, meta_file, comp_type)
-            mappings = np.array([None],dtype=object)
             mother_tab = comp_params['mother_table']
             self.print_db_msg(mother_tab, compID)
             try:
