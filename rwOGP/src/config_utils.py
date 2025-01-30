@@ -154,4 +154,3 @@ def load_config():
         with open(SETTINGS_FILE, 'r') as f:
             return yaml.safe_load(f)
     return None
-    return None
