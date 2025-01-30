@@ -428,6 +428,8 @@ class PlotTool:
         print("Hole Vs FDCenter:")
         print(Hole)
         print(FDCenter)
+        #print()
+        #print("Adjustment to Offsets: ", adjustmentX, adjustmentY) 
 
         print(f"Assembly Survey X Offset: {XOffset:.3f} mm. \n")
         print(f"Assembly Survey Y Offset: {YOffset:.3f} mm. \n")
@@ -436,8 +438,17 @@ class PlotTool:
 
         FD3to1 = FDPoints[0] - FDPoints[2]  #Vector from FD3 to FD1
         
-        if geometry == 'Bottom' or geometry == 'Top':       #if geometry is Top or bottom, FD3to1 will point either left or right
-            angle_FD3to1 = np.degrees(np.arctan2(FD3to1[1],FD3to1[0]))
+        if geometry == 'Bottom' or geometry == 'Top':
+            if density == 'LD':       #if geometry is Top or bottom, FD3to1 will point either left or right
+                angle_FD3to1 = np.degrees(np.arctan2(FD3to1[1],FD3to1[0]))
+            elif density == 'HD':
+                if position == 2:
+                    angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1]) * -1)
+                elif position == 1: 
+                    FD3to1 = FDPoints[2] - FDPoints[0]
+                    angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1]) * -1)
+
+
         elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':     #if geometry is Five, Right or Left, FD3to1 will point either up or down
             angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
         elif geometry == 'Full' and density == 'HD':
