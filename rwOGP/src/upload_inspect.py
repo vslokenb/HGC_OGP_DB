@@ -1,18 +1,19 @@
 import sys, asyncpg
 sys.path.append('../')
 
-from src.param import comptable
+from src.param import COMP_PREFIX
 
-def get_query_read(component_type, part_name = None, comptable=comptable, limit=15) -> str:
+def get_query_read(component_type, part_name = None, limit=15) -> str:
     """Get the query to read from the database.
 
     Returns:
     - query (str): Formatted query string.
     """
+    prefix = COMP_PREFIX[component_type]
     if part_name is None:
-        query = f"""SELECT {comptable[component_type]['prefix']}_name FROM {comptable[component_type]['prefix']}_inspect ORDER BY {comptable[component_type]['prefix']}_row_no DESC LIMIT {limit};"""
+        query = f"""SELECT {prefix}_name FROM {prefix}_inspect ORDER BY {prefix}_row_no DESC LIMIT {limit};"""
     else:
-        query = f"""SELECT hexplot FROM {comptable[component_type]['prefix']}_inspect WHERE {comptable[component_type]['prefix']}_name = '{part_name}'"""
+        query = f"""SELECT hexplot FROM {prefix}_inspect WHERE {prefix}_name = '{part_name}'"""
     return query
 
 def get_query_write(table_name, column_names) -> str:

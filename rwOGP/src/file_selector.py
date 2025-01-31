@@ -4,7 +4,7 @@ import subprocess, os, asyncio
 from io import BytesIO
 from PIL import Image, ImageTk
 from src.upload_inspect import DBClient
-from src.param import comptable
+from src.param import COMP_PREFIX
 
 nested_notebook = None
 image_lists = None
@@ -106,7 +106,7 @@ def refresh_listbox(dbclient: DBClient, subtab_label, image_lists):
     - image_lists (list): List of image list objects."""
     for s in range(len(subtab_label)):
         re = asyncio.run(dbclient.request_PostgreSQL(subtab_label[s]))
-        pe = [r[f"{comptable[subtab_label[s]]['prefix']}_name"] for r in re]
+        pe = [r[f"{COMP_PREFIX[subtab_label[s]]}_name"] for r in re]
         image_lists[s] = update_image_list(pe, image_lists[s])
 
 # def submit_comment(event):
