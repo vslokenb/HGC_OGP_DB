@@ -105,43 +105,50 @@ class DBClient():
         result = await self.fetch_PostgreSQL(get_query_read(component_type, bp_name ))
         return result
 
-    async def upload_PostgreSQL(self, comp_params, db_upload_data):
-        """Upload data to the database.
-        
+    async def upload_PostgreSQL(self, comp_params, db_upload_data) -> bool:
+        """Upload data to the database. Return True if successful, False otherwise.
+
         Parameters:
         - table_name (str): Name of the table to upload data to.
         - db_upload_data (dict): Dictionary containing the data to upload."""
-        conn = await asyncpg.connect(**self._connect_params)
-        
-        print('Connection successful. \n')
-        table_name = comp_params['db_table_name']
+        try:
+            conn = await asyncpg.connect(**self._connect_params)
+            print('Connection successful. \n')
+            table_name = comp_params['db_table_name']
 
-        schema_name = 'public'
-        table_exists_query = """
-        SELECT EXISTS (
-            SELECT 1 
-            FROM information_schema.tables 
-            WHERE table_schema = $1 
-            AND table_name = $2
-        );
-        """
-        print(f"Attempting to upload to Table {table_name}...")
-        table_exists = await conn.fetchval(table_exists_query, schema_name, table_name)  ### Returns True/False
-        if table_exists:
-            query = get_query_write(table_name, db_upload_data.keys())
-            await conn.execute(query, *db_upload_data.values())
-            print(f'Data successfully uploaded to the {table_name}!')
-        else:
-            print(f'Table {table_name} does not exist in the database.')
-            print("Please create the table before uploading data or double check the table name.")
-        await conn.close()
+            schema_name = 'public'
+            table_exists_query = """
+            SELECT EXISTS (
+                SELECT 1 
+                FROM information_schema.tables 
+                WHERE table_schema = $1 
+                AND table_name = $2
+            );
+            """
+            print(f"Attempting to upload to Table {table_name}...")
+            table_exists = await conn.fetchval(table_exists_query, schema_name, table_name)  ### Returns True/False
+            if table_exists:
+                query = get_query_write(table_name, db_upload_data.keys())
+                await conn.execute(query, *db_upload_data.values())
+                print(f'Data successfully uploaded to the {table_name}!')
+                return True
+            else:
+                print(f'Table {table_name} does not exist in the database.')
+                print("Please create the table before uploading data or double check the table name.")
+                return False
+        except Exception as e:
+            print("!" * 90)
+            print("Error encountered when uploading to the database.")
+            print(e)
+            return False
+        finally: 
+            await conn.close()
 
     async def link_and_update_table(self, comp_params, db_upload_data) -> bool:
-        """Link the component to the mother table and update the database."""
+        """Link the component to the mother table and update the database. Return True if successful, False otherwise."""
         conn = await asyncpg.connect(**self._connect_params)
         try:
-            comp_type = comp_params['key']
-            prequery, name, query, values = get_query_write_link(comp_type, db_upload_data)
+            prequery, name, query, values = get_query_write_link(comp_params, db_upload_data)
             print("Executing pre-query...")
             status = await conn.fetchval(prequery, name)
             if not status:
@@ -149,11 +156,11 @@ class DBClient():
                 return False
             else:
                 await conn.execute(query, *values)
-                print(f'Data for {comp_type} successfully uploaded and linked to the mother table!')
+                print('Data successfully uploaded and linked to the mother table!')
                 return True
         except Exception as e:
             print("!" * 90)
-            print(f"Error encountered when linking {comp_type} to the mother table.")
+            print("Error encountered when linking to the mother table.")
             print(e)
             return False
         

@@ -4,7 +4,7 @@ baseplates_params = {"vmini": 1.2, "vmaxi": 2.2, "new_angle": 0, "db_table_name"
 hexaboards_params = {"vmini": 1.2, "vmaxi": 2.9, "new_angle": 0, "db_table_name": 'hxb_inspect', 
                      "mother_table": 'hexaboard', 'prefix': 'hxb'}
 protomodules_params = {"vmini": 1.37, "vmaxi": 1.79, "new_angle": 270, "db_table_name": 'proto_inspect', 
-                       "mother_table": 'protomodule', 'prefix': 'proto'}
+                       "mother_table": 'proto_assembly', 'prefix': 'proto'}
 modules_params = {"vmini": 2.75, "vmaxi": 4.0, "new_angle": 270, "db_table_name": 'module_inspect', 
                   "mother_table": 'module_info', 'prefix': 'module'}
 

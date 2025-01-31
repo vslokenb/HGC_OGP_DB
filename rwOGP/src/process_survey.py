@@ -121,35 +121,15 @@ class SurveyProcessor():
             db_upload, comp_params, compID = await self.__getArgs__(ex_file, meta_file, comp_type)
             mother_tab = comp_params['mother_table']
             self.print_db_msg(mother_tab, compID)
-            try:
-                print(f"Uploading {compID} to database")
-                status = await self.upload_request(comp_type)(comp_params, db_upload) ## python 3.7
+            status = await self.client.link_and_update_table(comp_params, db_upload)
+            if status == False:
+                status = await self.client.upload_PostgreSQL(comp_params, db_upload)
                 if status == False:
                     return False, last_successful_index
-                last_successful_index = idx
-            except Exception as e:
-                print(f"Exception Encountered: {e}")
-                try: 
-                    print("Warning: Using python 3.6")
-                    db_table_name = comp_params['db_table_name']
-                    (asyncio.get_event_loop()).run_until_complete(self.client.upload_PostgreSQL(db_table_name, db_upload)) ## python 3.6
-                    last_successful_index = idx
-                except Exception as e:
-                    print("ERROR: Could not upload to database.")
-                    print(e)
-                    print("Check async code in process_survey.py or upload_inspect.py")
-                    return False, last_successful_index
+            last_successful_index = idx
         return True, last_successful_index  # Return True and last index if all files were processed successfully
                 # send2trash.send2trash(ex_file)
             # print(f'Moved {ex_file} to recycle bin.')
-    
-    #! This is now a hack
-    def upload_request(self, comp_type):
-        if comp_type == 'modules':
-            print("Upload without linking to mother table")
-            return self.client.upload_PostgreSQL
-        else:
-            return self.client.link_and_update_table
         
     @staticmethod
     def print_db_msg(comp_type, modname):
