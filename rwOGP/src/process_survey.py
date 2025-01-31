@@ -123,9 +123,15 @@ class SurveyProcessor():
             self.print_db_msg(mother_tab, compID)
             status = await self.client.link_and_update_table(comp_params, db_upload)
             if status == False:
-                status = await self.client.upload_PostgreSQL(comp_params, db_upload)
-                if status == False:
+                userinput = input("Do you want to continue uploading this file without component number linking? (y/n): ")
+                if userinput.lower() == 'n':
                     return False, last_successful_index
+                else:
+                    status = await self.client.upload_PostgreSQL(comp_params, db_upload)
+                    if status == False:
+                        print("!" * 90)
+                        print("No more uploading will be done due to the error. Please double check the data and try again.")
+                        return False, last_successful_index
             last_successful_index = idx
         return True, last_successful_index  # Return True and last index if all files were processed successfully
                 # send2trash.send2trash(ex_file)
