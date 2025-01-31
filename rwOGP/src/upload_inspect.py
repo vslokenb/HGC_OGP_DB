@@ -136,10 +136,11 @@ class DBClient():
             print("Please create the table before uploading data or double check the table name.")
         await conn.close()
 
-    async def link_and_update_table(self, comp_type, db_upload_data) -> bool:
+    async def link_and_update_table(self, comp_params, db_upload_data) -> bool:
         """Link the component to the mother table and update the database."""
         conn = await asyncpg.connect(**self._connect_params)
         try:
+            comp_type = comp_params['key']
             prequery, name, query, values = get_query_write_link(comp_type, db_upload_data)
             print("Executing pre-query...")
             status = await conn.fetchval(prequery, name)

@@ -7,7 +7,7 @@ from src.ogp_height_plotter import PlotTool
 from src.upload_inspect import DBClient
 import asyncio
 from src.make_accuracy_plot import make_accuracy_plot
-from src.param import *
+from src.param import COMPONENT_PARAMS, COMP_PREFIX
 from datetime import datetime
 
 pbase = os.path.basename
@@ -50,9 +50,7 @@ class SurveyProcessor():
         Return 
         - db_upload (dict): Dictionary of data to upload to database.
         - component_params (dict): Dictionary of parameters for the component type.
-        - compID (str): Title of the module."""
-        db_upload = {}
-
+        - comp_type (str): Component folder name."""
         with open(meta_file, 'r') as f:
             metadata = yaml.safe_load(f)
 
@@ -60,29 +58,24 @@ class SurveyProcessor():
 
         df = pd.read_csv(ex_file)
         plotter = PlotTool(metadata, comp_type, df, self.tray_dir, pjoin(self.im_dir, comp_type))
-
         filesuffix = pbase(ex_file).split('.')[0]
+
         print("=" * 100)
         print(f"Calculating offsets for {compID} ...")
 
-        if comp_type == 'baseplates':
-            db_upload.update({'bp_name': compID})
-            component_params = baseplates_params
-        elif comp_type == 'hexaboards':
-            db_upload.update({'hxb_name':compID})
-            component_params = hexaboards_params
-        elif comp_type == 'protomodules':
-            component_params = protomodules_params
+        singular_type = comp_type.rstrip('s')
+        component_params = COMPONENT_PARAMS[singular_type]
+        name_field = f'{COMP_PREFIX[singular_type]}_name'
+        db_upload = {name_field: compID}
+
+        if singular_type == 'baseplate' or singular_type == 'hexaboard':
+            db_upload.update({'flatness': metadata['Flatness'], 'thickness': np.round(np.mean(plotter.z_points),3)})
+        elif singular_type == 'protomodule' or singular_type == 'module':
             XOffset, YOffset, AngleOff = plotter.get_offsets()
-            db_upload.update({'proto_name': compID, 'x_offset_mu':np.round(XOffset*1000), 
-                              'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
+            db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
                               "weight": metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3),
                              'ave_thickness': np.round(np.mean(plotter.z_points),3)})
-        elif comp_type == 'modules':
-            component_params = modules_params
-            XOffset, YOffset, AngleOff = plotter.get_offsets()
-            db_upload.update({'module_name': compID, 'x_offset_mu':np.round(XOffset*1000), 
-                              'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
+            db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
                               'weight': metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3),
                              'ave_thickness': np.round(np.mean(plotter.z_points),3)})
             # ! what is this block doing?
@@ -98,8 +91,7 @@ class SurveyProcessor():
                 PMoffsets = [0, 0, 0]
             # ! ============================
         else:
-            raise ValueError("Component type not recognized. \
-                Currently only supports baseplates, hexaboards, and protomodules. Please change the directory this file belongs to or add customed component type.")
+            raise ValueError("Component type not recognized. Supporting only baseplate, hexaboard, protomodule, and module.")
 
         im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
                    "new_angle": component_params['new_angle'], "savename": pjoin(self.im_dir, comp_type, f"{filesuffix}_heights"),
@@ -107,19 +99,10 @@ class SurveyProcessor():
         
         im_bytes = plotter(**im_args)
 
-        db_upload.update({
-            'flatness': metadata['Flatness'], 
-            'thickness': np.round(np.mean(plotter.z_points),3), 
-            'x_points':(plotter.x_points).tolist(), 
-            'y_points':(plotter.y_points).tolist(), 
-            'z_points':(plotter.z_points).tolist(),
-            'hexplot':im_bytes, 
-            'inspector': metadata['Operator'], 
-            'comment':metadata.get("Comment", None)})
+        db_upload.update({'x_points':(plotter.x_points).tolist(), 'y_points':(plotter.y_points).tolist(), 
+            'z_points':(plotter.z_points).tolist(),'hexplot':im_bytes, 'inspector': metadata['Operator'], 'comment':metadata.get("Comment", None)})
         
         db_upload.update(self.getDateTime(metadata))
-
-        # mother_table = component_params['mother_table']
 
         return db_upload, component_params, compID  
     

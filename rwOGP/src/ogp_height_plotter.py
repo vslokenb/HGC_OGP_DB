@@ -209,10 +209,8 @@ class PlotTool:
                     angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
                 if position == 2:
                     angle_Pin = np.degrees(np.arctan2(pinY,pinX))
-
-            elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
-                angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
-            else: print('PlotTool: angle: geometry not recognized')
+        elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
+            angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
 
         print(f'Angle pin: {angle_Pin}')
     
@@ -256,9 +254,7 @@ class PlotTool:
                 FD3to1 = FDPoints[1] - FDPoints[0]
                 print("Angle calculated with FD1 & FD2")
                 angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
-            
             print("Current Angle:", angle_FD3to1)
-
         elif geometry == 'Full' and density == 'LD':
             # in this case angle_FD3to1 is actually the angle of the line that goes from 6 to 3, this points up and down wrt tray
             print("Angle calculated with FD6 & FD3")
@@ -267,7 +263,6 @@ class PlotTool:
                 angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
             if position == 2:
                 angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
-        else: print('PlotTool: angle: geometry not recognized')
 
         AngleOffset = angle_FD3to1 - angle_Pin
 
