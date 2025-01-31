@@ -153,7 +153,7 @@ class DBClient():
             print("Executing pre-query...")
             status = await conn.fetchval(prequery, name)
             if not status:
-                print(f"Component {name} not found in the mother table.")
+                print(f"Component {name} not found in the mother table {comp_params['mother_table']}.")
                 return False
             else:
                 await conn.execute(query, *values)

@@ -119,8 +119,7 @@ class SurveyProcessor():
         last_successful_index = -1
         for idx, (ex_file, meta_file) in enumerate(zip(self.OGPSurveyFile, self.MetaFile)):
             db_upload, comp_params, compID = await self.__getArgs__(ex_file, meta_file, comp_type)
-            mother_tab = comp_params['mother_table']
-            self.print_db_msg(mother_tab, compID)
+            self.print_db_msg(comp_type, compID)
             status = await self.client.link_and_update_table(comp_params, db_upload)
             if status == False:
                 userinput = input("Do you want to continue uploading this file without component number linking? (y/n): ")
