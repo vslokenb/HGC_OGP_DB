@@ -11,6 +11,7 @@ if src_dir not in sys.path:
 from src.parse_data import DataParser
 from src.ogp_height_plotter import PlotTool
 from src.param import modules_params as component_params
+from src.make_accuracy_plot import make_accuracy_plot
 
 if __name__ == '__main__':
     parser = DataParser(pjoin('rwOGP', 'templates', 'samples', 'module_109.txt'), 'tests')
@@ -26,7 +27,9 @@ if __name__ == '__main__':
             "new_angle": component_params['new_angle'], "savename": "ex_heights",
             "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": True}
 
-    # PT.get_offsets()
-    PT(**im_args)
+    XOffset, Yoffset, AngleOff = PT.get_offsets()
+    make_accuracy_plot(metadata['ComponentID'], XOffset, Yoffset, AngleOff, 0, 0, 0)
+
+    # PT(**im_args)
 
 

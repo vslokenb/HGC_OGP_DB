@@ -74,22 +74,17 @@ class SurveyProcessor():
             XOffset, YOffset, AngleOff = plotter.get_offsets()
             db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
                               "weight": metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3),
-                             'ave_thickness': np.round(np.mean(plotter.z_points),3)})
-            db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
-                              'weight': metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3),
-                             'ave_thickness': np.round(np.mean(plotter.z_points),3)})
-            # ! what is this block doing?
-            try:
+                             'avg_thickness': np.round(np.mean(plotter.z_points),3)})
+            if singular_type == 'module':
                 PMoffsets = await self.client.GrabSensorOffsets(compID)
                 SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
-                # ! This needs to be fixed
-                # print('Making Accuracy Plot With:', compID, SensorXOffset, SensorYOffset, XOffset, YOffset, SensorAngleOff, AngleOff)
-                # acc_bytes = make_accuracy_plot(compID, SensorXOffset, SensorYOffset, int(XOffset*1000), int(YOffset*1000), SensorAngleOff, AngleOff) 
-            except Exception as e: 
-                print(f" Accuracy Plot: An error pulling PM offsets from pg occurred: {e}")
-                print("Accuracy Plot: PM offsets set to 0, 0, 0, due to failed data pull.")
-                PMoffsets = [0, 0, 0]
-            # ! ============================
+                PCBXOffset, PCBYOffset, PCBAngleOff = int(XOffset*1000), int(YOffset*1000), AngleOff
+            else:
+                PCBXOffset, PCBYOffset, PCBAngleOff = 0, 0, 0 
+                SensorXOffset, SensorYOffset, SensorAngleOff = int(XOffset*1000), int(YOffset*1000), AngleOff
+            print("Making Accuracy Plot With:", compID, SensorXOffset, SensorYOffset, SensorAngleOff, PCBXOffset, PCBYOffset, PCBAngleOff)
+            acc_bytes = make_accuracy_plot(compID, pjoin(self.im_dir, comp_type), SensorXOffset, SensorYOffset, SensorAngleOff, PCBXOffset, PCBYOffset, PCBAngleOff)
+            db_upload.update({"offsetplot": acc_bytes})
         else:
             raise ValueError("Component type not recognized. Supporting only baseplate, hexaboard, protomodule, and module.")
 

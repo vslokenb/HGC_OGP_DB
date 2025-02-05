@@ -166,7 +166,7 @@ class DBClient():
             return False
         
     async def GrabSensorOffsets(self, name: str) -> list:
-        """Grab the sensor offsets from the database.
+        """Grab the sensor offsets (PM offset numbers) from the database.
         
         Parameters:
         - name (str): Name of the prototype module.
@@ -184,12 +184,13 @@ class DBClient():
                               for row in rows]
             
             return matching_offsets
-            
+
         except Exception as e:
             print("!" * 90)
-            print("Error encountered when grabbing sensor offsets from database.")
+            print("Error encountered when grabbing Protomodule offsets from database.")
+            print("Accuracy Plot: PM offsets set to 0, 0, 0, due to failed data pull.")
             print(e)
-            return []
+            return [0.0, 0.0, 0.0]
         finally:
             if conn:
                 await conn.close()
