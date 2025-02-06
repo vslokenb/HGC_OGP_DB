@@ -409,7 +409,7 @@ def grade(CenterOffset, AngleOff):
     
     if X_Offset <= 50 and Y_Offset <= 50 and AngleOff <= 0.02:
         return "A"
-    elif X_Offset <= 100 and Y_offset <= 100 and AngleOff <= 0.04:
+    elif X_Offset <= 100 and Y_Offset <= 100 and AngleOff <= 0.04:
         return "B"
     else:
         return "C"
