@@ -73,7 +73,7 @@ class SurveyProcessor():
             XOffset, YOffset, AngleOff = plotter.get_offsets()
             db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
                               "weight": metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3),
-                             'avg_thickness': np.round(np.mean(plotter.z_points),3)})
+                             'avg_thickness': np.round(np.mean(plotter.z_points),3), 'grade': grade((XOffset, YOffset), AngleOff)})
             if singular_type == 'module':
                 PMoffsets = await self.client.GrabSensorOffsets(compID)
                 SensorXOffset, SensorYOffset, SensorAngleOff = PMoffsets
