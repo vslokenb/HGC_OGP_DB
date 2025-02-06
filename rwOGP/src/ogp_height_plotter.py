@@ -197,7 +197,7 @@ class PlotTool:
         Hole = np.array([holeX, holeY])
         print(f'pinX: {pinX}  &  pinY: {pinY}')
 
-        if geometry == 'Full' or geometry == 'Bottom' or geometry == 'Top':
+        if geometry == 'Full':
             if density == 'HD':
                 if position == 1:
                     angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
@@ -208,8 +208,27 @@ class PlotTool:
                     angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
                 if position == 2:
                     angle_Pin = np.degrees(np.arctan2(pinY,pinX))
+        elif geometry == 'Bottom':
+            if density == 'LD':
+                if position == 1:
+                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
+                if position == 2:
+                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
         elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
-            angle_Pin= np.degrees(np.arctan2(-pinY, -pinX))
+            if position == 1: 
+                angle_Pin = np.degrees(np.arctan2(-pinX, -pinY))
+            elif position == 2: 
+                angle_Pin = np.degrees(np.arctan2(pinX, pinY))
+            if geometry == 'Left' or geometry == 'Right':
+                if position == 1:
+                    angle_Pin= np.degrees(np.arctan2(pinX, pinY))
+                if position == 2:
+                    angle_Pin= np.degrees(np.arctan2(-pinX, -pinY))
+        elif geometry == 'Top':
+                if position == 1:
+                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
+                if position == 2:
+                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
 
         print(f'Angle pin: {angle_Pin}')
     
@@ -239,10 +258,24 @@ class PlotTool:
 
         FD3to1 = FDPoints[0] - FDPoints[2]  #Vector from FD3 to FD1
         
-        if geometry == 'Bottom' or geometry == 'Top':       #if geometry is Top or bottom, FD3to1 will point either left or right
-            angle_FD3to1 = np.degrees(np.arctan2(FD3to1[1],FD3to1[0]))
+        if geometry == 'Bottom':        #if geometry is Top or bottom, FD3to1 will point either left or right
+            angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))
+        elif geometry == 'Top':
+            if density == 'LD':
+                angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))
+            elif density == 'HD':
+                if position == 1:
+                    angle_FD3to1 = np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1]))
+                elif position == 2:
+                    angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))
         elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':     #if geometry is Five, Right or Left, FD3to1 will point either up or down
-            angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
+            if position == 1:
+                angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[1],-FD3to1[0])));
+            if position == 2:
+                angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[1],FD3to1[0])) * -1);
+            if geometry == 'Left' or geometry == 'Right':
+                if density == 'LD':
+                    angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[1],-FD3to1[0])));
         elif geometry == 'Full' and density == 'HD':
             if position == 1:
                 FD3to1 = FDPoints[1] - FDPoints[0]
