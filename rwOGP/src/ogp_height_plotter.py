@@ -324,6 +324,13 @@ class PlotTool:
 
         CenterOff, AngleOff, XOffset, YOffset = self.angle(HolePin_xy, SlotPin_xy, FD_points)
 
+        if PositionID == 1:
+            NEWY = XOffset*-1;
+            NEWX = YOffset; 
+        elif PositionID == 2:
+            NEWY = XOffset;
+            NEWX = YOffset*1; 
+        
         print(f"Assembly Survey Rotational Offset is {AngleOff:.5f} degrees")
         print(f"Assembly Survey Center Offset is {CenterOff:.3f} mm")
 
@@ -334,7 +341,8 @@ class PlotTool:
             raise ValueError("The calculated offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
             print("X or Y Offset too Large")
 
-        return XOffset, YOffset, AngleOff
+        return NEWX, NEWY, AngleOff
+        #return XOffset, YOffset, AngleOff
 
 def vec_angle(x,y):
     angle_arctan = np.degrees(np.arctan2(y,x))
