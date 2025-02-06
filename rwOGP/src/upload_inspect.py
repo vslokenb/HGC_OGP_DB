@@ -165,26 +165,29 @@ class DBClient():
             print(e)
             return False
         
-    async def GrabSensorOffsets(self, name: str) -> list:
+    async def GrabSensorOffsets(self, name: str) -> tuple[float, float, float]:
         """Grab the sensor offsets (PM offset numbers) from the database.
         
         Parameters:
         - name (str): Name of the prototype module.
         
         Returns:
-        - list: List of tuples containing (x_offset, y_offset, angle_offset) for matching modules."""
+        - tuple[float, float, float]: x_offset, y_offset, angle_offset for the module."""
+        conn = None
         try:
             conn = await asyncpg.connect(**self._connect_params)
-            query = """SELECT proto_name, x_offset_mu, y_offset_mu, ang_offset_deg 
+            query = """SELECT x_offset_mu, y_offset_mu, ang_offset_deg 
                       FROM proto_inspect 
-                      WHERE proto_name = $1;"""
-            rows = await conn.fetch(query, name.replace('M', 'P'))
+                      WHERE proto_name = $1
+                      LIMIT 1;"""
+            #! This could potentially be troublesome if multiple entries are available
+            row = await conn.fetchrow(query, name.replace('M', 'P'))
             
-            matching_offsets = [(row['x_offset_mu'], row['y_offset_mu'], row['ang_offset_deg']) 
-                              for row in rows]
-            
-            return matching_offsets
-
+            if row:
+                return row['x_offset_mu'], row['y_offset_mu'], row['ang_offset_deg']
+            else:
+                print(f"No data found for the prototype module {name.replace('M', 'P')}.")
+                return 0.0, 0.0, 0.0
         except Exception as e:
             print("!" * 90)
             print("Error encountered when grabbing Protomodule offsets from database.")
