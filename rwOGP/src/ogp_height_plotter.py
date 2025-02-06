@@ -399,6 +399,7 @@ def grade(CenterOffset, AngleOff):
     
     Parameters
     - `CenterOffset`: offset of the sensor from the tray center. In mm
+    - `AngleOff`: angle of the sensor from the tray fiducials. In degrees
     """
     '''
     QC designation for different measurements
