@@ -68,11 +68,11 @@ class SurveyProcessor():
         db_upload = {name_field: compID}
 
         if singular_type == 'baseplate' or singular_type == 'hexaboard':
-            db_upload.update({'flatness': metadata['Flatness'], 'thickness': np.round(np.mean(plotter.z_points),3)})
+            db_upload.update({'flatness': np.round(metadata['Flatness'],3), 'thickness': np.round(np.mean(plotter.z_points),3)})
         elif singular_type == 'protomodule' or singular_type == 'module':
             XOffset, YOffset, AngleOff = plotter.get_offsets()
             db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
-                              "weight": metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3),
+                              "weight": metadata.get('Weight', None), 'max_thickness': np.round(np.max(plotter.z_points),3), "flatness": np.round(metadata['Flatness'],3),
                              'avg_thickness': np.round(np.mean(plotter.z_points),3), 'grade': grade((XOffset, YOffset), AngleOff)})
             if singular_type == 'module':
                 PMoffsets = await self.client.GrabSensorOffsets(compID)
