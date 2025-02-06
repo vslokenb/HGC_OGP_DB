@@ -36,8 +36,13 @@ def clear_invent():
                 print(f"Clearing the current inventory {invent_path}...")
                 inventory[userinput] = []
             else:
-                print(f"These are the files in the inventory for {userinput}:")
-                print(inventory[userinput])
+                filenames = input(f"Please enter specific filenames to clear from the inventory for {userinput}: (e.g. file1, file2, ...)\n")
+                filenames = filenames.split(',')
+                for filename in filenames:
+                    if filename in inventory[userinput]:
+                        inventory[userinput].remove(filename)
+                    else:
+                        print(f"Filename {filename} not found in inventory for {userinput}.")
         
         with open(invent_path, 'w') as f:
             json.dump(inventory, f)

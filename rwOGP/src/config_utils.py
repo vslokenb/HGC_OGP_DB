@@ -35,7 +35,6 @@ def get_default_config():
     }
 
 async def update_credentials():
-    """Update database credentials after authenticating with current ones."""
     """Update database credentials and/or database connection details after authenticating with current ones."""
     import getpass
     import asyncpg
@@ -159,10 +158,8 @@ def create_default_config():
 
     print(f"Configuration file created at {config_file}")
     
-    # Get the system's default editor
     editor = os.environ.get('EDITOR', 'vim')  # Default to vim if no EDITOR is set
     
-    # Ask user if they want to edit the configuration
     print("\nWould you like to edit the configuration file now? (y/n)")
     if input().strip().lower() == 'y':
         try:
