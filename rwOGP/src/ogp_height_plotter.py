@@ -305,10 +305,6 @@ class PlotTool:
         print("Loading TrayFile:", TrayFile)
         with open(TrayFile, 'r') as f:
             trayinfo = yaml.safe_load(f)
-        
-        if PositionID == 1:
-            pos = 'left'
-        else: pos = 'right'
 
         HolePin, SlotPin = pin_mapping.get(Geometry, {}).get(density, {}).get(PositionID, ('', ''))
 
@@ -390,7 +386,12 @@ def plotFD(FDpoints:np.array, holeXY:tuple, slotXY:tuple, save=False, save_name=
     else: plt.show()
     plt.close()
 
-def quality(Center, Rotation, position = "P1", details =0, note = 0):
+def grade(CenterOffset, AngleOff):
+    """Quality Control for modules
+    
+    Parameters
+    - `CenterOffset`: offset of the sensor from the tray center. In mm
+    """
     '''
     QC designation for different measurements
     Measurement      |         GREEN          |        YELLOW         |          RED          |
@@ -402,27 +403,13 @@ def quality(Center, Rotation, position = "P1", details =0, note = 0):
     Min Hght ffrom Nom|      0 < x <= 0.05     |    0.05 < x <= 0.1    |    0.1 < x <= 10.     | 
     
 #     '''
-#     if details == 1:
-#         print(f"The Center Offset is {Center:.3f} mm")
-#         print(f"The Rotational Offset is {Rotation:.5f} degrees ")
-#         print()
-        
-#     for i, p in enumerate(centers):
-#         if Center < p:
-#             print(f"The placement in position {position} is {colorClassify[str(i)]}")
-#             break
-#         elif Center > centers[-1]:
-#             print(f"The placement in position {position} is more than {centers[-1]} mm")
-#             break
-            
-#     for j, d in enumerate(degrees):
-#         if abs(Rotation) < d:
-#             print(f"The angle in position {position} is {colorClassify[str(j)]}")
-#             break
-#         elif abs(Rotation) > degrees[-1]:
-#             print(f"The angle in position {position} is more than {degrees[-1]} degree")
-#             break
-#     return colorClassify[str(i)], colorClassify[str(j)]
-#     # if note == 1:
-#     #     print()
-#     #     help(QualityControl)
+    X_Offset, Y_offset = CenterOffset
+    X_Offset *= 1000
+    Y_Offset *= 1000
+    
+    if X_Offset <= 50 and Y_Offset <= 50 and AngleOff <= 0.02:
+        return "A"
+    elif X_Offset <= 100 and Y_offset <= 100 and AngleOff <= 0.04:
+        return "B"
+    else:
+        return "C"

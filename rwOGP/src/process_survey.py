@@ -1,11 +1,10 @@
 import numpy as np
 import pandas as pd
-import asyncio, send2trash, glob, re, yaml, os
+import send2trash, yaml, os
 import matplotlib
 matplotlib.use('Agg')
-from src.ogp_height_plotter import PlotTool
+from src.ogp_height_plotter import PlotTool, grade
 from src.upload_inspect import DBClient
-import asyncio
 from src.make_accuracy_plot import make_accuracy_plot
 from src.param import COMPONENT_PARAMS, COMP_PREFIX
 from datetime import datetime
