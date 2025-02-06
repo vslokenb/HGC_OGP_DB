@@ -336,13 +336,10 @@ class PlotTool:
 
         if abs(AngleOff) > 20:
             raise ValueError("The calculated angle offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
-            print("Angle Offset too Large")        
         if abs(XOffset) > 5 or abs(YOffset) > 5:
             raise ValueError("The calculated offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
-            print("X or Y Offset too Large")
 
         return NEWX, NEWY, AngleOff
-        #return XOffset, YOffset, AngleOff
 
 def vec_angle(x,y):
     angle_arctan = np.degrees(np.arctan2(y,x))
