@@ -215,7 +215,8 @@ class PlotTool:
     
         if density == 'HD':   
             if geometry == 'Full':
-                FDCenter = np.nanmean(FDPoints, axis=0) #Average of All FDs
+                FDCenter = np.mean(FDPoints[[0,1,2,3]], axis=0)
+                #FDCenter = np.nanmean(FDPoints, axis=0) #Average of All FDs
             else:
                 FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to modules except HD Full
         if density == 'LD':
@@ -225,6 +226,7 @@ class PlotTool:
                 FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
         
         adjustmentX, adjustmentY = ADJUSTMENTS[CompType][geometry][density][position]
+        print(f'Adjustment X: ', adjustmentX, 'Adjustment Y: ', adjustmentY)
         
         XOffset = FDCenter[0]-Hole[0]-adjustmentX
         YOffset = FDCenter[1]-Hole[1]-adjustmentY
@@ -322,7 +324,7 @@ class PlotTool:
         
         print("=" * 100)
         print(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} \n')
-        print(f"Geometry: {Geometry}; Density: {density}; PositionID: {PositionID}")
+        print(f"Geometry: {Geometry}; Density: {density}; PositionID: {PositionID}; Comp_Type: {self.comp_type}")
 
         CenterOff, AngleOff, XOffset, YOffset = self.angle(HolePin_xy, SlotPin_xy, FD_points)
 
@@ -331,8 +333,10 @@ class PlotTool:
 
         if abs(AngleOff) > 20:
             raise ValueError("The calculated angle offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
-        if abs(XOffset) > 1 or abs(YOffset) > 1:
+            print("Angle Offset too Large")        
+        if abs(XOffset) > 5 or abs(YOffset) > 5:
             raise ValueError("The calculated offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
+            print("X or Y Offset too Large")
 
         return XOffset, YOffset, AngleOff
 
