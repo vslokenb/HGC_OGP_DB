@@ -60,7 +60,7 @@ class SurveyProcessor():
         filesuffix = pbase(ex_file).split('.')[0]
 
         print("=" * 100)
-        print(f"Calculating offsets for {compID} ...")
+        print(f"###### Calculating offsets for {comp_type} {compID} #######")
 
         singular_type = comp_type.rstrip('s')
         component_params = COMPONENT_PARAMS[singular_type]
