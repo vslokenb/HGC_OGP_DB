@@ -181,11 +181,12 @@ class DBClient():
                       WHERE proto_name = $1
                       LIMIT 1;"""
             #! This could potentially be troublesome if multiple entries are available
-            row = await conn.fetchrow(query, name.replace('M', 'P'))
+            row = await conn.fetchrow(query, name.replace('M', 'P', 1))
             
             if row:
                 return row['x_offset_mu'], row['y_offset_mu'], row['ang_offset_deg']
             else:
+                print("!" * 90)
                 print(f"No data found for the prototype module {name.replace('M', 'P')}.")
                 return 0.0, 0.0, 0.0
         except Exception as e:

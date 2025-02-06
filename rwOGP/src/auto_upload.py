@@ -37,10 +37,8 @@ class InventoryUpdater():
                 self.inventory[subdir] = files
             else:
                 self.inventory[subdir].extend(files)
-                # Remove duplicates while preserving order
                 self.inventory[subdir] = list(dict.fromkeys(self.inventory[subdir]))
         
-        # Save updated inventory
         with open(self.inventory_p, 'w') as f:
             json.dump(self.inventory, f)
         
@@ -105,12 +103,10 @@ class InventoryUpdater():
 
         for subdir, files in new_inventory.items():
             if subdir not in old_inventory:
-                # Handle new subdirectories
                 new_subdirs.append(subdir)
                 changed_inventory[subdir] = files
                 total_new_files += len(files)
             else:
-                # Compare files in existing subdirectories
                 new_files = set(files) - set(old_inventory[subdir])
                 removed_files = set(old_inventory[subdir]) - set(files)
                 if new_files or removed_files:
@@ -125,7 +121,6 @@ class InventoryUpdater():
                 if new_files:
                     changed_inventory[subdir] = new_files
         
-        # Print summary
         print("\n=== Summary of Changes ===")
         if new_subdirs:
             print(f"New subdirectories detected: {', '.join(new_subdirs)}")

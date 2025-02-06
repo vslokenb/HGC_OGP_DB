@@ -35,29 +35,28 @@ def get_default_config():
     }
 
 async def update_credentials():
-    """Update database credentials after authenticating with current ones."""
+    """Update database credentials and/or database connection details after authenticating with current ones."""
     import getpass
     import asyncpg
 
-    # Load settings and config files with error handling
     try:
         with open(SETTINGS_FILE, 'r') as f:
             settings = yaml.safe_load(f)
             config_file = settings['config_path']
-
         with open(config_file, 'r') as f:
             current_config = yaml.safe_load(f)
     except (FileNotFoundError, yaml.YAMLError) as e:
         print(f"Error reading configuration files: {e}")
         return False
 
-    async def verify_credentials(user, password):
+    async def verify_credentials(host, database, user, password):
         """Helper function to verify database credentials."""
         conn = None
+        print(f"Connecting to database {database} at {host} using provided credentials ...")
         try:
             conn = await asyncpg.connect(
-                host=current_config['host'],
-                database=current_config['database'],
+                host=host,
+                database=database,
                 user=user,
                 password=password
             )
@@ -69,9 +68,11 @@ async def update_credentials():
             if conn is not None:
                 await conn.close()
 
-    def update_config_file(user, password):
+    def update_config_file(host, database, user, password):
         """Helper function to update configuration file."""
         try:
+            current_config['host'] = host
+            current_config['database'] = database
             current_config['user'] = user
             current_config['password'] = password
             with open(config_file, 'w') as f:
@@ -81,11 +82,40 @@ async def update_credentials():
             print(f"Error updating configuration file: {e}")
             return False
 
-    # Verify current credentials
-    if not await verify_credentials(current_config['user'], current_config['password']):
+    if not await verify_credentials(
+        current_config['host'],
+        current_config['database'],
+        current_config['user'],
+        current_config['password']
+    ):
         return False
 
-    # Get new credentials
+    print("\nWhat would you like to update?")
+    print("1. Database credentials only")
+    print("2. Database, user, and password")
+    print("3. Host, database, user, and password")
+    choice = input("Enter your choice (1/2/3): ").strip()
+
+    new_host = current_config['host']
+    new_database = current_config['database']
+    
+    if choice == '3':
+        print("\nEnter new database connection details:")
+        new_host = input(f"New host [{current_config['host']}]: ").strip()
+        if not new_host:
+            new_host = current_config['host']
+        
+        new_database = input(f"New database name [{current_config['database']}]: ").strip()
+        if not new_database:
+            new_database = current_config['database']
+    elif choice == '2':
+        new_database = input(f"New database name [{current_config['database']}]: ").strip()
+        if not new_database:
+            new_database = current_config['database']
+    elif choice != '1':
+        print("Invalid choice!")
+        return False
+
     print("\nEnter new credentials:")
     new_user = input("New username: ").strip()
     new_password = getpass.getpass("New password: ").strip()
@@ -95,17 +125,14 @@ async def update_credentials():
         print("Passwords do not match!")
         return False
 
-    # Verify new credentials
-    if not await verify_credentials(new_user, new_password):
+    if not await verify_credentials(new_host, new_database, new_user, new_password):
         return False
 
-    # Update configuration file
-    if not update_config_file(new_user, new_password):
+    if not update_config_file(new_host, new_database, new_user, new_password):
         return False
 
-    print("Credentials updated successfully!")
-    return
-
+    print("Configuration updated successfully!")
+    return True
 
 def create_settings_file(config_file):
     """Create settings file with config and inventory paths."""
@@ -131,10 +158,8 @@ def create_default_config():
 
     print(f"Configuration file created at {config_file}")
     
-    # Get the system's default editor
     editor = os.environ.get('EDITOR', 'vim')  # Default to vim if no EDITOR is set
     
-    # Ask user if they want to edit the configuration
     print("\nWould you like to edit the configuration file now? (y/n)")
     if input().strip().lower() == 'y':
         try:
