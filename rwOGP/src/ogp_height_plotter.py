@@ -403,7 +403,7 @@ def grade(CenterOffset, AngleOff):
     Min Hght ffrom Nom|      0 < x <= 0.05     |    0.05 < x <= 0.1    |    0.1 < x <= 10.     | 
     
 #     '''
-    X_Offset, Y_offset = CenterOffset
+    X_Offset, Y_Offset = CenterOffset
     X_Offset *= 1000
     Y_Offset *= 1000
     
