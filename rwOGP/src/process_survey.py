@@ -81,7 +81,7 @@ class SurveyProcessor():
             else:
                 PCBXOffset, PCBYOffset, PCBAngleOff = 0, 0, 0 
                 SensorXOffset, SensorYOffset, SensorAngleOff = int(XOffset*1000), int(YOffset*1000), AngleOff
-            print("Making Accuracy Plot With:", compID, SensorXOffset, SensorYOffset, SensorAngleOff, PCBXOffset, PCBYOffset, PCBAngleOff)
+            print("Making Accuracy Plot With Sensor Offsets", SensorXOffset, SensorYOffset, SensorAngleOff)
             acc_bytes = make_accuracy_plot(compID, pjoin(self.im_dir, comp_type), SensorXOffset, SensorYOffset, SensorAngleOff, PCBXOffset, PCBYOffset, PCBAngleOff)
             db_upload.update({"offsetplot": acc_bytes})
         else:
@@ -135,9 +135,6 @@ class SurveyProcessor():
         print('')
         print(f"###### NEW {comp_type} UPLOAD #######")
         print(f"###### FROM: {modname} #######")
-        print('')
-
-        print(f'Component type: {comp_type}')
 
     @staticmethod
     def getDateTime(metadata):

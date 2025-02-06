@@ -186,6 +186,7 @@ class DBClient():
             if row:
                 return row['x_offset_mu'], row['y_offset_mu'], row['ang_offset_deg']
             else:
+                print("!" * 90)
                 print(f"No data found for the prototype module {name.replace('M', 'P')}.")
                 return 0.0, 0.0, 0.0
         except Exception as e:

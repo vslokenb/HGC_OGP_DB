@@ -46,7 +46,7 @@ class PlotTool:
         """Get the index of the fiducial center in the dataframe by taking the average of the x and y coordinates."""
         center_x = (max(self.x_points) + min(self.x_points)) / 2
         center_y = (max(self.y_points) + min(self.y_points)) / 2
-        print(f"Center of the sensor is at ({center_x:.3f}, {center_y:.3f}) mm")
+        print(f"Center = ({center_x:.3f}, {center_y:.3f}) mm")
         return (center_x, center_y)
     
     @staticmethod
@@ -56,12 +56,10 @@ class PlotTool:
         std_h = np.std(zheight)
         max_h = max(zheight)
         min_h = min(zheight)
-        
-        print(f"Average Height is {mean_h:.3f} mm")
-        print(f"Maximum Height is {max_h:.3f} mm")
-        print(f"Minimum Height is {min_h:.3f} mm")
-        print(f"Height --> {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm. \n")
-        
+
+        print(f"Average Height = {mean_h:.3f} mm; Maximum Height = {max_h:.3f} mm; Minimum Height = {min_h:.3f} mm")
+        print(f"Height = {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm. \n")
+
         return mean_h, std_h, max_h, min_h
     
     @staticmethod
@@ -270,7 +268,6 @@ class PlotTool:
         
         Return 
         - `FD_points`: 8 by 2 array of fiducial points, empty points are filled with np.nan"""
-        print("Reading the fiducial points from the features dataframe.")
         FD_points = self.features[self.features['FeatureName'].str.contains('FD')].copy()
         FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(lambda x: int(re.search(r'FD(\d+)', x).group(1)) if re.search(r'FD(\d+)', x) else 0)
         FD_names = FD_points['FeatureName'].values
@@ -318,7 +315,6 @@ class PlotTool:
 
         plotFD(FD_points, HolePin_xy, SlotPin_xy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))
         
-        print("=" * 100)
         print(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} \n')
         print(f"Geometry: {Geometry}; Density: {density}; PositionID: {PositionID}; Comp_Type: {self.comp_type}")
 
@@ -331,8 +327,7 @@ class PlotTool:
             NEWY = XOffset;
             NEWX = YOffset*1; 
         
-        print(f"Assembly Survey Rotational Offset is {AngleOff:.5f} degrees")
-        print(f"Assembly Survey Center Offset is {CenterOff:.3f} mm")
+        print(f"Rotational Offset is {AngleOff:.5f} degrees; Center Offset is {CenterOff:.3f} mm")
 
         if abs(AngleOff) > 20:
             raise ValueError("The calculated angle offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
