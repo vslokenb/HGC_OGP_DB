@@ -190,7 +190,7 @@ class DBClient():
             print("Error encountered when grabbing Protomodule offsets from database.")
             print("Accuracy Plot: PM offsets set to 0, 0, 0, due to failed data pull.")
             print(e)
-            return [0.0, 0.0, 0.0]
+            return 0.0, 0.0, 0.0
         finally:
             if conn:
                 await conn.close()
