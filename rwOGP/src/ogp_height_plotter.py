@@ -212,12 +212,29 @@ class PlotTool:
                     angle_Pin = np.degrees(np.arctan2(pinY,pinX))
                 if position == 2:
                     angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-        elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':
+        elif geometry == 'Five':
             if position == 1: 
                 angle_Pin = np.degrees(np.arctan2(-pinX, -pinY))
             elif position == 2: 
                 angle_Pin = np.degrees(np.arctan2(pinX, pinY))
-            if geometry == 'Left' or geometry == 'Right':
+        elif geometry == 'Left':
+            if density == 'LD':
+                if position == 1:
+                    angle_Pin= np.degrees(np.arctan2(-pinX, -pinY))
+                if position == 2:
+                    angle_Pin= np.degrees(np.arctan2(pinX, pinY))
+            if density == 'HD':
+                if position == 1:
+                    angle_Pin= np.degrees(np.arctan2(pinX, pinY))
+                if position == 2:
+                    angle_Pin= np.degrees(np.arctan2(-pinX, -pinY))
+        elif geometry == 'Right':
+            if density == 'LD':
+                if position == 1:
+                    angle_Pin= np.degrees(np.arctan2(pinX, pinY))
+                if position == 2:
+                    angle_Pin= np.degrees(np.arctan2(-pinX, -pinY))
+            if density == 'HD':
                 if position == 1:
                     angle_Pin= np.degrees(np.arctan2(pinX, pinY))
                 if position == 2:
@@ -266,13 +283,22 @@ class PlotTool:
                     angle_FD3to1 = np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1]))
                 elif position == 2:
                     angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))
-        elif geometry == 'Left' or geometry == 'Right' or geometry == 'Five':     #if geometry is Five, Right or Left, FD3to1 will point either up or down
+        elif geometry == 'Five':     #if geometry is Five
             if position == 1:
                 angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[1],-FD3to1[0])));
             if position == 2:
                 angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[1],FD3to1[0])) * -1);
-            if geometry == 'Left' or geometry == 'Right':
-                if density == 'LD':
+        elif geometry == 'Left': 
+            if density == 'LD':
+                if position == 1:
+                    angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[1],-FD3to1[0])));
+                if position == 2:
+                    angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[1],FD3to1[0])));
+        elif geometry == 'Right':
+            if density == 'LD':
+                if position == 1:
+                    angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[1],-FD3to1[0])));
+                if position == 2:
                     angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[1],-FD3to1[0])));
         elif geometry == 'Full' and density == 'HD':
             if position == 1:
@@ -292,8 +318,10 @@ class PlotTool:
             if position == 2:
                 angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
 
-        AngleOffset = angle_FD3to1 - angle_Pin
 
+        
+        AngleOffset = angle_FD3to1 - angle_Pin
+        #print("---------------AngleOffset:", AngleOffset, angle_FD3to1, angle_Pin)
         return CenterOffset, AngleOffset, XOffset, YOffset
 
     def get_FDs(self) -> np.array:
