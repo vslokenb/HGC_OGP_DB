@@ -359,8 +359,9 @@ class PlotTool:
         PositionID, Geometry, density, TrayNo = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo']
 
         TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
+        print(f"Using Tray {TrayNo} info...")
+        
 
-        print("Loading TrayFile:", TrayFile)
         with open(TrayFile, 'r') as f:
             trayinfo = yaml.safe_load(f)
 

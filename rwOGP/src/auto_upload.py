@@ -1,4 +1,4 @@
-import os, subprocess, json, sys
+import os, subprocess, json
 from .parse_data import DataParser
 from .process_survey import SurveyProcessor
 
@@ -16,6 +16,8 @@ class InventoryUpdater():
         self.config = config_yaml
         self.checkdir = self.config.get('ogp_survey_dir')
         self.parsed_dir = self.config.get('ogp_parsed_dir')
+        print("Parsing OGP survey files from directory:", self.checkdir)
+        print("Saving parsed data to directory:", self.parsed_dir)
     
     async def __call__(self):
         if not pexist(self.inventory_p):

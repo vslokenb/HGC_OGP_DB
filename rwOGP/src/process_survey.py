@@ -34,6 +34,7 @@ class SurveyProcessor():
             os.makedirs(im_dir)
         self.im_dir = im_dir
         self.tray_dir = yamlconfig.get('ogp_tray_dir')
+        print("Using tray files from directory:", self.tray_dir)
 
         self.client = DBClient(yamlconfig)
         pass
