@@ -83,6 +83,7 @@ class DataParser():
         header_dict = self.check_missing_keys(header_dict)
         header_dict = self.check_types(header_dict)
         header_dict = self.check_missing_mappings(header_dict)
+        header_dict = self.check_illegal_chars(header_dict)
 
         filename = f"{header_dict['ComponentID']}_{header_dict['Operator']}"
         meta_file = f'{filename}_meta.yaml'
@@ -107,6 +108,28 @@ class DataParser():
             print("DataParser did not parse all the optional keys due to mismatching in naming or missing data.")
             print("Missing keys: ", set(warning_keys) - set(header_dict.keys()))
         
+        return header_dict
+    
+    def check_illegal_chars(self, header_dict):
+        """Remove all illegal characters from the header_dict."""
+        illegal_chars = ['/', '\\', ':', '*', '?', '<', '>', '|']
+        filename_fields = ['ComponentID', 'Operator']
+    
+        for field in filename_fields:
+            has_illegal = any(char in header_dict[field] for char in illegal_chars)
+            if has_illegal:
+                original = header_dict[field]
+                print("!" * 90)
+                print(f"WARNINGS: Unconventional character(s) detected in {field}: {original}")
+                found_chars = [char for char in illegal_chars if char in original]
+                print(f"Found illegal characters: {found_chars}")
+                user_in = input("Would you want to remove these characters? If not the parsing might not continue correctly. (y/n): ")
+                if user_in.lower() == 'y':
+                    cleaned_value = original
+                    for char in illegal_chars:
+                        cleaned_value = cleaned_value.replace(char, '')
+                        header_dict[field] = cleaned_value
+    
         return header_dict
     
     def check_missing_mappings(self, header_dict):
