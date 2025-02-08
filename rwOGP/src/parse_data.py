@@ -6,6 +6,7 @@ from io import StringIO
 from src.param import header_template, data_template, required_keys, warning_keys, default_params, pin_mapping
 
 pjoin = os.path.join
+pbase = os.path.basename
 
 class DataParser():
     """Parse data file(s) using TTP template. 
@@ -36,7 +37,7 @@ class DataParser():
         for filename in self.data_file:
             self.data = open(filename, 'r').read()
             print("=" * 100)
-            print("Parsing data for file: ", filename)
+            print(f"Parsing data for {pbase(filename)}")
             self.read_temp_sep()
             filename = self.output_meta()
             self.output_features(f'{filename}.csv')
