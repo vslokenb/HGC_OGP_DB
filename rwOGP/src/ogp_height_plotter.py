@@ -325,9 +325,9 @@ class PlotTool:
             print("The number of fiducial points measured must be 2, 4, 6, or 8.")
             print(f"Measured {len(FD_names)} FDs:", FD_names)
             print("This program looks for keyword 'FD' in file output. Make sure you rename your routine to include 'FD' in the name.")
-            return False
+            print("The program will now exit ...\n")
+            sys.exit()
         
-        # Sort points based on FD numbers
         sort_indices = np.argsort(FD_numbers)
         FD_points = x_y_coords[sort_indices]
         print(f"Found {num_FDs} fiducial points: {FD_names}")
@@ -365,8 +365,6 @@ class PlotTool:
 
         FD_points = self.get_FDs()
         
-        if not FD_points: return None
-
         plotFD(FD_points, HolePin_xy, SlotPin_xy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))
         
         print(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} \n')
