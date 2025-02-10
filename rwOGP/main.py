@@ -19,7 +19,7 @@ The program will also update the inventory file to reflect the results that have
 
 Running without any arguments will process and upload all new surveys to the OGP database."""
 
-async def main_func():
+async def main_func(comp_type):
     """Main function to run the program."""
     settings = load_config()
     if settings is None:
@@ -33,7 +33,7 @@ async def main_func():
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
     
-    updater = InventoryUpdater(invent_path, config)
+    updater = InventoryUpdater(invent_path, config, comp_type)
     await updater()
 
 if __name__ == "__main__":
@@ -41,11 +41,11 @@ if __name__ == "__main__":
     parser.add_argument("--print", action='store_true', help="Print the current inventory.")
     parser.add_argument("--clear", action='store_true', help="Clear the current inventory. Note that these do not delete the OGP output files. They only remove the files from being marked as uploaded in the inventory.")
     parser.add_argument("--update", action='store_true', help="Update the credentials in the configuration file.")
+    parser.add_argument("--type", type=str, default='', help="Specify the type of component to process and upload.")
 
     args = parser.parse_args()
     
     if args.print:
-        print("Printing the current inventory...")
         invent_print()
         sys.exit(0)
     if args.clear:
@@ -57,4 +57,4 @@ if __name__ == "__main__":
         result = asyncio.run(update_credentials())
         sys.exit(0)
 
-    asyncio.run(main_func())
+    asyncio.run(main_func(args.type))

@@ -1,4 +1,4 @@
-import os, subprocess, json
+import os, subprocess, json, sys
 from .parse_data import DataParser
 from .process_survey import SurveyProcessor
 
@@ -7,7 +7,7 @@ pjoin = os.path.join
 
 class InventoryUpdater():
     """Update the inventory of OGP results and upload new files to the database."""
-    def __init__(self, inventory_path, config_yaml):
+    def __init__(self, inventory_path, config_yaml, comp_type=''):
         """Initialize the file uploader.
         
         Parameters
@@ -16,6 +16,8 @@ class InventoryUpdater():
         self.config = config_yaml
         self.checkdir = self.config.get('ogp_survey_dir')
         self.parsed_dir = self.config.get('ogp_parsed_dir')
+        self.comp_type = comp_type
+        print("Reading inventory from:", self.inventory_p)
         print("Parsing OGP survey files from directory:", self.checkdir)
         print("Saving parsed data to directory:", self.parsed_dir)
     
@@ -30,7 +32,6 @@ class InventoryUpdater():
         new_files = self.__check_inventory()
         success_invent = await self.upload_files(new_files)
         self.__update_inven(success_invent)
-
     
     def __update_inven(self, success_invent):
         """Update the inventory with the successfully uploaded files."""
@@ -90,6 +91,8 @@ class InventoryUpdater():
     
     def __check_inventory(self) -> dict:
         """Check for changes in the inventory of OGP results.
+        If self.comp_type is specified, only check that specific subdirectory.
+
         Returns:
         - dict: Subdirectories and their corresponding new files to be processed.
         """
@@ -98,10 +101,21 @@ class InventoryUpdater():
         old_inventory = self.inventory.copy()
         changed_inventory = {}
 
-        # Track overall statistics
         total_new_files = 0
         total_removed_files = 0
         new_subdirs = []
+
+        if self.comp_type:
+            if self.comp_type in new_inventory:
+                new_inventory = {self.comp_type: new_inventory[self.comp_type]}
+            else:
+                new_inventory = {}
+                print("No new files to process for component type:", self.comp_type)
+                sys.exit()
+            if self.comp_type in old_inventory:
+                old_inventory = {self.comp_type: old_inventory[self.comp_type]}
+            else:
+                old_inventory = {}
 
         for subdir, files in new_inventory.items():
             if subdir not in old_inventory:
@@ -119,16 +133,16 @@ class InventoryUpdater():
                     if removed_files:
                         print(f"  - Removed: {', '.join(sorted(removed_files))}")
                         total_removed_files += len(removed_files)
-                
+
                 if new_files:
-                    changed_inventory[subdir] = new_files
-        
+                    changed_inventory[subdir] = list(new_files)
+
         print("\n=== Summary of Changes ===")
         if new_subdirs:
             print(f"New subdirectories detected: {', '.join(new_subdirs)}")
         print(f"Total new files to process: {total_new_files}")
         print(f"Total files removed: {total_removed_files}")
-                    
+
         return changed_inventory
     
     async def upload_files(self, invent):
