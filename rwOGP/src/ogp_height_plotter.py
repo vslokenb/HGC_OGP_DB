@@ -191,7 +191,7 @@ class PlotTool:
             if userinput.lower() != 'y':
                 sys.exit()
             else:
-                valid_points = FDPoints[~np.isnan(FDPoints).any(axis=1)]
+                points_to_average = FDPoints[~np.isnan(FDPoints).any(axis=1)]
         print(points_to_average)
         FDCenter = np.mean(points_to_average, axis=0)
         print(FDCenter)
