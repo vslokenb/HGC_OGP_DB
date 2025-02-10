@@ -173,13 +173,14 @@ class PlotTool:
         """Get the center of the fiducial points."""
         points_to_average = FDPoints[fd_indices]
         if np.any(np.isnan(points_to_average)):
-            print(f"NaN values found in FD points {[i+1 for i in fd_indices]}. All fiducial points must be measured.")
+            print(f"NaN values found in FD points {[i+1 for i in fd_indices]} used for default calculation.")
             userinput = input(f"Would you like to continue with the available points? (y/n): ")
             if userinput.lower() != 'y':
                 sys.exit()
             else:
                 points_to_average = FDPoints[~np.isnan(FDPoints)]
         FDCenter = np.mean(points_to_average, axis=0)
+        print(FDCenter)
         return FDCenter
 
     def angle(self, holeXY:tuple, slotXY:tuple, FDPoints:np.array):
