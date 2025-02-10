@@ -34,6 +34,7 @@ class DataParser():
         - gen_features (list): List of feature files generated."""
         gen_meta = []
         gen_features = []
+        print("=== Parsing OGP Data ===")
         for filename in self.data_file:
             self.data = open(filename, 'r').read()
             print("Parsing data file:", pbase(filename))
