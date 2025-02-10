@@ -168,6 +168,19 @@ class PlotTool:
             return None
             
         return PlotTool._save_plot_output(fig, savename)
+    
+    def get_FD_center(self, fd_indices, FDPoints):
+        """Get the center of the fiducial points."""
+        points_to_average = FDPoints[fd_indices]
+        if np.any(np.isnan(points_to_average)):
+            print(f"NaN values found in FD points {[i+1 for i in fd_indices]}. All fiducial points must be measured.")
+            userinput = input(f"Would you like to continue with the available points? (y/n): ")
+            if userinput.lower() != 'y':
+                sys.exit()
+            else:
+                points_to_average = FDPoints[~np.isnan(FDPoints)]
+        FDCenter = np.mean(points_to_average, axis=0)
+        return FDCenter
 
     def angle(self, holeXY:tuple, slotXY:tuple, FDPoints:np.array):
         """Calculate the angle and offset of the sensor from the tray fiducials.
@@ -207,18 +220,19 @@ class PlotTool:
 
         print(f'Angle pin: {angle_Pin}')
     
-        if density == 'HD':   
+        if density == 'HD':
             if geometry == 'Full':
-                FDCenter = np.mean(FDPoints[[0,1,2,3]], axis=0)
-                #FDCenter = np.nanmean(FDPoints, axis=0) #Average of All FDs
+                fd_indices = [0, 1, 2, 3]
             else:
-                FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to modules except HD Full
+                fd_indices = [0, 2]
+            FDCenter = self.get_FD_center(fd_indices, FDPoints)
         if density == 'LD':
             if geometry == 'Full':
-                FDCenter = np.mean(FDPoints[[2,5]], axis=0)
+                fd_indices = [2, 5]
             else:
-                FDCenter = np.mean(FDPoints[[0,2]], axis=0)  #Average of FD1 and FD3, this applies to all modules except LD Full
-        
+                fd_indices = [0, 2]
+            FDCenter = self.get_FD_center(fd_indices, FDPoints)
+
         adjustmentX, adjustmentY = ADJUSTMENTS[CompType][geometry][density][position]
         print(f'Adjustment X: ', adjustmentX, 'Adjustment Y: ', adjustmentY)
         
@@ -277,7 +291,6 @@ class PlotTool:
                 angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
             if position == 2:
                 angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
-
 
         
         AngleOffset = angle_FD3to1 - angle_Pin
