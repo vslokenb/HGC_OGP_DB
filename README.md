@@ -27,7 +27,10 @@ python rwOGP/startGUI.py
 
 For more information on how to use the CLI tool, run:
 ```python rwOGP/main.py --help```
-The following options are available: to mark the files to be recalculated, to upload a specific file, to upload all files, and to view the database.
+The following options are available: 
+```python rwOGP/main.py --type baseplates```, for uploading a specific type of components.
+```python rwOGP/main.py --print```, for viewing the current uploaded data.
+```python rwOGP/main.py --clear```, for wipe upload record clean (used for re-uploading data)
 
 ### Method 2: Install as a package (Under Development)
 In Python 3.6 or greater on the OGP computer: 

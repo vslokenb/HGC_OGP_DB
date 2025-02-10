@@ -103,7 +103,7 @@ class DBClient():
 
     async def request_PostgreSQL(self, component_type, bp_name = None):
         """Request data from the database."""
-        result = await self.fetch_PostgreSQL(get_query_read(component_type, bp_name ))
+        result = await self.fetch_PostgreSQL(get_query_read(component_type, bp_name))
         return result
 
     async def upload_PostgreSQL(self, comp_params, db_upload_data) -> bool:
@@ -129,6 +129,7 @@ class DBClient():
             print(f"Attempting to upload to Table {table_name}...")
             table_exists = await conn.fetchval(table_exists_query, schema_name, table_name)  ### Returns True/False
             if table_exists:
+                print(f"Using {db_upload_data.keys()}")
                 query = get_query_write(table_name, db_upload_data.keys())
                 await conn.execute(query, *db_upload_data.values())
                 print(f'Data successfully uploaded to the {table_name}!')
@@ -170,25 +171,20 @@ class DBClient():
         
         Parameters:
         - name (str): Name of the prototype module.
-        
+
         Returns:
         - tuple[float, float, float]: x_offset, y_offset, angle_offset for the module."""
         conn = None
         try:
             conn = await asyncpg.connect(**self._connect_params)
-            query = """SELECT x_offset_mu, y_offset_mu, ang_offset_deg 
-                      FROM proto_inspect 
-                      WHERE proto_name = $1
-                      LIMIT 1;"""
-            #! This could potentially be troublesome if multiple entries are available
+            query = """SELECT x_offset_mu, y_offset_mu, ang_offset_deg
+                        FROM proto_inspect
+                        WHERE proto_name = $1
+                        ORDER BY proto_row_no DESC
+                        LIMIT 1;"""
+            # Order by row number descending to get the most recent entry
             row = await conn.fetchrow(query, name.replace('M', 'P', 1))
-            
-            if row:
-                return row['x_offset_mu'], row['y_offset_mu'], row['ang_offset_deg']
-            else:
-                print("!" * 90)
-                print(f"No data found for the prototype module {name.replace('M', 'P')}.")
-                return 0.0, 0.0, 0.0
+            return row['x_offset_mu'], row['y_offset_mu'], row['ang_offset_deg']
         except Exception as e:
             print("!" * 90)
             print("Error encountered when grabbing Protomodule offsets from database.")
