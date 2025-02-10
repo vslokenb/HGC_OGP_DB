@@ -1,11 +1,10 @@
 import numpy as np
 import pandas as pd
-import os, re
-import yaml
+import os, re, yaml, sys
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
-from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS
+from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS, angle_lookup
 
 pjoin = os.path.join
 
@@ -195,55 +194,16 @@ class PlotTool:
         Hole = np.array([holeX, holeY])
         print(f'pinX: {pinX}  &  pinY: {pinY}')
 
-        if geometry == 'Full':
-            if density == 'HD':
-                if position == 1:
-                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-                if position == 2:
-                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
-            if density == 'LD':
-                if position == 1:
-                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-                if position == 2:
-                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
-        elif geometry == 'Bottom':
-            if density == 'LD':
-                if position == 1:
-                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
-                if position == 2:
-                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-        elif geometry == 'Five':
-            if position == 1: 
-                angle_Pin = np.degrees(np.arctan2(-pinX, -pinY))
-            elif position == 2: 
-                angle_Pin = np.degrees(np.arctan2(pinX, pinY))
-        elif geometry == 'Left':
-            if density == 'LD':
-                if position == 1:
-                    angle_Pin= np.degrees(np.arctan2(-pinX, -pinY))
-                if position == 2:
-                    angle_Pin= np.degrees(np.arctan2(pinX, pinY))
-            if density == 'HD':
-                if position == 1:
-                    angle_Pin= np.degrees(np.arctan2(pinX, pinY))
-                if position == 2:
-                    angle_Pin= np.degrees(np.arctan2(-pinX, -pinY))
-        elif geometry == 'Right':
-            if density == 'LD':
-                if position == 1:
-                    angle_Pin= np.degrees(np.arctan2(pinX, pinY))
-                if position == 2:
-                    angle_Pin= np.degrees(np.arctan2(-pinX, -pinY))
-            if density == 'HD':
-                if position == 1:
-                    angle_Pin= np.degrees(np.arctan2(pinX, pinY))
-                if position == 2:
-                    angle_Pin= np.degrees(np.arctan2(-pinX, -pinY))
-        elif geometry == 'Top':
-                if position == 1:
-                    angle_Pin = np.degrees(np.arctan2(-pinY,-pinX))
-                if position == 2:
-                    angle_Pin = np.degrees(np.arctan2(pinY,pinX))
+
+        # Get the angle calculation function from the lookup dictionary
+        density_dict = angle_lookup.get(geometry, {})
+        position_dict = density_dict.get(density, density_dict.get('default', {}))
+        angle_func = position_dict.get(position)
+
+        if angle_func is None:
+            raise ValueError(f"No angle calculation defined for geometry={geometry}, density={density}, position={position}")
+
+        angle_Pin = angle_func(pinX, pinY)
 
         print(f'Angle pin: {angle_Pin}')
     
@@ -335,7 +295,10 @@ class PlotTool:
         FD_numbers = FD_points['FD_number'].values
         x_y_coords = FD_points[['X_coordinate', 'Y_coordinate']].values
         num_FDs = len(x_y_coords)
-        assert num_FDs in {2, 4, 6, 8}, "The number of fiducial points measured must be 2, 4, 6, or 8."
+        if not num_FDs in {2, 4, 6, 8}:
+            print("The number of fiducial points measured must be 2, 4, 6, or 8.")
+            print(f"Measured {len(FD_names)} FDs:", FD_names)
+            sys.exit()
         
         # Sort points based on FD numbers
         sort_indices = np.argsort(FD_numbers)

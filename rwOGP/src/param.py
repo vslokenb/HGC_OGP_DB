@@ -1,4 +1,6 @@
 from colorama import Fore
+import numpy as np
+
 baseplates_params = {"vmini": 1.2, "vmaxi": 2.2, "new_angle": 0, "db_table_name": 'bp_inspect', 
                      "mother_table": 'baseplate', "prefix": 'bp'}
 hexaboards_params = {"vmini": 1.2, "vmaxi": 2.9, "new_angle": 0, "db_table_name": 'hxb_inspect', 
@@ -61,6 +63,58 @@ ADJUSTMENTS = {
         'Left':   {'LD': {1: (0, -18),    2: (0, 18)},     'HD': {1: (0, -5),      2: (0, 5)}}
     }
 }
+
+angle_lookup = {
+    'Full': {
+        'HD': {
+            1: lambda pinX, pinY: np.degrees(np.arctan2(-pinY, -pinX)),
+            2: lambda pinX, pinY: np.degrees(np.arctan2(pinY, pinX))
+        },
+        'LD': {
+            1: lambda pinX, pinY: np.degrees(np.arctan2(-pinY, -pinX)),
+            2: lambda pinX, pinY: np.degrees(np.arctan2(pinY, pinX))
+        }
+    },
+    'Bottom': {
+        'LD': {
+            1: lambda pinX, pinY: np.degrees(np.arctan2(pinY, pinX)),
+            2: lambda pinX, pinY: np.degrees(np.arctan2(-pinY, -pinX))
+        }
+    },
+    'Five': {
+        'default': {
+            1: lambda pinX, pinY: np.degrees(np.arctan2(-pinX, -pinY)),
+            2: lambda pinX, pinY: np.degrees(np.arctan2(pinX, pinY))
+        }
+    },
+    'Left': {
+        'LD': {
+            1: lambda pinX, pinY: np.degrees(np.arctan2(-pinX, -pinY)),
+            2: lambda pinX, pinY: np.degrees(np.arctan2(pinX, pinY))
+        },
+        'HD': {
+            1: lambda pinX, pinY: np.degrees(np.arctan2(pinX, pinY)),
+            2: lambda pinX, pinY: np.degrees(np.arctan2(-pinX, -pinY))
+        }
+    },
+    'Right': {
+        'LD': {
+            1: lambda pinX, pinY: np.degrees(np.arctan2(pinX, pinY)),
+            2: lambda pinX, pinY: np.degrees(np.arctan2(-pinX, -pinY))
+        },
+        'HD': {
+            1: lambda pinX, pinY: np.degrees(np.arctan2(pinX, pinY)),
+            2: lambda pinX, pinY: np.degrees(np.arctan2(-pinX, -pinY))
+        }
+    },
+    'Top': {
+        'default': {
+            1: lambda pinX, pinY: np.degrees(np.arctan2(-pinY, -pinX)),
+            2: lambda pinX, pinY: np.degrees(np.arctan2(pinY, pinX))
+        }
+    }
+}
+
 
 # DataParser looks for these keys in the metadata
 required_keys = ['TrayNo', 'ComponentID', 'Operator', 'Geometry', 'Density', 'Flatness', 'PositionID']
