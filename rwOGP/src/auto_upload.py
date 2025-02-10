@@ -32,13 +32,14 @@ class InventoryUpdater():
         new_files, removed_files = self.__check_inventory()
         self.__update_removed(removed_files)
         
-        status = self.upload_and_update(new_files)
+        status = await self.upload_and_update(new_files)
         
         if status:
             print("All new files were successfully processed and uploaded to the database.")
+            print("\n=== Inventory Update Complete ===\n")
         else:
             print("!" * 100)
-            print("Some files failed to upload to the database.")
+            print("Some files failed to upload to the database.\n")
 
     def __update_removed(self, removed_invent):
         for subdir, files in removed_invent.items():
