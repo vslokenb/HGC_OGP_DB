@@ -173,9 +173,11 @@ class InventoryUpdater():
                         successful_uploads[subdir] = successful_files
                     print(f"Failed to upload file: {inputs[indx + 1]}")
                 else:
-                        print(f"Failed to upload files from {subdir}")
+                    print(f"Failed to upload files from {subdir}")
             else:
                 print(f"No files from {subdir} to process/upload to database.")
+        
+        if successful_uploads: print("These files were successfully uploaded:", successful_uploads)
         
         return successful_uploads
         
