@@ -33,7 +33,7 @@ class InventoryUpdater():
         success_invent = await self.upload_files(new_files)
         self.__update_inven(success_invent)
     
-    def __update_inven(self, success_invent):
+    def __update_inven(self, success_invent, removed_invent):
         """Update the inventory with the successfully uploaded files."""
         for subdir, files in success_invent.items():
             if subdir not in self.inventory:
@@ -42,11 +42,18 @@ class InventoryUpdater():
                 self.inventory[subdir].extend(files)
                 self.inventory[subdir] = list(dict.fromkeys(self.inventory[subdir]))
         
+        for subdir, files in removed_invent.items():
+            if subdir in self.inventory:
+                self.inventory[subdir] = [file for file in self.inventory[subdir] if file not in files]
+                if not self.inventory[subdir]:
+                    del self.inventory[subdir]
+        
         with open(self.inventory_p, 'w') as f:
             json.dump(self.inventory, f)
         
         print("\n=== Inventory Update Summary ===")
         print(f"Successfully updated inventory with {sum(len(files) for files in success_invent.values())} new files")
+        print(f"Removed {sum(len(files) for files in removed_invent.values())} files from inventory")
 
     def __create_new(self) -> dict:
         """Create a new inventory dictionary. 
@@ -100,6 +107,7 @@ class InventoryUpdater():
         new_inventory = self.__create_new()
         old_inventory = self.inventory.copy()
         changed_inventory = {}
+        removed_inventory = {}
 
         total_new_files = 0
         total_removed_files = 0
@@ -136,6 +144,14 @@ class InventoryUpdater():
 
                 if new_files:
                     changed_inventory[subdir] = list(new_files)
+                if removed_files:
+                    removed_inventory[subdir] = list(removed_files)
+        
+        # check for removed subdirectories
+        for subdir in old_inventory:
+            if subdir not in new_inventory:
+                removed_inventory[subdir] = old_inventory[subdir]
+                total_removed_files += len(old_inventory[subdir])
 
         print("\n=== Summary of Changes ===")
         if new_subdirs:
@@ -143,7 +159,7 @@ class InventoryUpdater():
         print(f"Total new files to process: {total_new_files}")
         print(f"Total files removed: {total_removed_files}")
 
-        return changed_inventory
+        return changed_inventory, removed_inventory
     
     async def upload_files(self, invent):
         """Parse, postprocess and upload files to the database.
