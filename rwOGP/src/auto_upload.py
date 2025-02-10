@@ -29,19 +29,18 @@ class InventoryUpdater():
         with open(self.inventory_p, 'r') as f:
             self.inventory = json.load(f)
         
-        new_files = self.__check_inventory()
-        success_invent = await self.upload_files(new_files)
-        self.__update_inven(success_invent)
-    
-    def __update_inven(self, success_invent, removed_invent):
-        """Update the inventory with the successfully uploaded files."""
-        for subdir, files in success_invent.items():
-            if subdir not in self.inventory:
-                self.inventory[subdir] = files
-            else:
-                self.inventory[subdir].extend(files)
-                self.inventory[subdir] = list(dict.fromkeys(self.inventory[subdir]))
+        new_files, removed_files = self.__check_inventory()
+        self.__update_removed(removed_files)
         
+        status = self.upload_and_update(new_files)
+        
+        if status:
+            print("All new files were successfully processed and uploaded to the database.")
+        else:
+            print("!" * 100)
+            print("Some files failed to upload to the database.")
+
+    def __update_removed(self, removed_invent):
         for subdir, files in removed_invent.items():
             if subdir in self.inventory:
                 self.inventory[subdir] = [file for file in self.inventory[subdir] if file not in files]
@@ -51,9 +50,23 @@ class InventoryUpdater():
         with open(self.inventory_p, 'w') as f:
             json.dump(self.inventory, f)
         
-        print("\n=== Inventory Update Summary ===")
-        print(f"Successfully updated inventory with {sum(len(files) for files in success_invent.values())} new files")
+        print("\n=== Inventory Update Alert ===")
         print(f"Removed {sum(len(files) for files in removed_invent.values())} files from inventory")
+
+    def __update_inven(self, success_invent):
+        """Update the inventory with the successfully uploaded files."""
+        for subdir, files in success_invent.items():
+            if subdir not in self.inventory:
+                self.inventory[subdir] = files
+            else:
+                self.inventory[subdir].extend(files)
+                self.inventory[subdir] = list(dict.fromkeys(self.inventory[subdir]))
+        
+        with open(self.inventory_p, 'w') as f:
+            json.dump(self.inventory, f)
+        
+        print("\n=== Inventory Update Alert ===")
+        print(f"Successfully updated inventory with {sum(len(files) for files in success_invent.values())} new files")
 
     def __create_new(self) -> dict:
         """Create a new inventory dictionary. 
@@ -96,12 +109,13 @@ class InventoryUpdater():
             print("Exiting...")
             return False
     
-    def __check_inventory(self) -> dict:
+    def __check_inventory(self) -> tuple[dict, dict]:
         """Check for changes in the inventory of OGP results.
         If self.comp_type is specified, only check that specific subdirectory.
 
         Returns:
         - dict: Subdirectories and their corresponding new files to be processed.
+        - dict: Subdirectories and their corresponding removed files.
         """
         print("\n=== Checking for OGP Survey File Changes ===")
         new_inventory = self.__create_new()
@@ -161,17 +175,16 @@ class InventoryUpdater():
 
         return changed_inventory, removed_inventory
     
-    async def upload_files(self, invent):
+    async def upload_and_update(self, invent) -> bool:
         """Parse, postprocess and upload files to the database.
         
         Parameters
         - `invent`: dictionary of {subdir:[files]} to be uploaded. subdir should be names of components, e.g. baseplate, modules, etc.
         
         Returns
-        - dict: inventory of successfully uploaded files in the same format as input {subdir:[files]}
+        - `bool`: True if all files were successfully processed & uploaded, False otherwise.
         """
-        successful_uploads = {}
-        
+        status = True 
         for subdir, files in invent.items():
             inputs = [pjoin(self.checkdir, subdir, file) for file in files]
             if inputs:
@@ -180,22 +193,27 @@ class InventoryUpdater():
                 
                 uploader = SurveyProcessor(gen_features, gen_meta, self.config)
                 success, indx = await uploader(subdir)
+
+                successful_uploads = {}
                 if success:
                     successful_uploads[subdir] = files
                 elif indx != -1:
-                    # Some files were uploaded successfully (up to the index that failed)
                     successful_files = files[:indx+1]
                     if successful_files:  # Only add if there were successful uploads
                         successful_uploads[subdir] = successful_files
                     print(f"Failed to upload file: {inputs[indx + 1]}")
+                    status = False
                 else:
+                    status = False
                     print(f"Failed to upload files from {subdir}")
+                
+                if successful_uploads: 
+                    print("These files were successfully uploaded:", successful_uploads)
+                    self.__update_inven(successful_uploads)
             else:
                 print(f"No files from {subdir} to process/upload to database.")
         
-        if successful_uploads: print("These files were successfully uploaded:", successful_uploads)
-        
-        return successful_uploads
+        return status
         
     def run_on_new_files(self, files, action):
         """Run the action on each file in the list of files

@@ -311,6 +311,7 @@ class PlotTool:
 
     def get_FDs(self) -> np.array:
         """Get the fiducial points from the features dataframe, ordered by the FD number.
+        If none of the FDs are found, return False.
         
         Return 
         - `FD_points`: 8 by 2 array of fiducial points, empty points are filled with np.nan"""
@@ -323,7 +324,8 @@ class PlotTool:
         if not num_FDs in {2, 4, 6, 8}:
             print("The number of fiducial points measured must be 2, 4, 6, or 8.")
             print(f"Measured {len(FD_names)} FDs:", FD_names)
-            sys.exit()
+            print("This program looks for keyword 'FD' in file output. Make sure you rename your routine to include 'FD' in the name.")
+            return False
         
         # Sort points based on FD numbers
         sort_indices = np.argsort(FD_numbers)
@@ -362,6 +364,8 @@ class PlotTool:
         SlotPin_xy = tuple(trayinfo[f'{SlotPin}_xy'])
 
         FD_points = self.get_FDs()
+        
+        if not FD_points: return None
 
         plotFD(FD_points, HolePin_xy, SlotPin_xy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))
         
