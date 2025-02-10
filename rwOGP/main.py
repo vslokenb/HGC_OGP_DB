@@ -29,7 +29,7 @@ async def main_func(comp_type):
     else:
         config_path = settings['config_path']
         invent_path = settings['inventory_path']
-        print("Using configuration file to create database client...")
+        print("\n \nUsing configuration file to create database client...")
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
     
