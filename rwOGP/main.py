@@ -41,7 +41,7 @@ if __name__ == "__main__":
     parser.add_argument("--print", action='store_true', help="Print the current inventory.")
     parser.add_argument("--clear", action='store_true', help="Clear the current inventory. Note that these do not delete the OGP output files. They only remove the files from being marked as uploaded in the inventory.")
     parser.add_argument("--update", action='store_true', help="Update the credentials in the configuration file.")
-    parser.add_argument("--type", type=str, default='', help="Specify the type of component to process and upload.")
+    parser.add_argument("--type", type=str, default='', help="Specify the type of component to process and upload. If not specified, all components will be processed.")
 
     args = parser.parse_args()
     
