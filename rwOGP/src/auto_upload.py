@@ -196,6 +196,7 @@ class InventoryUpdater():
                     sys.exit()
                 uploader = SurveyProcessor(gen_features, gen_meta, self.config)
                 success, indx = await uploader(subdir)
+                print(f"index is {indx}")
 
                 successful_uploads = {}
                 if success:
