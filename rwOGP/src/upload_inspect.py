@@ -3,6 +3,9 @@ sys.path.append('../')
 
 from src.param import COMP_PREFIX
 
+class MissingEntryException(Exception):
+    pass
+
 def get_query_read(component_type, part_name = None, limit=15) -> str:
     """Get the query to read from the database.
 
@@ -27,61 +30,62 @@ def get_query_write(table_name, column_names) -> str:
     return query
 
 def get_query_write_link(comp_params, db_dict) -> tuple[str, str, str, list]:
-    """Get the query to write to the database and link the component to the mother table.
-    
+    """Get queries to link a component to its mother table and write to the database.
     Parameters:
-    - comp_params (dict): Dictionary containing the parameters of the component.
-    - db_dict (dict): Dictionary containing the data to upload.
-    
-    Returns: 
-    - pre_query (str): Pre-query to check if component exists in mother table.
-    - query (str): Formatted query string.
-    - column_values (list): List of values to upload."""
+    - comp_params (dict): Component parameters including prefix and mother table info.
+    - db_dict (dict): Data to be uploaded to the database.
+    Returns:
+    - pre_query (str): Query to verify component exists in mother table.
+    - comp_name_val (str): Component name/ID value.
+    - query (str): Main insertion query.
+    - column_values (list): Values to be inserted.
 
-    column_names = list(db_dict.keys())
-    column_values = [db_dict[key] for key in column_names]
+    Raises:
+    - MissingEntryException: If component ID column is not in the data."""
 
+    # Extract basic parameters
     prefix = comp_params['prefix']
     mother_table = comp_params['mother_table']
     table_name = f"{prefix}_inspect"
-    number_name = f"{prefix}_no"
-    comp_name = f"{prefix}_name"
 
-    comp_name_val = column_values[column_names.index(comp_name)]
-    
-    if not comp_name in column_names:
-        print("!" * 90)
-        print("Component ID not provided in the data.")
-        raise ValueError(f"Column names must contain {comp_name}.")
-    else:
-        comp_name_index = f"${column_names.index(comp_name) + 1}"
+    # Define column names
+    number_col = f"{prefix}_no"
+    comp_name_col = f"{prefix}_name"
+    column_names = list(db_dict.keys())
+    column_values = list(db_dict.values())
 
-    # Pre-query to check if component exists in mother table
+    # Verify component name exists in data
+    if comp_name_col not in column_names:
+        raise MissingEntryException(
+            f"Component ID not provided in data. Column names must contain {comp_name_col}."
+        )
+
+    # Get component name value and its position in the data
+    comp_name_val = db_dict[comp_name_col]
+    comp_name_position = f"${column_names.index(comp_name_col) + 1}"
+
+    # Generate the existence check query
     pre_query = f"""
-    SELECT CASE 
-        WHEN EXISTS (
-            SELECT 1 FROM {mother_table} 
-            WHERE {comp_name} = $1
-        ) THEN TRUE
-        ELSE FALSE
-    END
-    """
+    SELECT EXISTS (
+        SELECT 1
+        FROM {mother_table}
+        WHERE {comp_name_col} = $1
+    );"""
 
+    # Generate the main insertion query
     placeholders = [f"${i + 1}" for i in range(len(column_names))]
-    placeholder_str = ', '.join(placeholders)
-
-    query = f"""INSERT INTO {table_name} ({number_name}, {', '.join(column_names)})
-    SELECT {mother_table}.{number_name}, {placeholder_str}
+    query = f"""
+    INSERT INTO {table_name} ({number_col}, {', '.join(column_names)})
+    SELECT {mother_table}.{number_col}, {', '.join(placeholders)}
     FROM {mother_table}
-    WHERE {mother_table}.{prefix}_name = {comp_name_index};"""
+    WHERE {mother_table}.{comp_name_col} = {comp_name_position};
+    """
 
     return pre_query, comp_name_val, query, column_values
 
 class DBClient():
-    """Client to interact with the PostgreSQL database."""
     def __init__(self, config):
         """Initialize the database client.
-        
         Parameters:
         - config: a loaded yaml configuration object."""
         self.host = config['host']
