@@ -243,7 +243,7 @@ class PlotTool:
             FDCenter = self.get_FD_center(fd_indices, FDPoints)
         if density == 'LD':
             if geometry == 'Full':
-                if CompType == 'modules':
+                if CompType == 'module':
                     fd_indices = [2, 5]
                 elif CompType == 'protomodule':
                     fd_indices = [0, 1, 2, 3]
@@ -307,7 +307,10 @@ class PlotTool:
             print("Current Angle:", angle_FD3to1)
         elif geometry == 'Full' and density == 'LD':
             print("Angle calculated with FD6 & FD3")
-            FD3to1 = FDPoints[2] - FDPoints[5]
+            if CompType == 'protomodule':
+                FD3to1 = FDPoints[1] - FDPoints[0]
+            elif CompType == 'module':
+                FD3to1 = FDPoints[2] - FDPoints[5]    
             if position == 1:
                 angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
             if position == 2:
