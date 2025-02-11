@@ -263,20 +263,23 @@ class PlotTool:
         FD3to1 = FDPoints[0] - FDPoints[2]  #Vector from FD3 to FD1
         
         if geometry == 'Bottom':        #if geometry is Top or bottom, FD3to1 will point either left or right
-            angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))
+                        angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1]) * -1)
         elif geometry == 'Top':
             if density == 'LD':
-                angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))
+                if position == 1:
+                    angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1])* -1)
+                elif position == 2:
+                    angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1])* -1)
             elif density == 'HD':
                 if position == 1:
-                    angle_FD3to1 = np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1]))
+                    angle_FD3to1 = np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])* -1)
                 elif position == 2:
-                    angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1]))
+                    angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1])* -1)
         elif geometry == 'Five':     #if geometry is Five
             if position == 1:
                 angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[1],-FD3to1[0])));
             if position == 2:
-                angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[1],FD3to1[0])) * -1);
+                angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[1],FD3to1[0])));
         elif geometry == 'Left': 
             if density == 'LD':
                 if position == 1:
@@ -379,7 +382,7 @@ class PlotTool:
             NEWX = YOffset; 
         elif PositionID == 2:
             NEWY = XOffset;
-            NEWX = YOffset*1; 
+            NEWX = YOffset*-1; 
         
         print(f"Rotational Offset is {AngleOff:.5f} degrees; Center Offset is {CenterOff:.3f} mm")
 
