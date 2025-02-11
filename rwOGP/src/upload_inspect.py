@@ -77,8 +77,9 @@ def get_query_write_link(comp_params, db_dict) -> tuple[str, str, str, list]:
     INSERT INTO {table_name} ({number_col}, {', '.join(column_names)})
     SELECT {mother_table}.{number_col}, {', '.join(placeholders)}
     FROM {mother_table}
-    WHERE REPLACE({mother_table}.{comp_name_col}, '-', '_') = {comp_name_position};
+    WHERE {mother_table}.{comp_name_col} = {comp_name_position};
     """
+    # WHERE REPLACE({mother_table}.{comp_name_col}, '-', '_') = {comp_name_position};
     return pre_query, comp_name_val, query, column_values
 
 class DBClient():
