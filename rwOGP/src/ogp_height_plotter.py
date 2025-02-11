@@ -243,7 +243,10 @@ class PlotTool:
             FDCenter = self.get_FD_center(fd_indices, FDPoints)
         if density == 'LD':
             if geometry == 'Full':
-                fd_indices = [2, 5]
+                if CompType == 'modules':
+                    fd_indices = [2, 5]
+                elif CompType == 'protomodule':
+                    fd_indices = [0, 1, 2, 3]
             else:
                 fd_indices = [0, 2]
             FDCenter = self.get_FD_center(fd_indices, FDPoints)
