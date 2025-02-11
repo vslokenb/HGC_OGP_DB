@@ -160,6 +160,9 @@ class DataParser():
         header_dict['TrayNo'] = int(header_dict['TrayNo'])
         header_dict['Density'] = str(header_dict['Density']).upper()
         header_dict['Geometry'] = str(header_dict['Geometry']).capitalize()
+        header_dict['Flatness'] = float(header_dict['Flatness'])
+        if header_dict.get("Thickness") is not None:
+            header_dict['Thickness'] = float(header_dict['Thickness'])
         return header_dict
         
     def adopt_default(self, header_dict):
