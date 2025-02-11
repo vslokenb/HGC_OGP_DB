@@ -186,7 +186,7 @@ class DBClient():
                         ORDER BY proto_row_no DESC
                         LIMIT 1;"""
             # Order by row number descending to get the most recent entry
-            row = await conn.fetchrow(query, name.replace('M', 'P', 1))
+            row = await conn.fetchrow(query, name.replace('ML', 'PL', 1))
             return row['x_offset_mu'], row['y_offset_mu'], row['ang_offset_deg']
         except Exception as e:
             print("!" * 90)

@@ -53,17 +53,19 @@ class SurveyProcessor():
         - comp_type (str): Component folder name."""
         with open(meta_file, 'r') as f:
             metadata = yaml.safe_load(f)
-
+        
+        singular_type = comp_type.rstrip('s')
         compID = metadata['ComponentID']
 
+        if singular_type == 'protomodule': compID = compID.replace('ML', 'PL', 1)
+            
         df = pd.read_csv(ex_file)
         plotter = PlotTool(metadata, comp_type, df, self.tray_dir, pjoin(self.im_dir, comp_type))
         filesuffix = pbase(ex_file).split('.')[0]
 
         print("=" * 100)
         print(f"###### Calculating offsets for {comp_type} {compID} #######")
-
-        singular_type = comp_type.rstrip('s')
+        
         component_params = COMPONENT_PARAMS[singular_type]
         name_field = f'{COMP_PREFIX[singular_type]}_name'
         db_upload = {name_field: compID}
