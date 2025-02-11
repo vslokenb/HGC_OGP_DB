@@ -129,8 +129,7 @@ class SurveyProcessor():
                         print("!" * 90)
                         print("No more uploading will be done due to the error. Please double check the data and try again.")
                         return False, last_successful_index
-            else:
-                last_successful_index = idx
+            last_successful_index = idx
         return True, last_successful_index  # Return True and last index if all files were processed successfully
                 # send2trash.send2trash(ex_file)
             # print(f'Moved {ex_file} to recycle bin.')
