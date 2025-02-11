@@ -1,4 +1,4 @@
-import os, yaml, sys
+import os, yaml
 from ttp import ttp
 import pandas as pd
 from io import StringIO
@@ -7,6 +7,9 @@ from src.param import header_template, data_template, required_keys, warning_key
 
 pjoin = os.path.join
 pbase = os.path.basename
+
+class ParserKeyException(Exception):
+    pass
 
 class DataParser():
     """Parse data file(s) using TTP template. 
@@ -62,12 +65,7 @@ class DataParser():
             self.header_results.update(header)
 
         self.feature_results = pd.read_csv(StringIO(feature_results[0])).drop_duplicates()
-
-        if 'Flatness' not in self.header_results:
-            print(self.header_results)
-            raise ValueError('Flatness not found in header. Please check the OGP template.')
         
-        self.header_results['Flatness'] = float(self.header_results['Flatness'])
         return header_results, feature_results
     
     def output_features(self, output_filename):
@@ -100,10 +98,13 @@ class DataParser():
             print("Parsed data: ", header_dict)
             print("Missing keys: ", set(required_keys) - set(header_dict.keys()))
             header_dict = self.adopt_default(header_dict)
-            user_input = input("Do you want to adopt the default values for the missing keys? (y/n): ")
+            user_input = input("Do you want to enter values for the missing keys? (y/n): ")
             if user_input.lower() != 'y':
-                print("Exiting...")
-                sys.exit()
+                raise ParserKeyException(f"Missing keys not resolved! Exiting...")
+            else:
+                for key in set(required_keys) - set(header_dict.keys()):
+                    value = input(f"Enter value for {key}: ")
+                    header_dict[key] = value
 
         if set(warning_keys) - set(header_dict.keys()):
             print("DataParser did not parse all the optional keys due to mismatching in naming or missing data.")
@@ -142,16 +143,14 @@ class DataParser():
             print(f"Geometry {Geometry} not recognized. Default to Full.")
             user_input = input("Do you want to adopt the default values for Geometry? (y/n): ")
             if user_input.lower() != 'y':
-                print("Exiting... Please check the Geometry value or update the pin mapping in param.py.")
-                sys.exit()
+                raise ParserKeyException("Exiting... Please check the Geometry value or update the pin mapping in param.py.")
             header_dict['Geometry'] = 'Full'
             Geometry = 'Full'
         if pin_mapping.get(Geometry).get(density) is None:
             print(f"Density {density} not recognized for Geometry {Geometry}. Default to LD.")
             user_input = input("Do you want to adopt the default values for Density? (y/n): ")
             if user_input.lower() != 'y':
-                print("Exiting... Please check the Density value or update the pin mapping in param.py.")
-                sys.exit()
+                raise ParserKeyException("Exiting... Please check the Density value or update the pin mapping in param.py.")
             header_dict['Density'] = 'LD'
         return header_dict
 

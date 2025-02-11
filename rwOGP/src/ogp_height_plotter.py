@@ -8,6 +8,9 @@ from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS, angle_lookup
 
 pjoin = os.path.join
 
+class ValueMissingError(Exception):
+    pass
+
 class PlotTool:
     def __init__(self, meta, component_type, features: 'pd.DataFrame', tray_dir, save_dir=None):
         """
@@ -189,7 +192,7 @@ class PlotTool:
             print(f"NaN values found in FD points {[i+1 for i in fd_indices]} used for default calculation.")
             userinput = input(f"Would you like to continue with the available points? (y/n): ")
             if userinput.lower() != 'y':
-                sys.exit()
+                raise ValueMissingError("Exiting... Please check the FD points and try again.")
             else:
                 points_to_average = FDPoints[~np.isnan(FDPoints).any(axis=1)]
         FDCenter = np.mean(points_to_average, axis=0)
@@ -325,8 +328,7 @@ class PlotTool:
             print("The number of fiducial points measured must be 2, 4, 6, or 8.")
             print(f"Measured {len(FD_names)} FDs:", FD_names)
             print("This program looks for keyword 'FD' in file output. Make sure you rename your routine to include 'FD' in the name.")
-            print("The program will now exit ...\n")
-            sys.exit()
+            raise ValueMissingError("Exiting... Please check the FD points and try again.")
         
         sort_indices = np.argsort(FD_numbers)
         FD_points = x_y_coords[sort_indices]

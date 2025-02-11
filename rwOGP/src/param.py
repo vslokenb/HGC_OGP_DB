@@ -115,7 +115,6 @@ angle_lookup = {
     }
 }
 
-
 # DataParser looks for these keys in the metadata
 required_keys = ['TrayNo', 'ComponentID', 'Operator', 'Geometry', 'Density', 'Flatness', 'PositionID']
 # If the following keys are missing from the header, a warning will be raised

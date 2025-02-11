@@ -1,5 +1,5 @@
 import os, subprocess, json, sys
-from .parse_data import DataParser
+from .parse_data import DataParser, ParserKeyException
 from .process_survey import SurveyProcessor
 
 pexist = os.path.exists
@@ -190,8 +190,10 @@ class InventoryUpdater():
             inputs = [pjoin(self.checkdir, subdir, file) for file in files]
             if inputs:
                 dp = DataParser(inputs, self.parsed_dir)
-                gen_meta, gen_features = dp()
-                
+                try: 
+                    gen_meta, gen_features = dp()
+                except ParserKeyException as e:
+                    sys.exit()
                 uploader = SurveyProcessor(gen_features, gen_meta, self.config)
                 success, indx = await uploader(subdir)
 
