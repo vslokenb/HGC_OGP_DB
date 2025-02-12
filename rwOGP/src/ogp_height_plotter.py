@@ -226,9 +226,9 @@ class PlotTool:
     
         if density == 'HD':
             if geometry == 'Full':
-                fd_indices = [0, 1, 2, 3]
+                fd_indices = [0, 1, 2, 3] # FD1, FD2, FD3, FD4
             else:
-                fd_indices = [0, 2]
+                fd_indices = [0, 2] # FD1 and FD3
             FDCenter = self.get_FD_center(fd_indices, FDPoints)
         if density == 'LD':
             if geometry == 'Full':
@@ -237,7 +237,7 @@ class PlotTool:
                 elif CompType == 'protomodule':
                     fd_indices = [0, 1, 2, 3] # FD1, FD2, FD3, FD4
             else:
-                fd_indices = [0, 2]
+                fd_indices = [0, 2] # FD1 and FD3
             FDCenter = self.get_FD_center(fd_indices, FDPoints)
 
         adjustmentX, adjustmentY = ADJUSTMENTS[CompType][geometry][density][position]
@@ -261,7 +261,7 @@ class PlotTool:
                 if isinstance(config, dict):
                     config = config[position]
 
-            angle_FD3to1 = config(FD3to1, FDPoints, CompType)
+            angle_FD3to1 = config(FD3to1, FDPoints, CompType) # Angle of FD3 to FD1
         except (KeyError, TypeError) as e:
             raise ValueError(f"Invalid configuration for geometry={geometry}, density={density}, position={position}")
         

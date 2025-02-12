@@ -80,8 +80,8 @@ class InventoryUpdater():
             subdir_path = pjoin(self.checkdir, item)
             if os.path.isdir(subdir_path):
                 txt_files = [
-                    file for file in os.listdir(subdir_path) 
-                    if file.endswith('.txt')
+                    file for file in os.listdir(subdir_path)
+                    if file.endswith('.txt') and not file.startswith('.')
                 ]
                 
                 if txt_files:
