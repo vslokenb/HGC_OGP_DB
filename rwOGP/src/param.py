@@ -1,5 +1,6 @@
 from colorama import Fore
 import numpy as np
+from helper import calc_basic_angle, calc_five_angle, calc_full_angle
 
 baseplates_params = {"vmini": 1.2, "vmaxi": 2.2, "new_angle": 0, "db_table_name": 'bp_inspect', 
                      "mother_table": 'baseplate', "prefix": 'bp'}
@@ -64,59 +65,42 @@ ADJUSTMENTS = {
     }
 }
 
-def _calc_basic_angle(fd3to1):
-    return np.degrees(np.arctan2(fd3to1[0], fd3to1[1]) * -1)
-
-def _calc_five_angle(fd3to1, is_second=False):
-    sign = 1 if is_second else -1
-    return np.degrees(np.arctan2(sign * fd3to1[1], sign * fd3to1[0]))
-
-def _calc_full_angle(fdpoints, comp_type, is_second=False):
-    sign = -1 if is_second else 1
-    if comp_type == 'protomodule':
-        points_diff = fdpoints[1] - fdpoints[0]
-    else:
-        points_diff = fdpoints[2] - fdpoints[5]
-    return np.degrees(np.arctan2(
-        sign * points_diff[0],
-        sign * points_diff[1]) * -1)
-
 ANGLE_CALC_CONFIG = {
-    'Bottom': lambda fd3to1, *_: _calc_basic_angle(fd3to1),
+    'Bottom': lambda fd3to1, *_: calc_basic_angle(fd3to1),
     'Top': {
         'LD': {
-            1: lambda fd3to1, *_: _calc_basic_angle(fd3to1),
-            2: lambda fd3to1, *_: _calc_basic_angle(fd3to1),
+            1: lambda fd3to1, *_: calc_basic_angle(fd3to1),
+            2: lambda fd3to1, *_: calc_basic_angle(fd3to1),
         },
         'HD': {
-            1: lambda fd3to1, *_: _calc_basic_angle(-fd3to1),
-            2: lambda fd3to1, *_: _calc_basic_angle(fd3to1),
+            1: lambda fd3to1, *_: calc_basic_angle(-fd3to1),
+            2: lambda fd3to1, *_: calc_basic_angle(fd3to1),
         }
     },
     'Five': {
-        1: lambda fd3to1, *_: _calc_five_angle(fd3to1),
-        2: lambda fd3to1, *_: _calc_five_angle(fd3to1, True),
+        1: lambda fd3to1, *_: calc_five_angle(fd3to1),
+        2: lambda fd3to1, *_: calc_five_angle(fd3to1, True),
     },
     'Left': {
         'LD': {
-            1: lambda fd3to1, *_: _calc_five_angle(fd3to1),
-            2: lambda fd3to1, *_: _calc_five_angle(fd3to1, True),
+            1: lambda fd3to1, *_: calc_five_angle(fd3to1),
+            2: lambda fd3to1, *_: calc_five_angle(fd3to1, True),
         }
     },
     'Right': {
         'LD': {
-            1: lambda fd3to1, *_: _calc_five_angle(fd3to1),
-            2: lambda fd3to1, *_: _calc_five_angle(fd3to1),
+            1: lambda fd3to1, *_: calc_five_angle(fd3to1),
+            2: lambda fd3to1, *_: calc_five_angle(fd3to1),
         }
     },
     'Full': {
         'HD': {
-            1: lambda fd3to1, fdpoints, *_: _calc_full_angle(fdpoints, None),
-            2: lambda fd3to1, fdpoints, *_: _calc_full_angle(fdpoints, None, True),
+            1: lambda fd3to1, fdpoints, *_: calc_full_angle(fdpoints, None),
+            2: lambda fd3to1, fdpoints, *_: calc_full_angle(fdpoints, None, True),
         },
         'LD': {
-            1: lambda fd3to1, fdpoints, comp_type: _calc_full_angle(fdpoints, comp_type),
-            2: lambda fd3to1, fdpoints, comp_type: _calc_full_angle(fdpoints, comp_type, True),
+            1: lambda fd3to1, fdpoints, comp_type: calc_full_angle(fdpoints, comp_type),
+            2: lambda fd3to1, fdpoints, comp_type: calc_full_angle(fdpoints, comp_type, True),
         }
     }
 }
