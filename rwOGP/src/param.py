@@ -46,7 +46,7 @@ pin_mapping = {
 }
 
 ADJUSTMENTS = {
-    'protomodules': {
+    'protomodule': {
         'Full':   {'LD': {1: (0, 0),      2: (0, 0)},      'HD': {1: (0, 0),       2: (0, 0)}},
         'Five':   {'LD': {1: (0, 0),      2: (0, 0)},      'HD': {1: (0, 0),       2: (0, 0)}},
         'Top':    {'LD': {1: (-9.72, 0),  2: (9.72, 0)},   'HD': {1: (-8.44, 0),   2: (8.44, 0)}},
@@ -54,13 +54,61 @@ ADJUSTMENTS = {
         'Right':  {'LD': {1: (0, 9.72),   2: (0, -9.72)},  'HD': {1: (0, 6.52),    2: (0, -6.52)}},
         'Left':   {'LD': {1: (0, -9.72),  2: (0, 9.72)},   'HD': {1: (0, -6.52),   2: (0, 6.52)}}
     },
-    'modules': {
+    'module': {
         'Full':   {'LD': {1: (0, 0),      2: (0, 0)},      'HD': {1: (0, 0),       2: (0, 0)}},
         'Five':   {'LD': {1: (0, 0),      2: (0, 0)},      'HD': {1: (0, 0),       2: (0, 0)}},
         'Top':    {'LD': {1: (-8, 0),     2: (8, 0)},      'HD': {1: (-4, 0),      2: (4, 0)}},
         'Bottom': {'LD': {1: (9, 0),      2: (-9, 0)},     'HD': {1: (-15, 0),     2: (15, 0)}},
         'Right':  {'LD': {1: (0, 18),     2: (0, -18)},    'HD': {1: (0, 5),       2: (0, -5)}},
         'Left':   {'LD': {1: (0, -18),    2: (0, 18)},     'HD': {1: (0, -5),      2: (0, 5)}}
+    }
+}
+
+ANGLE_CALC_CONFIG = {
+    'Bottom': lambda fd3to1, *_: np.degrees(np.arctan2(fd3to1[0], fd3to1[1]) * -1),
+    'Top': {
+        'LD': {
+            1: lambda fd3to1, *_: np.degrees(np.arctan2(fd3to1[0], fd3to1[1]) * -1),
+            2: lambda fd3to1, *_: np.degrees(np.arctan2(fd3to1[0], fd3to1[1]) * -1),
+        },
+        'HD': {
+            1: lambda fd3to1, *_: np.degrees(np.arctan2(-fd3to1[0], -fd3to1[1]) * -1),
+            2: lambda fd3to1, *_: np.degrees(np.arctan2(fd3to1[0], fd3to1[1]) * -1),
+        }
+    },
+    'Five': {
+        1: lambda fd3to1, *_: np.degrees(np.arctan2(-fd3to1[1], -fd3to1[0])),
+        2: lambda fd3to1, *_: np.degrees(np.arctan2(fd3to1[1], fd3to1[0])),
+    },
+    'Left': {
+        'LD': {
+            1: lambda fd3to1, *_: np.degrees(np.arctan2(-fd3to1[1], -fd3to1[0])),
+            2: lambda fd3to1, *_: np.degrees(np.arctan2(fd3to1[1], fd3to1[0])),
+        }
+    },
+    'Right': {
+        'LD': {
+            1: lambda fd3to1, *_: np.degrees(np.arctan2(-fd3to1[1], -fd3to1[0])),
+            2: lambda fd3to1, *_: np.degrees(np.arctan2(-fd3to1[1], -fd3to1[0])),
+        }
+    },
+    'Full': {
+        'HD': {
+            1: lambda fd3to1, fdpoints, *_: np.degrees(np.arctan2(
+                (fdpoints[1] - fdpoints[0])[0],
+                (fdpoints[1] - fdpoints[0])[1]) * -1),
+            2: lambda fd3to1, fdpoints, *_: np.degrees(np.arctan2(
+                -(fdpoints[1] - fdpoints[0])[0],
+                -(fdpoints[1] - fdpoints[0])[1]) * -1),
+        },
+        'LD': {
+            1: lambda fd3to1, fdpoints, comp_type: np.degrees(np.arctan2(
+                (fdpoints[1] - fdpoints[0])[0] if comp_type == 'protomodule' else (fdpoints[2] - fdpoints[5])[0],
+                (fdpoints[1] - fdpoints[0])[1] if comp_type == 'protomodule' else (fdpoints[2] - fdpoints[5])[1]) * -1),
+            2: lambda fd3to1, fdpoints, comp_type: np.degrees(np.arctan2(
+                -(fdpoints[1] - fdpoints[0])[0] if comp_type == 'protomodule' else -(fdpoints[2] - fdpoints[5])[0],
+                -(fdpoints[1] - fdpoints[0])[1] if comp_type == 'protomodule' else -(fdpoints[2] - fdpoints[5])[1]) * -1),
+        }
     }
 }
 

@@ -4,7 +4,7 @@ import os, re, yaml, sys
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
-from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS, angle_lookup
+from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS, angle_lookup, ANGLE_CALC_CONFIG
 
 pjoin = os.path.join
 
@@ -21,7 +21,7 @@ class PlotTool:
         - `save_dir`: directory to save the plots to"""
         self.save_dir = save_dir
         self.meta = meta
-        self.comp_type = component_type
+        self.comp_type = component_type.rstrip('s')
         self.tray_dir = tray_dir
         #! this is a hack
         self.features = DataParser.get_xyz(features, ['Tray'])
@@ -51,18 +51,7 @@ class PlotTool:
         print(f"Center = ({center_x:.3f}, {center_y:.3f}) mm")
         return (center_x, center_y)
     
-    @staticmethod
-    def _calculate_height_stats(zheight):
-        """Calculate basic height statistics."""
-        mean_h = np.mean(zheight)
-        std_h = np.std(zheight)
-        max_h = max(zheight)
-        min_h = min(zheight)
 
-        print(f"Average Height = {mean_h:.3f} mm; Maximum Height = {max_h:.3f} mm; Minimum Height = {min_h:.3f} mm")
-        print(f"Height = {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm. \n")
-
-        return mean_h, std_h, max_h, min_h
     
     @staticmethod
     def _prepare_coordinates(x, y, centerxy, rotate, new_angle):
@@ -244,9 +233,9 @@ class PlotTool:
         if density == 'LD':
             if geometry == 'Full':
                 if CompType == 'module':
-                    fd_indices = [2, 5]
+                    fd_indices = [2, 5] # FD3 and FD6
                 elif CompType == 'protomodule':
-                    fd_indices = [0, 1, 2, 3]
+                    fd_indices = [0, 1, 2, 3] # FD1, FD2, FD3, FD4
             else:
                 fd_indices = [0, 2]
             FDCenter = self.get_FD_center(fd_indices, FDPoints)
@@ -265,60 +254,19 @@ class PlotTool:
 
         FD3to1 = FDPoints[0] - FDPoints[2]  #Vector from FD3 to FD1
         
-        if geometry == 'Bottom':        #if geometry is Top or bottom, FD3to1 will point either left or right
-                        angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1]) * -1)
-        elif geometry == 'Top':
-            if density == 'LD':
-                if position == 1:
-                    angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1])* -1)
-                elif position == 2:
-                    angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1])* -1)
-            elif density == 'HD':
-                if position == 1:
-                    angle_FD3to1 = np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])* -1)
-                elif position == 2:
-                    angle_FD3to1 = np.degrees(np.arctan2(FD3to1[0],FD3to1[1])* -1)
-        elif geometry == 'Five':     #if geometry is Five
-            if position == 1:
-                angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[1],-FD3to1[0])));
-            if position == 2:
-                angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[1],FD3to1[0])));
-        elif geometry == 'Left': 
-            if density == 'LD':
-                if position == 1:
-                    angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[1],-FD3to1[0])));
-                if position == 2:
-                    angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[1],FD3to1[0])));
-        elif geometry == 'Right':
-            if density == 'LD':
-                if position == 1:
-                    angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[1],-FD3to1[0])));
-                if position == 2:
-                    angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[1],-FD3to1[0])));
-        elif geometry == 'Full' and density == 'HD':
-            if position == 1:
-                FD3to1 = FDPoints[1] - FDPoints[0]
-                print("Angle calculated with FD1 & FD2")
-                angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
-            if position == 2:
-                FD3to1 = FDPoints[1] - FDPoints[0]
-                print("Angle calculated with FD1 & FD2")
-                angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
-            print("Current Angle:", angle_FD3to1)
-        elif geometry == 'Full' and density == 'LD':
-            print("Angle calculated with FD6 & FD3")
-            if CompType == 'protomodule':
-                FD3to1 = FDPoints[1] - FDPoints[0]
-            elif CompType == 'module':
-                FD3to1 = FDPoints[2] - FDPoints[5]    
-            if position == 1:
-                angle_FD3to1 = (np.degrees(np.arctan2(FD3to1[0],FD3to1[1])) * -1);
-            if position == 2:
-                angle_FD3to1 = (np.degrees(np.arctan2(-FD3to1[0],-FD3to1[1])) * -1);
+        try:
+            config = ANGLE_CALC_CONFIG[geometry]
+            if isinstance(config, dict):
+                config = config[density] if density in config else config
+                if isinstance(config, dict):
+                    config = config[position]
 
+            angle_FD3to1 = config(FD3to1, FDPoints, CompType)
+        except (KeyError, TypeError) as e:
+            raise ValueError(f"Invalid configuration for geometry={geometry}, density={density}, position={position}")
         
         AngleOffset = angle_FD3to1 - angle_Pin
-        #print("---------------AngleOffset:", AngleOffset, angle_FD3to1, angle_Pin)
+
         return CenterOffset, AngleOffset, XOffset, YOffset
 
     def get_FDs(self) -> np.array:
@@ -398,6 +346,19 @@ class PlotTool:
             raise ValueError("The calculated offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
 
         return NEWX, NEWY, AngleOff
+    
+    @staticmethod
+    def _calculate_height_stats(zheight):
+        """Calculate basic height statistics."""
+        mean_h = np.mean(zheight)
+        std_h = np.std(zheight)
+        max_h = max(zheight)
+        min_h = min(zheight)
+
+        print(f"Average Height = {mean_h:.3f} mm; Maximum Height = {max_h:.3f} mm; Minimum Height = {min_h:.3f} mm")
+        print(f"Height = {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm. \n")
+
+        return mean_h, std_h, max_h, min_h
 
 def vec_angle(x,y):
     angle_arctan = np.degrees(np.arctan2(y,x))
