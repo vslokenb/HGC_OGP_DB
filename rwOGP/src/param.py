@@ -1,6 +1,6 @@
 from colorama import Fore
 import numpy as np
-from helper import calc_basic_angle, calc_five_angle, calc_full_angle
+from src.helper import calc_basic_angle, calc_five_angle, calc_full_angle
 
 baseplates_params = {"vmini": 1.2, "vmaxi": 2.2, "new_angle": 0, "db_table_name": 'bp_inspect', 
                      "mother_table": 'baseplate', "prefix": 'bp'}

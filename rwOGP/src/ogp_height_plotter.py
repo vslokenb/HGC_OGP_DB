@@ -51,8 +51,6 @@ class PlotTool:
         print(f"Center = ({center_x:.3f}, {center_y:.3f}) mm")
         return (center_x, center_y)
     
-
-    
     @staticmethod
     def _prepare_coordinates(x, y, centerxy, rotate, new_angle):
         """Prepare and transform coordinates."""
