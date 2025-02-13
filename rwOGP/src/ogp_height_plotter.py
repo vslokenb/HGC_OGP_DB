@@ -223,7 +223,7 @@ class PlotTool:
 
         angle_Pin = angle_func(pinX, pinY)
 
-        print(f'Angle pin: {angle_Pin}')
+        print(f'Pin Angle: {angle_Pin}')
     
         if density == 'HD':
             if geometry == 'Full':

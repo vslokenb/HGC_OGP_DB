@@ -3,7 +3,8 @@ from ttp import ttp
 import pandas as pd
 from io import StringIO
 
-from src.param import header_template, data_template, required_keys, warning_keys, default_params, pin_mapping
+from src.param import default_params, pin_mapping
+from src.parser_template import header_template, data_template, required_keys, warning_keys
 
 pjoin = os.path.join
 pbase = os.path.basename
