@@ -3,6 +3,75 @@ from os.path import join as pjoin
 
 SETTINGS_FILE = pjoin(os.path.expanduser('~'), ".my-cli-tool", "settings.yaml")
 
+def read_config_files():
+    """Helper function to read both settings and config files."""
+    try:
+        with open(SETTINGS_FILE, 'r') as f:
+            settings = yaml.safe_load(f)
+            config_file = settings['config_path']
+        with open(config_file, 'r') as f:
+            current_config = yaml.safe_load(f)
+        return settings, config_file, current_config
+    except (FileNotFoundError, yaml.YAMLError) as e:
+        print(f"Error reading configuration files: {e}")
+        return None, None, None
+
+def write_config_file(config_file, config_data):
+    """Helper function to write configuration data to file."""
+    try:
+        with open(config_file, 'w') as f:
+            yaml.dump(config_data, f, default_flow_style=False)
+        return True
+    except (IOError, yaml.YAMLError) as e:
+        print(f"Error updating configuration file: {e}")
+        return False
+
+def validate_directory(dir_path):
+    """Validate and create directory if user confirms."""
+    dir_path = os.path.expanduser(dir_path)
+    dir_path = os.path.abspath(dir_path)
+    
+    if not os.path.exists(dir_path):
+        print(f"\nDirectory does not exist: {dir_path}")
+        create = input("Would you like to create it? (y/n): ").strip().lower()
+        if create == 'y':
+            try:
+                os.makedirs(dir_path, exist_ok=True)
+                print(f"Created directory: {dir_path}")
+            except OSError as e:
+                print(f"Error creating directory: {e}")
+                return None
+        else:
+            return None
+    
+    if not os.access(dir_path, os.W_OK):
+        print(f"Warning: No write permission for directory: {dir_path}")
+        proceed = input("Continue anyway? (y/n): ").strip().lower()
+        if proceed != 'y':
+            return None
+    
+    return dir_path
+
+async def verify_db_credentials(host, database, user, password):
+    """Helper function to verify database credentials."""
+    import asyncpg
+    conn = None
+    print(f"Connecting to database {database} at {host} using provided credentials ...")
+    try:
+        conn = await asyncpg.connect(
+            host=host,
+            database=database,
+            user=user,
+            password=password
+        )
+        return True
+    except Exception as e:
+        print(f"Authentication failed: {e}")
+        return False
+    finally:
+        if conn is not None:
+            await conn.close()
+
 def get_config_location():
     """Get the configuration file location based on user preference."""
     print("Do you want to create the config file at a custom location? (y/n)")
@@ -44,15 +113,8 @@ async def update_directorys():
     - ogp_tray_dir: Directory for tray information
     - ogp_image_dir: Directory for OGP images
     """
-    try:
-        # Load current configuration
-        with open(SETTINGS_FILE, 'r') as f:
-            settings = yaml.safe_load(f)
-            config_file = settings['config_path']
-        with open(config_file, 'r') as f:
-            current_config = yaml.safe_load(f)
-    except (FileNotFoundError, yaml.YAMLError) as e:
-        print(f"Error reading configuration files: {e}")
+    _, config_file, current_config = read_config_files()
+    if not current_config:
         return False
 
     # Directory configurations to update
@@ -62,32 +124,6 @@ async def update_directorys():
         'ogp_tray_dir': 'tray information',
         'ogp_image_dir': 'OGP images'
     }
-
-    def validate_directory(dir_path):
-        """Validate and create directory if user confirms."""
-        dir_path = os.path.expanduser(dir_path)
-        dir_path = os.path.abspath(dir_path)
-        
-        if not os.path.exists(dir_path):
-            print(f"\nDirectory does not exist: {dir_path}")
-            create = input("Would you like to create it? (y/n): ").strip().lower()
-            if create == 'y':
-                try:
-                    os.makedirs(dir_path, exist_ok=True)
-                    print(f"Created directory: {dir_path}")
-                except OSError as e:
-                    print(f"Error creating directory: {e}")
-                    return None
-            else:
-                return None
-        
-        if not os.access(dir_path, os.W_OK):
-            print(f"Warning: No write permission for directory: {dir_path}")
-            proceed = input("Continue anyway? (y/n): ").strip().lower()
-            if proceed != 'y':
-                return None
-        
-        return dir_path
 
     missing_dirs = []
     print("\nCurrent directory configurations:")
@@ -189,34 +225,9 @@ async def update_credentials():
     import getpass
     import asyncpg
 
-    try:
-        with open(SETTINGS_FILE, 'r') as f:
-            settings = yaml.safe_load(f)
-            config_file = settings['config_path']
-        with open(config_file, 'r') as f:
-            current_config = yaml.safe_load(f)
-    except (FileNotFoundError, yaml.YAMLError) as e:
-        print(f"Error reading configuration files: {e}")
+    settings, config_file, current_config = read_config_files()
+    if not current_config:
         return False
-
-    async def verify_credentials(host, database, user, password):
-        """Helper function to verify database credentials."""
-        conn = None
-        print(f"Connecting to database {database} at {host} using provided credentials ...")
-        try:
-            conn = await asyncpg.connect(
-                host=host,
-                database=database,
-                user=user,
-                password=password
-            )
-            return True
-        except Exception as e:
-            print(f"Authentication failed: {e}")
-            return False
-        finally:
-            if conn is not None:
-                await conn.close()
 
     def update_config_file(host, database, user, password):
         """Helper function to update configuration file."""
@@ -232,7 +243,7 @@ async def update_credentials():
             print(f"Error updating configuration file: {e}")
             return False
 
-    if not await verify_credentials(
+    if not await verify_db_credentials(
         current_config['host'],
         current_config['database'],
         current_config['user'],
@@ -275,7 +286,7 @@ async def update_credentials():
         print("Passwords do not match!")
         return False
 
-    if not await verify_credentials(new_host, new_database, new_user, new_password):
+    if not await verify_db_credentials(new_host, new_database, new_user, new_password):
         return False
 
     if not update_config_file(new_host, new_database, new_user, new_password):
