@@ -63,9 +63,19 @@ async def update_directorys():
         'ogp_image_dir': 'OGP images'
     }
 
+    missing_dirs = []
     print("\nCurrent directory configurations:")
     for key, desc in dir_configs.items():
-        print(f"{desc}: {current_config[key]}")
+        if key not in current_config:
+            missing_dirs.append(key)
+            current_config[key] = '/path/to/ogp/' + key.replace('ogp_', '').replace('_dir', '')
+        else:
+            print(f"{desc}: {current_config[key]}")
+    if missing_dirs:
+        print("\nWARNING: The following required directories were missing from config and have been added with default values:")
+        for key in missing_dirs:
+            print(f"- {dir_configs[key]}: {current_config[key]}")
+        print("Please update these directories to valid paths.")
 
     print("\nWhich directory would you like to update?")
     print("1. OGP survey directory")
