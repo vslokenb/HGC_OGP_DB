@@ -402,7 +402,7 @@ def plotFD(FDpoints:np.array, holeXY:tuple, slotXY:tuple, save=False, save_name=
         if not np.isnan(x) and not np.isnan(y):
             plt.annotate(FDnames[i], (x, y))
     
-    plt.xlim(50,190)
+    plt.xlim(50,350)
     plt.xlabel("x [mm]")
     plt.ylabel("y [mm]")
 
