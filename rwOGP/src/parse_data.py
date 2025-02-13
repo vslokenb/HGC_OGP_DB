@@ -28,11 +28,20 @@ class DataParser():
         self.output_dir = output_dir
 
         input_parent = os.path.dirname(data_file[0])
+        self.backup_dir = pjoin(input_parent, '.backup')
+
         if input_parent == self.output_dir:
             raise ParserKeyException("Input and output directories of the DataParser cannot be the same.")
         
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        try:
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            
+            if not os.path.exists(self.backup_dir):
+                os.makedirs(self.backup_dir)
+            
+        except OSError as e:
+            raise ParserKeyException(f"Error creating output directory: {e}")
     
     def __call__(self) -> tuple:
         """Parse data file produced by default OGP template. Create metadata file and output feature results to a csv file.
@@ -44,13 +53,21 @@ class DataParser():
         gen_features = []
         print("=== Parsing OGP Data ===")
         for filename in self.data_file:
-            self.data = open(filename, 'r').read()
+            with open(filename, 'r') as f:
+                self.data = f.read()
             print("Parsing data file:", pbase(filename))
+
+            backup_file = pjoin(self.backup_dir, pbase(filename))
+            if not os.path.exists(backup_file):
+                with open(backup_file, 'w') as f:
+                    f.write(self.data)
+            
             self.read_temp_sep()
-            filename = self.output_meta()
-            self.output_features(f'{filename}.csv')
-            gen_features.append(pjoin(self.output_dir, f'{filename}.csv'))
-            gen_meta.append(pjoin(self.output_dir, f'{filename}_meta.yaml'))
+            output_filename = self.output_meta()
+            self.output_features(f'{output_filename}.csv')
+
+            gen_features.append(pjoin(self.output_dir, f'{output_filename}.csv'))
+            gen_meta.append(pjoin(self.output_dir, f'{output_filename}_meta.yaml'))
         return gen_meta, gen_features
 
     def read_temp_sep(self, header_template=header_template, feature_template=data_template, delimiter='---'):
