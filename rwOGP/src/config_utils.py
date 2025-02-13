@@ -63,34 +63,6 @@ async def update_directorys():
         'ogp_image_dir': 'OGP images'
     }
 
-    missing_dirs = []
-    print("\nCurrent directory configurations:")
-    for key, desc in dir_configs.items():
-        if key not in current_config:
-            missing_dirs.append(key)
-            current_config[key] = '/path/to/ogp/' + key.replace('ogp_', '').replace('_dir', '')
-        else:
-            print(f"{desc}: {current_config[key]}")
-    if missing_dirs:
-        print("\nWARNING: The following required directories were missing from config and have been added with default values:")
-        for key in missing_dirs:
-            print(f"- {dir_configs[key]}: {current_config[key]}")
-        print("Please update these directories to valid paths.")
-
-    print("\nWhich directory would you like to update?")
-    print("1. OGP survey directory")
-    print("2. Parsed data directory")
-    print("3. Tray information directory")
-    print("4. Image directory")
-    print("5. All directories")
-    print("6. Cancel")
-
-    choice = input("Enter your choice (1-6): ").strip()
-
-    if choice == '6':
-        print("Operation cancelled.")
-        return False
-
     def validate_directory(dir_path):
         """Validate and create directory if user confirms."""
         dir_path = os.path.expanduser(dir_path)
@@ -116,6 +88,48 @@ async def update_directorys():
                 return None
         
         return dir_path
+
+    missing_dirs = []
+    print("\nCurrent directory configurations:")
+    for key, desc in dir_configs.items():
+        if key not in current_config:
+            missing_dirs.append(key)
+        else:
+            print(f"{desc}: {current_config[key]}")
+    if missing_dirs:
+        print("\nWARNING: The following required directories were missing from config and have been added with default values:")
+        for key in missing_dirs:
+            print(f"\nSetting up {dir_configs[key]} directory")
+            while True:
+                new_path = input(f"Enter path for {dir_configs[key]}: ").strip()
+                if not new_path:
+                    print("Path cannot be empty. Please enter a valid path.")
+                    continue
+                validated_path = validate_directory(new_path)
+                if validated_path:
+                    current_config[key] = validated_path
+                    print(f"Successfully set {dir_configs[key]} to: {validated_path}")
+                else:
+                    retry = input("Would you like to try another path? (y/n): ").strip().lower()
+                    if retry != 'y':
+                        current_config[key] = '/path/to/ogp/' + key.replace('ogp_', '').replace('_dir', '')
+                        print(f"Using default path: {current_config[key]}")
+                        print("You can update this later using the directory update menu.")
+                        break
+
+    print("\nWhich directory would you like to update?")
+    print("1. OGP survey directory")
+    print("2. Parsed data directory")
+    print("3. Tray information directory")
+    print("4. Image directory")
+    print("5. All directories")
+    print("6. Cancel")
+
+    choice = input("Enter your choice (1-6): ").strip()
+
+    if choice == '6':
+        print("Operation cancelled.")
+        return False
 
     def update_single_directory(key, desc):
         """Update a single directory configuration."""
