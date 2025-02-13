@@ -9,7 +9,7 @@ if src_dir not in sys.path:
     sys.path.append(src_dir)
 
 from src.auto_upload import InventoryUpdater
-from src.config_utils import load_config, create_default_config, update_credentials
+from src.config_utils import load_config, create_default_config, update_credentials, update_directorys
 from src.invent_utils import invent_print, clear_invent
 
 program_descriptions = """This program is used to automatically upload results to the OGP database. 
@@ -40,7 +40,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=program_descriptions)
     parser.add_argument("--print", action='store_true', help="Print the current inventory.")
     parser.add_argument("--clear", action='store_true', help="Clear the current inventory. Note that these do not delete the OGP output files. They only remove the files from being marked as uploaded in the inventory.")
-    parser.add_argument("--update", action='store_true', help="Update the credentials in the configuration file.")
+    parser.add_argument("--updatedb", action='store_true', help="Update the credentials in the configuration file.")
+    parser.add_argument("--updatedir", action='store_true', help="Update the directory paths for OGP outputs/processing in the configuration file.")
     parser.add_argument("--type", type=str, default='', help="Specify the type of component to process and upload. If not specified, all components will be processed.")
 
     args = parser.parse_args()
@@ -52,9 +53,13 @@ if __name__ == "__main__":
         print("Clearing the current inventory...")
         clear_invent()
         sys.exit(0)
-    if args.update:
+    if args.updatedb:
         print("Updating credentials...")
         result = asyncio.run(update_credentials())
+        sys.exit(0)
+    if args.updatedir:
+        print("Updating directory paths...")
+        result = asyncio.run(update_directorys())
         sys.exit(0)
 
     asyncio.run(main_func(args.type))

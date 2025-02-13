@@ -31,8 +31,121 @@ def get_default_config():
         'institution_name': 'Carnegie Mellon University',
         'ogp_survey_dir': '/path/to/ogp/survey/directory',
         'ogp_parsed_dir': '/path/to/ogp/parsed/directory',
-        'ogp_tray_dir': '/path/to/ogp/tray/directory'
+        'ogp_tray_dir': '/path/to/ogp/tray/directory',
+        'ogp_image_dir': '/path/to/ogp/image/directory',
     }
+
+async def update_directorys():
+    """Update directory paths in the configuration file.
+    
+    Updates the following directory configurations:
+    - ogp_survey_dir: Directory containing OGP survey files
+    - ogp_parsed_dir: Directory for parsed OGP data
+    - ogp_tray_dir: Directory for tray information
+    - ogp_image_dir: Directory for OGP images
+    """
+    try:
+        # Load current configuration
+        with open(SETTINGS_FILE, 'r') as f:
+            settings = yaml.safe_load(f)
+            config_file = settings['config_path']
+        with open(config_file, 'r') as f:
+            current_config = yaml.safe_load(f)
+    except (FileNotFoundError, yaml.YAMLError) as e:
+        print(f"Error reading configuration files: {e}")
+        return False
+
+    # Directory configurations to update
+    dir_configs = {
+        'ogp_survey_dir': 'OGP survey files',
+        'ogp_parsed_dir': 'parsed OGP data',
+        'ogp_tray_dir': 'tray information',
+        'ogp_image_dir': 'OGP images'
+    }
+
+    print("\nCurrent directory configurations:")
+    for key, desc in dir_configs.items():
+        print(f"{desc}: {current_config[key]}")
+
+    print("\nWhich directory would you like to update?")
+    print("1. OGP survey directory")
+    print("2. Parsed data directory")
+    print("3. Tray information directory")
+    print("4. Image directory")
+    print("5. All directories")
+    print("6. Cancel")
+
+    choice = input("Enter your choice (1-6): ").strip()
+
+    if choice == '6':
+        print("Operation cancelled.")
+        return False
+
+    def validate_directory(dir_path):
+        """Validate and create directory if user confirms."""
+        dir_path = os.path.expanduser(dir_path)
+        dir_path = os.path.abspath(dir_path)
+        
+        if not os.path.exists(dir_path):
+            print(f"\nDirectory does not exist: {dir_path}")
+            create = input("Would you like to create it? (y/n): ").strip().lower()
+            if create == 'y':
+                try:
+                    os.makedirs(dir_path, exist_ok=True)
+                    print(f"Created directory: {dir_path}")
+                except OSError as e:
+                    print(f"Error creating directory: {e}")
+                    return None
+            else:
+                return None
+        
+        if not os.access(dir_path, os.W_OK):
+            print(f"Warning: No write permission for directory: {dir_path}")
+            proceed = input("Continue anyway? (y/n): ").strip().lower()
+            if proceed != 'y':
+                return None
+        
+        return dir_path
+
+    def update_single_directory(key, desc):
+        """Update a single directory configuration."""
+        print(f"\nUpdating {desc} directory")
+        new_path = input(f"Enter new path [{current_config[key]}]: ").strip()
+        
+        if not new_path:  # Keep existing path
+            return True
+            
+        validated_path = validate_directory(new_path)
+        if validated_path:
+            current_config[key] = validated_path
+            return True
+        return False
+
+    success = True
+    if choice == '5':  # Update all directories
+        for key, desc in dir_configs.items():
+            if not update_single_directory(key, desc):
+                success = False
+                break
+    elif choice in ['1', '2', '3', '4']:
+        # Map choice to directory key
+        key = list(dir_configs.keys())[int(choice) - 1]
+        success = update_single_directory(key, dir_configs[key])
+    else:
+        print("Invalid choice!")
+        return False
+
+    if success:
+        try:
+            with open(config_file, 'w') as f:
+                yaml.dump(current_config, f, default_flow_style=False)
+            print("\nDirectory configuration updated successfully!")
+            return True
+        except (IOError, yaml.YAMLError) as e:
+            print(f"Error updating configuration file: {e}")
+            return False
+    
+    return False
 
 async def update_credentials():
     """Update database credentials and/or database connection details after authenticating with current ones."""

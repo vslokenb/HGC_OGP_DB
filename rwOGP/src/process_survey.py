@@ -29,7 +29,7 @@ class SurveyProcessor():
                 raise ValueError('Parsed OGP result must be a csv file.')
             self.OGPSurveyFile[i] = file.replace('\\', '/')
         
-        im_dir = pjoin(pdir(self.OGPSurveyFile[0]), 'images')
+        im_dir = yamlconfig.get('ogp_image_dir')
         if not os.path.exists(im_dir):
             os.makedirs(im_dir)
         self.im_dir = im_dir
