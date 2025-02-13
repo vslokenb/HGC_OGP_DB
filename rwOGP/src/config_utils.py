@@ -104,6 +104,52 @@ def get_default_config():
         'ogp_image_dir': '/path/to/ogp/image/directory',
     }
 
+def verify_config():
+    """
+    Verify that the configuration file has all required keys and valid directory paths.
+    Returns (bool, list): A tuple containing:
+        - Boolean indicating if config is valid
+        - List of error messages if any
+    """
+    _, config_file, current_config = read_config_files()
+    if not current_config:
+        return False, ["Configuration file could not be read"]
+    
+    errors = []
+    
+    # Required directory paths
+    dir_keys = {
+        'ogp_survey_dir': 'OGP survey files',
+        'ogp_parsed_dir': 'parsed OGP data',
+        'ogp_tray_dir': 'tray information',
+        'ogp_image_dir': 'OGP images'
+    }
+    
+    # Check directory paths
+    for key, desc in dir_keys.items():
+        if key not in current_config:
+            errors.append(f"Missing directory configuration for {desc}")
+            continue
+            
+        dir_path = current_config[key]
+        if not dir_path:
+            errors.append(f"Empty path for {desc}")
+            continue
+            
+        # Expand path
+        dir_path = os.path.expanduser(dir_path)
+        dir_path = os.path.abspath(dir_path)
+        
+        if not os.path.exists(dir_path):
+            errors.append(f"Directory does not exist: {dir_path} ({desc})")
+        elif not os.path.isdir(dir_path):
+            errors.append(f"Path is not a directory: {dir_path} ({desc})")
+        elif not os.access(dir_path, os.W_OK):
+            errors.append(f"No write permission for directory: {dir_path} ({desc})")
+    
+    is_valid = len(errors) == 0
+    return is_valid, errors
+
 async def update_directorys():
     """Update directory paths in the configuration file.
     
