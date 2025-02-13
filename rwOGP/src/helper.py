@@ -32,12 +32,12 @@ def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
     if comp_type == 'protomodule':
         points_diff = fdpoints[1] - fdpoints[0] # vector from FD1 to FD2
         angle = np.degrees(np.arctan2(
-            sign * points_diff[0],
-            sign * points_diff[1]))
+            sign * points_diff[1],
+            sign * points_diff[0]))
         print(f"Angle of FD1 -> FD2: {angle}")
     else:
         points_diff = fdpoints[2] - fdpoints[5]
         angle = np.degrees(np.arctan2(
-            sign * points_diff[0],
-            sign * points_diff[1]) * -1)
+            sign * points_diff[1],
+            sign * points_diff[0]) * -1)
     return angle

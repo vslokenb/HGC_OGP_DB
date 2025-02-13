@@ -311,6 +311,7 @@ class PlotTool:
         TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
         print(f"Using Tray {TrayNo} info...")
         
+        print(f"Geometry: {Geometry}; Density: {density}; PositionID: {PositionID}; Comp_Type: {self.comp_type}")
 
         with open(TrayFile, 'r') as f:
             trayinfo = yaml.safe_load(f)
@@ -328,7 +329,7 @@ class PlotTool:
         plotFD(FD_points, HolePin_xy, SlotPin_xy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))
         
         print(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} \n')
-        print(f"Geometry: {Geometry}; Density: {density}; PositionID: {PositionID}; Comp_Type: {self.comp_type}")
+        
 
         CenterOff, AngleOff, XOffset, YOffset = self.angle(HolePin_xy, SlotPin_xy, FD_points)
 
