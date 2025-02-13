@@ -100,22 +100,35 @@ async def update_directorys():
         print("\nWARNING: The following required directories were missing from config and have been added with default values:")
         for key in missing_dirs:
             print(f"\nSetting up {dir_configs[key]} directory")
-            while True:
+            max_attempts = 3 
+            attempts = 0
+            while attempts < max_attempts:
+                attempts += 1
                 new_path = input(f"Enter path for {dir_configs[key]}: ").strip()
+
                 if not new_path:
                     print("Path cannot be empty. Please enter a valid path.")
                     continue
+
                 validated_path = validate_directory(new_path)
                 if validated_path:
                     current_config[key] = validated_path
                     print(f"Successfully set {dir_configs[key]} to: {validated_path}")
-                else:
+                    break # break out of while loop if success
+                
+                if attempts < max_attempts:
                     retry = input("Would you like to try another path? (y/n): ").strip().lower()
                     if retry != 'y':
                         current_config[key] = '/path/to/ogp/' + key.replace('ogp_', '').replace('_dir', '')
                         print(f"Using default path: {current_config[key]}")
                         print("You can update this later using the directory update menu.")
                         break
+            if attempts == max_attempts:
+                print("Max attempts reached. Skipping directory setup.")
+                current_config[key] = '/path/to/ogp/' + key.replace('ogp_', '').replace('_dir', '')
+                print(f"Using default path: {current_config[key]}")
+                print("This does not guarantee that the path is valid. Please update this later using the directory update menu.")
+                break
 
     print("\nWhich directory would you like to update?")
     print("1. OGP survey directory")
