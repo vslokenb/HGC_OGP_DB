@@ -187,6 +187,8 @@ class DataParser():
         header_dict['Flatness'] = float(header_dict['Flatness'])
         if header_dict.get("Thickness") is not None:
             header_dict['Thickness'] = float(header_dict['Thickness'])
+        if header_dict.get("Thickness_Offset") is not None:
+            header_dict['Thickness_Offset'] = float(header_dict['Thickness_Offset'])
         return header_dict
         
     def adopt_default(self, header_dict):
