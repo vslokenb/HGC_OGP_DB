@@ -167,52 +167,63 @@ async def update_directorys():
         'ogp_image_dir': 'OGP images'
     }
 
-    missing_dirs = []
+    def set_default_path(key):
+        """Set and save default path for a directory."""
+        default_path = '/path/to/ogp/' + key.replace('ogp_', '').replace('_dir', '')
+        current_config[key] = default_path
+        if write_config_file(config_file, current_config):
+            print(f"Using default path: {default_path}")
+            print("You can update this later using the directory update menu.")
+            return True
+        print("Failed to save configuration file")
+        return False
+
+    def handle_directory_setup(key, desc, max_attempts=3):
+        """Handle the directory setup process with validation and saving."""
+        for attempt in range(max_attempts):
+            new_path = input(f"Enter path for {desc}: ").strip()
+
+            if not new_path:
+                print("Path cannot be empty. Please enter a valid path.")
+                continue
+
+            validated_path = validate_directory(new_path)
+            if validated_path:
+                current_config[key] = validated_path
+                if write_config_file(config_file, current_config):
+                    print(f"Successfully set {desc} to: {validated_path}")
+                    return True
+                print("Failed to save configuration file")
+                return False
+
+            if attempt < max_attempts - 1:
+                if input("Would you like to try another path? (y/n): ").strip().lower() != 'y':
+                    return set_default_path(key)
+
+        print("Max attempts reached. Skipping directory setup.")
+        return set_default_path(key)
+
+    # Display current configuration
     print("\nCurrent directory configurations:")
+    missing_dirs = []
     for key, desc in dir_configs.items():
         if key not in current_config:
             missing_dirs.append(key)
         else:
             print(f"{desc}: {current_config[key]}")
+
+    # Handle missing directories
     if missing_dirs:
         print("\nWARNING: The following required directories were missing from config and have been added with default values:")
         for key in missing_dirs:
             print(f"\nSetting up {dir_configs[key]} directory")
-            max_attempts = 3 
-            attempts = 0
-            while attempts < max_attempts:
-                attempts += 1
-                new_path = input(f"Enter path for {dir_configs[key]}: ").strip()
+            if not handle_directory_setup(key, dir_configs[key]):
+                return False
 
-                if not new_path:
-                    print("Path cannot be empty. Please enter a valid path.")
-                    continue
-
-                validated_path = validate_directory(new_path)
-                if validated_path:
-                    current_config[key] = validated_path
-                    print(f"Successfully set {dir_configs[key]} to: {validated_path}")
-                    break # break out of while loop if success
-                
-                if attempts < max_attempts:
-                    retry = input("Would you like to try another path? (y/n): ").strip().lower()
-                    if retry != 'y':
-                        current_config[key] = '/path/to/ogp/' + key.replace('ogp_', '').replace('_dir', '')
-                        print(f"Using default path: {current_config[key]}")
-                        print("You can update this later using the directory update menu.")
-                        break
-            if attempts == max_attempts:
-                print("Max attempts reached. Skipping directory setup.")
-                current_config[key] = '/path/to/ogp/' + key.replace('ogp_', '').replace('_dir', '')
-                print(f"Using default path: {current_config[key]}")
-                print("This does not guarantee that the path is valid. Please update this later using the directory update menu.")
-                break
-
+    # Menu for directory updates
     print("\nWhich directory would you like to update?")
-    print("1. OGP survey directory")
-    print("2. Parsed data directory")
-    print("3. Tray information directory")
-    print("4. Image directory")
+    for i, (_, desc) in enumerate(dir_configs.items(), 1):
+        print(f"{i}. {desc}")
     print("5. All directories")
     print("6. Cancel")
 
@@ -222,44 +233,17 @@ async def update_directorys():
         print("Operation cancelled.")
         return False
 
-    def update_single_directory(key, desc):
-        """Update a single directory configuration."""
-        print(f"\nUpdating {desc} directory")
-        new_path = input(f"Enter new path [{current_config[key]}]: ").strip()
-        
-        if not new_path:  # Keep existing path
-            return True
-            
-        validated_path = validate_directory(new_path)
-        if validated_path:
-            current_config[key] = validated_path
-            return True
-        return False
-
-    success = True
     if choice == '5':  # Update all directories
         for key, desc in dir_configs.items():
-            if not update_single_directory(key, desc):
-                success = False
-                break
-    elif choice in ['1', '2', '3', '4']:
-        # Map choice to directory key
-        key = list(dir_configs.keys())[int(choice) - 1]
-        success = update_single_directory(key, dir_configs[key])
-    else:
-        print("Invalid choice!")
-        return False
+            if not handle_directory_setup(key, desc):
+                return False
+        return True
 
-    if success:
-        try:
-            with open(config_file, 'w') as f:
-                yaml.dump(current_config, f, default_flow_style=False)
-            print("\nDirectory configuration updated successfully!")
-            return True
-        except (IOError, yaml.YAMLError) as e:
-            print(f"Error updating configuration file: {e}")
-            return False
-    
+    if choice in ['1', '2', '3', '4']:
+        key = list(dir_configs.keys())[int(choice) - 1]
+        return handle_directory_setup(key, dir_configs[key])
+
+    print("Invalid choice!")
     return False
 
 async def update_credentials():
