@@ -35,9 +35,11 @@ class DataParser():
         
         try:
             if not os.path.exists(output_dir):
+                print("Creating parsed output directory:", output_dir)
                 os.makedirs(output_dir)
             
             if not os.path.exists(self.backup_dir):
+                print("Creating backup directory:", self.backup_dir)
                 os.makedirs(self.backup_dir)
             
         except OSError as e:
