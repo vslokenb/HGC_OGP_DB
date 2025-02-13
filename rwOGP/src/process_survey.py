@@ -73,7 +73,14 @@ class SurveyProcessor():
         db_upload = {name_field: compID}
 
         if singular_type == 'baseplate' or singular_type == 'hexaboard':
-            db_upload.update({'flatness': np.round(metadata['Flatness'],3), 'thickness': np.round(np.mean(plotter.z_points),3)})
+            Offset = metadata.get("Thickness_Offset", 0)
+            report_thick = metadata.get("Thickness", None)
+            if report_thick is not None:
+                print(f"Unconstrained thickness reported by OGP {report_thick} - Offset: {Offset}")
+                report_thick -= Offset
+            avg_thick = np.round(np.mean(plotter.z_points), 3) - Offset
+            print(f"Thickness by averaging reported points after subtracting offset {Offset}: {avg_thick}")
+            db_upload.update({'flatness': np.round(metadata['Flatness'],3), 'thickness': avg_thick})
         elif singular_type == 'protomodule' or singular_type == 'module':
             XOffset, YOffset, AngleOff = plotter.get_offsets()
             db_upload.update({'x_offset_mu':np.round(XOffset*1000), 'y_offset_mu':np.round(YOffset*1000), 'ang_offset_deg':np.round(AngleOff,3),
