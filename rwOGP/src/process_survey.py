@@ -57,7 +57,9 @@ class SurveyProcessor():
         singular_type = comp_type.rstrip('s')
         compID = metadata['ComponentID']
 
-        if singular_type == 'protomodule': compID = compID.replace('ML', 'PL', 1)
+        if singular_type == 'protomodule': 
+            compID = compID.replace('ML', 'PL', 1)
+            metadata['ComponentID'] = compID
             
         df = pd.read_csv(ex_file)
         plotter = PlotTool(metadata, comp_type, df, self.tray_dir, pjoin(self.im_dir, comp_type))
