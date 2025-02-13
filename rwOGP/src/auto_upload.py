@@ -189,7 +189,8 @@ class InventoryUpdater():
         for subdir, files in invent.items():
             inputs = [pjoin(self.checkdir, subdir, file) for file in files]
             if inputs:
-                dp = DataParser(inputs, self.parsed_dir)
+                parse_output_dir = pjoin(self.parsed_dir, subdir)
+                dp = DataParser(inputs, parse_output_dir)
                 try: 
                     gen_meta, gen_features = dp()
                 except ParserKeyException as e:
