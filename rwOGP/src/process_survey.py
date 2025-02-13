@@ -3,7 +3,7 @@ import pandas as pd
 import send2trash, yaml, os
 import matplotlib
 matplotlib.use('Agg')
-from src.ogp_height_plotter import PlotTool, grade, ValueMissingError
+from src.ogp_height_plotter import PlotTool, grade, ValueMissingError, ValueRangeError
 from src.upload_inspect import DBClient
 from src.make_accuracy_plot import make_accuracy_plot
 from src.param import COMPONENT_PARAMS, COMP_PREFIX
@@ -94,6 +94,7 @@ class SurveyProcessor():
                    "new_angle": component_params['new_angle'], "savename": pjoin(self.im_dir, comp_type, f"{filesuffix}_heights"),
                    "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": False}
         
+        print("###### Generating Image for", compID, " #######")
         im_bytes = plotter(**im_args)
 
         db_upload.update({'x_points':(plotter.x_points).tolist(), 'y_points':(plotter.y_points).tolist(), 
@@ -118,6 +119,12 @@ class SurveyProcessor():
             try: 
                 db_upload, comp_params, compID = await self.__getArgs__(ex_file, meta_file, comp_type)
             except ValueMissingError as e:
+                print("!" * 90)
+                print(f"Error in {ex_file}: {e}")
+                return False, last_successful_index
+            except ValueRangeError as e:
+                print("!" * 90)
+                print(f"Error in {ex_file}: {e}")
                 return False, last_successful_index
             self.print_db_msg(comp_type, compID)
             status = await self.client.link_and_update_table(comp_params, db_upload)

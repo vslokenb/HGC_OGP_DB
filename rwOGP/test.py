@@ -27,9 +27,9 @@ if __name__ == '__main__':
             "new_angle": component_params['new_angle'], "savename": "ex_heights",
             "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": True}
 
-    XOffset, Yoffset, AngleOff = PT.get_offsets()
-    make_accuracy_plot(metadata['ComponentID'], XOffset, Yoffset, AngleOff, 0, 0, 0)
+    # XOffset, Yoffset, AngleOff = PT.get_offsets()
+    # make_accuracy_plot(metadata['ComponentID'], XOffset, Yoffset, AngleOff, 0, 0, 0)
 
-    # PT(**im_args)
+    PT(**im_args)
 
 

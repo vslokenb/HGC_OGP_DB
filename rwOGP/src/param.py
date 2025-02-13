@@ -69,7 +69,7 @@ ANGLE_CALC_CONFIG = {
     'Bottom': lambda fd3to1, *_: calc_basic_angle(fd3to1),
     'Top': {
         'LD': {
-            1: lambda fd3to1, *_: calc_basic_angle(fd3to1),
+            1: lambda fd3to1, *_: calc_basic_angle(-fd3to1),
             2: lambda fd3to1, *_: calc_basic_angle(fd3to1),
         },
         'HD': {

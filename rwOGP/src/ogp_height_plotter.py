@@ -11,6 +11,9 @@ pjoin = os.path.join
 class ValueMissingError(Exception):
     pass
 
+class ValueRangeError(Exception):
+    pass
+
 class PlotTool:
     def __init__(self, meta, component_type, features: 'pd.DataFrame', tray_dir, save_dir=None):
         """
@@ -339,9 +342,9 @@ class PlotTool:
         print(f"Rotational Offset is {AngleOff:.5f} degrees; Center Offset is {CenterOff:.3f} mm")
 
         if abs(AngleOff) > 20:
-            raise ValueError("The calculated angle offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
+            raise ValueRangeError("The calculated angle offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
         if abs(XOffset) > 5 or abs(YOffset) > 5:
-            raise ValueError("The calculated offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
+            raise ValueRangeError("The calculated offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
 
         return NEWX, NEWY, AngleOff
     

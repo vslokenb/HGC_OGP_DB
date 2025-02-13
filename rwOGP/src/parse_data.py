@@ -25,6 +25,10 @@ class DataParser():
         
         self.data_file = data_file
         self.output_dir = output_dir
+
+        input_parent = os.path.dirname(data_file[0])
+        if input_parent == self.output_dir:
+            raise ParserKeyException("Input and output directories of the DataParser cannot be the same.")
         
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
