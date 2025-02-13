@@ -9,7 +9,7 @@ if src_dir not in sys.path:
     sys.path.append(src_dir)
 
 from src.auto_upload import InventoryUpdater
-from src.config_utils import load_config, create_default_config, update_credentials, update_directorys
+from src.config_utils import load_config, create_default_config, update_credentials, update_directorys, verify_config
 from src.invent_utils import invent_print, clear_invent
 
 program_descriptions = """This program is used to automatically upload results to the OGP database. 
@@ -32,6 +32,11 @@ async def main_func(comp_type):
         print("\n \nUsing configuration file to create database client...")
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
+        
+        status, message = verify_config(config)
+        if not status:
+            print(message)
+            return
     
     updater = InventoryUpdater(invent_path, config, comp_type)
     await updater()

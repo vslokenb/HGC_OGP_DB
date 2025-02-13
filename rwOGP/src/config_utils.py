@@ -104,17 +104,13 @@ def get_default_config():
         'ogp_image_dir': '/path/to/ogp/image/directory',
     }
 
-def verify_config():
+def verify_config(current_config):
     """
     Verify that the configuration file has all required keys and valid directory paths.
     Returns (bool, list): A tuple containing:
         - Boolean indicating if config is valid
         - List of error messages if any
     """
-    _, config_file, current_config = read_config_files()
-    if not current_config:
-        return False, ["Configuration file could not be read"]
-    
     errors = []
     
     # Required directory paths
