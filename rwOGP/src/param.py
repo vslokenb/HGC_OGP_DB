@@ -1,6 +1,6 @@
 from colorama import Fore
 import numpy as np
-from src.helper import calc_basic_angle, calc_five_angle, calc_full_angle
+from src.helper import calc_basic_angle, calc_five_angle, calc_full_angle, calc_HDfull_angle
 
 baseplates_params = {"vmini": 1.2, "vmaxi": 2.2, "new_angle": 0, "db_table_name": 'bp_inspect', 
                      "mother_table": 'baseplate', "prefix": 'bp'}
@@ -95,8 +95,8 @@ ANGLE_CALC_CONFIG = {
     },
     'Full': {
         'HD': {
-            1: lambda fd3to1, fdpoints, *_: calc_full_angle(fdpoints, None),
-            2: lambda fd3to1, fdpoints, *_: calc_full_angle(fdpoints, None, True),
+            1: lambda fd3to1, fdpoints, *_: calc_HDfull_angle(fdpoints, None),
+            2: lambda fd3to1, fdpoints, *_: calc_HDfull_angle(fdpoints, None, True),
         },
         'LD': {
             1: lambda fd3to1, fdpoints, comp_type: calc_full_angle(fdpoints, comp_type),
