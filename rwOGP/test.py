@@ -11,6 +11,7 @@ if src_dir not in sys.path:
 from src.parse_data import DataParser
 from src.ogp_height_plotter import PlotTool
 from src.param import modules_params as component_params
+from src.config_utils import setup_loggings
 # from src.make_accuracy_plot import make_accuracy_plot
 
 if __name__ == '__main__':
@@ -19,6 +20,8 @@ if __name__ == '__main__':
 
     with open(meta[0], 'r') as f:
         metadata = yaml.safe_load(f)
+        
+    setup_loggings()
 
     feature_df = pd.read_csv(features[0])
     PT = PlotTool(metadata, "protomodules", feature_df, 'rwOGP/templates/trays', 'tests')
