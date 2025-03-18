@@ -1,0 +1,118 @@
+               
+Step3_2_protomodule_constrained_survey
+LastModified: 02:26:25 10:23:33		
+Runtime: 02:26:25 10:30:45
+Component ID: 320PLF3W2CM0121 
+Operator: jestein   
+Geometry: Full
+Density: LD
+Sensor size:  
+Flatness: 0.196
+Thickness: 2.209
+Thickness_Offset: 
+Position ID: 1
+TrayNo: 1
+Comment: 
+---
+BestfitPlane Pos1_ProtomoduleThickness
+Point       140.27827186584      288.82946893076        2.20872340541
+direction cosine:       -0.00288115113       -0.00200071176       -0.99999384804
+Circle TrayFiducial2
+Point         0.00001125381      392.80675293586       -8.91897442696
+direction cosine:        0.00188981867        0.00004441505        0.99999821330
+Radius                0.0470
+Circle Pos1_FD1
+Point        57.92389379886      325.86708743182        2.34424539075
+direction cosine:        0.00215044536        0.00003910932        0.99999768702
+Radius                0.1225
+Circle Pos1_FD2
+Point       223.92566221129      326.58131595566        1.83890782061
+direction cosine:        0.00166393614       -0.00019622765        0.99999859640
+Radius                0.1226
+Circle Pos1_FD3
+Point        58.24962401298      249.86352566572        2.46537920428
+direction cosine:        0.00194628683        0.00017790984        0.99999809016
+Radius                0.1225
+Circle Pos1_FD4
+Point       224.25228891616      250.57869504109        1.96446533843
+direction cosine:        0.00184923776       -0.00008494884        0.99999828655
+Radius                0.1225
+Plane Pos1_PMThickness1
+Point       133.70201491447      199.79886083651        2.36060278627
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness2
+Point       149.65442979602      200.11518604703        2.31302560606
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness3
+Point       178.65009346828      219.57874875320        2.20757383406
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness4
+Point       210.29295569948      239.86028375295        2.04722409095
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness5
+Point       220.73752247989      250.16966946423        1.99198241340
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness6
+Point       217.84560742183      285.70721160089        1.99451605322
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness7
+Point       219.59053495197      327.16914933740        1.87127453754
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness8
+Point       211.05722953359      340.84331682569        1.86414851383
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness9
+Point       178.40544397741      359.11683699052        1.93184001824
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness10
+Point       147.71212437704      377.31158702638        1.93137765291
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness11
+Point       133.04524855115      376.37141992192        1.98241213806
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness12
+Point        99.67280929857      356.53649201129        2.15148861481
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness13
+Point        71.75712299661      339.74447889744        2.25966714150
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness14
+Point        61.70271229012      325.39571758389        2.34708440755
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness15
+Point        61.81749507671      289.55800175770        2.45492775320
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness16
+Point        61.94726271440      248.46189470187        2.46858818116
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness17
+Point        65.37825797593      241.81204918535        2.45998761263
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness18
+Point       101.42034364623      221.48383893809        2.43060822207
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness19
+Point       116.69936104110      254.43081060379        2.40834490916
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness20
+Point       160.29110987635      254.57183981819        2.30055270832
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness21
+Point       178.31329061726      287.26148213746        2.22960833908
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness22
+Point       162.75250068308      322.04846610463        2.20164292328
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness23
+Point       116.35830201225      321.89871689477        2.29041829228
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness24
+Point       103.80071493356      290.25968767305        2.39919928173
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+Plane Pos1_PMThickness25
+Point       144.35230831272      291.23097640480        2.31998910400
+direction cosine:        0.00187188747       -0.00008729311        0.99999824421
+BestfitPlane Pos1_ProtomoduleThickness
+Point       140.27827186584      288.82946893076        2.20872340541
+direction cosine:       -0.00288115113       -0.00200071176       -0.99999384804
+     

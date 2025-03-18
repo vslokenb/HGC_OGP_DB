@@ -1,6 +1,9 @@
 from colorama import Fore
 import numpy as np
 from src.helper import calc_basic_angle, calc_five_angle, calc_full_angle, calc_HDfull_angle
+import logging
+
+from src.helper import calc_basic_angle, calc_five_angle, calc_full_angle
 
 baseplates_params = {"vmini": 1.2, "vmaxi": 2.2, "new_angle": 0, "db_table_name": 'bp_inspect', 
                      "mother_table": 'baseplate', "prefix": 'bp'}
@@ -105,21 +108,28 @@ ANGLE_CALC_CONFIG = {
     }
 }
 
+def calc_ref_angle(pinx, pinY, sign):
+    if sign == 1:
+        logging.debug("Using Angle of Hole(Center) --> Slot(OffCenter) for rotational reference")
+    else:
+        logging.debug("Using Angle of Slot(OffCenter) --> Hole(Center) for rotational reference")
+    return np.degrees(np.arctan2(sign * pinY, sign * pinx))
+
 angle_lookup = {
     'Full': {
         'HD': {
-            1: lambda pinX, pinY: np.degrees(np.arctan2(-pinY, -pinX)),
-            2: lambda pinX, pinY: np.degrees(np.arctan2(pinY, pinX))
+            1: lambda pinX, pinY: calc_ref_angle(pinX, pinY, -1),
+            2: lambda pinX, pinY: calc_ref_angle(pinX, pinY, 1)
         },
         'LD': {
-            1: lambda pinX, pinY: np.degrees(np.arctan2(-pinY, -pinX)),
-            2: lambda pinX, pinY: np.degrees(np.arctan2(pinY, pinX))
+            1: lambda pinX, pinY: calc_ref_angle(pinX, pinY, -1),
+            2: lambda pinX, pinY: calc_ref_angle(pinX, pinY, 1)
         }
     },
     'Bottom': {
         'LD': {
-            1: lambda pinX, pinY: np.degrees(np.arctan2(pinY, pinX)),
-            2: lambda pinX, pinY: np.degrees(np.arctan2(-pinY, -pinX))
+            1: lambda pinX, pinY: calc_ref_angle(pinX, pinY, 1), 
+            2: lambda pinX, pinY: calc_ref_angle(pinX, pinY, -1)
         }
     },
     'Five': {

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import os, re, yaml, sys
+import os, re, yaml, sys, logging
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
@@ -190,7 +190,7 @@ class PlotTool:
 
     def angle(self, holeXY:tuple, slotXY:tuple, FDPoints:np.array):
         """Calculate the angle and offset of the sensor from the tray fiducials.
-        
+
         Parameters
         - `holeXY`: the location of the pin that corresponds to the HOLE in the base plate. the center pin for Full, LD/HD.
         - `slotXY`: the location of the pin that corresponds to the SLOT in the base plate. the offcenter pin for Full, LD/HD.
@@ -211,7 +211,7 @@ class PlotTool:
         pinY = slotY - holeY     #Y component "" ""
 
         Hole = np.array([holeX, holeY])
-        print(f'pinX: {pinX}  &  pinY: {pinY}')
+        logging.debug(f"Define Pin vector: Hole (Center) to Slot (Offcenter): {pinX}, {pinY}")
 
         # Get the angle calculation function from the lookup dictionary
         density_dict = angle_lookup.get(geometry, {})
@@ -219,12 +219,12 @@ class PlotTool:
         angle_func = position_dict.get(position)
 
         if angle_func is None:
-            raise ValueError(f"No angle calculation defined for geometry={geometry}, density={density}, position={position}")
+            raise ValueError(f"No reference angle calculation defined for geometry={geometry}, density={density}, position={position}")
 
-        angle_Pin = angle_func(pinX, pinY)
+        angle_Pin = angle_func(pinX, pinY) # reference angle based on the vec(center pin to offcenter pin)
 
-        print(f'Pin Angle: {angle_Pin}')
-    
+        logging.debug(f'Pin Angle as reference angle: {angle_Pin}')
+
         if density == 'HD':
             if geometry == 'Full':
                 fd_indices = [0, 1, 2, 3] # FD1, FD2, FD3, FD4
@@ -242,19 +242,19 @@ class PlotTool:
             FDCenter = self.get_FD_center(fd_indices, FDPoints)
 
         adjustmentX, adjustmentY = ADJUSTMENTS[CompType][geometry][density][position]
-        print(f'Adjustment X: ', adjustmentX, 'Adjustment Y: ', adjustmentY)
-        
+        logging.debug(f'Adjustment X: {adjustmentX}, Adjustment Y: {adjustmentY}')
+
         XOffset = FDCenter[0]-Hole[0]-adjustmentX
         YOffset = FDCenter[1]-Hole[1]-adjustmentY
-        print(f"Hole Vs FDCenter: {Hole} vs {FDCenter}")
+        logging.debug(f"Hole Vs FDCenter: {Hole} vs {FDCenter}")
 
-        print(f"Assembly Survey X Offset: {XOffset:.3f} mm.")
-        print(f"Assembly Survey Y Offset: {YOffset:.3f} mm. \n")
+        logging.info(f"Assembly Survey X Offset: {XOffset:.3f} mm.")
+        logging.info(f"Assembly Survey Y Offset: {YOffset:.3f} mm.")
 
         CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
 
         FD3to1 = FDPoints[0] - FDPoints[2]  #Vector from FD3 to FD1
-        
+
         try:
             config = ANGLE_CALC_CONFIG[geometry]
             if isinstance(config, dict):
@@ -262,11 +262,11 @@ class PlotTool:
                 if isinstance(config, dict):
                     config = config[position]
 
-            angle_FD3to1 = config(FD3to1, FDPoints, CompType) # Angle of FD3 to FD1
+            angle_FD = config(FD3to1, FDPoints, CompType) # Angle of FD3 to FD1
         except (KeyError, TypeError) as e:
             raise ValueError(f"Invalid configuration for geometry={geometry}, density={density}, position={position}")
-        
-        AngleOffset = angle_FD3to1 - angle_Pin
+
+        AngleOffset = angle_FD - angle_Pin
 
         return CenterOffset, AngleOffset, XOffset, YOffset
 
@@ -299,19 +299,21 @@ class PlotTool:
 
         return FD_array
 
+
     def get_offsets(self):
         """Get the offsets of the sensor from the tray fiducials.
-        
-        Return 
+
+        Return
         - `XOffset`: x-offset of the sensor from the tray center
         - `YOffset`: y-offset of the sensor from the tray center
         - `AngleOff`: angle of the sensor from the tray fiducials"""
+
         PositionID, Geometry, density, TrayNo = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo']
 
-        TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml") 
-        print(f"Using Tray {TrayNo} info...")
-        
-        print(f"Geometry: {Geometry}; Density: {density}; PositionID: {PositionID}; Comp_Type: {self.comp_type}")
+        TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml")
+        logging.info(f"Using Tray {TrayNo} info...")
+
+        logging.debug(f"Geometry: {Geometry}; Density: {density}; PositionID: {PositionID}; Comp_Type: {self.comp_type}")
 
         with open(TrayFile, 'r') as f:
             trayinfo = yaml.safe_load(f)
@@ -319,37 +321,37 @@ class PlotTool:
         HolePin, SlotPin = pin_mapping.get(Geometry, {}).get(density, {}).get(PositionID, ('', ''))
 
         if HolePin == '' or SlotPin == '':
-            print(f"Could not find the HolePin and SlotPin for the given Geometry: {Geometry} and Density: {density}.")
+            logging.warning(f"Could not find the HolePin and SlotPin for the given Geometry: {Geometry} and Density: {density}.")
 
-        HolePin_xy = tuple(trayinfo[f'{HolePin}_xy'])  
+        HolePin_xy = tuple(trayinfo[f'{HolePin}_xy'])
         SlotPin_xy = tuple(trayinfo[f'{SlotPin}_xy'])
 
         FD_points = self.get_FDs()
-        
+
         plotFD(FD_points, HolePin_xy, SlotPin_xy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))
-        
-        print(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy} \n')
-        
+
+        logging.debug(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy}')
 
         CenterOff, AngleOff, XOffset, YOffset = self.angle(HolePin_xy, SlotPin_xy, FD_points)
 
         if PositionID == 1:
-            NEWY = XOffset*-1;
-            NEWX = YOffset; 
+            NEWY = XOffset*-1
+            NEWX = YOffset
         elif PositionID == 2:
-            NEWY = XOffset;
-            NEWX = YOffset*-1; 
-        
-        print(f"Rotational Offset is {AngleOff:.5f} degrees; Center Offset is {CenterOff:.3f} mm")
+            NEWY = XOffset
+            NEWX = YOffset*-1
+
+        logging.info(f"Rotational Offset is {AngleOff:.5f} degrees; Center Offset is {CenterOff:.3f} mm")
 
         if abs(AngleOff) > 20:
+            logging.error("The calculated angle offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
             raise ValueRangeError("The calculated angle offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
         if abs(XOffset) > 5 or abs(YOffset) > 5:
+            logging.error("The calculated offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
             raise ValueRangeError("The calculated offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
 
         return NEWX, NEWY, AngleOff
-    
-    @staticmethod
+
     def _calculate_height_stats(zheight):
         """Calculate basic height statistics."""
         mean_h = np.mean(zheight)

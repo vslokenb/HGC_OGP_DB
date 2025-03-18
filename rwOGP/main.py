@@ -9,7 +9,7 @@ if src_dir not in sys.path:
     sys.path.append(src_dir)
 
 from src.auto_upload import InventoryUpdater
-from src.config_utils import load_config, create_default_config, update_credentials, update_directorys, verify_config
+from src.config_utils import load_config, create_default_config, update_credentials, update_directorys, verify_config, setup_loggings
 from src.invent_utils import invent_print, clear_invent
 
 program_descriptions = """This program is used to automatically upload results to the OGP database. 
@@ -50,6 +50,8 @@ if __name__ == "__main__":
     parser.add_argument("--type", type=str, default='', help="Specify the type of component to process and upload. If not specified, all components will be processed.")
 
     args = parser.parse_args()
+
+    setup_loggings()
     
     if args.print:
         invent_print()

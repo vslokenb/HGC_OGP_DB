@@ -1,4 +1,5 @@
 import numpy as np
+import logging
 
 def calc_basic_angle(fd3to1) -> float:
     """Calculate the basic angle between two points
@@ -34,12 +35,17 @@ def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
         angle = np.degrees(np.arctan2(
             sign * points_diff[1],
             sign * points_diff[0]))
-        print(f"Angle of FD1 -> FD2: {angle}")
+        if sign == 1:
+            logging.debug(f"Using Angle of FD1 -> FD2 for rotational offset: {angle}")
+        else:
+            logging.debug(f"Using Angle of FD2 -> FD1 for rotational offset: {angle}")
     else:
-        points_diff = fdpoints[2] - fdpoints[5]
+        points_diff = fdpoints[2] - fdpoints[5] # vector from FD6 to FD3
         angle = np.degrees(np.arctan2(
             sign * points_diff[1],
             sign * points_diff[0]) * -1)
+        if sign == 1:
+            logging.debug(f"Using Angle of FD6 -> FD3 for rotational offset: {angle}")
     return angle
 
 def calc_HDfull_angle(fdpoints, comp_type, is_second=False) -> float:

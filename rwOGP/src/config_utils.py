@@ -1,5 +1,15 @@
 import os, yaml
 from os.path import join as pjoin
+import logging
+
+def setup_loggings(level=logging.INFO):
+    formatter = logging.Formatter('%(levelname)s: %(message)s')
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
+    root_logger.addHandler(console_handler)
 
 SETTINGS_FILE = pjoin(os.path.expanduser('~'), ".my-cli-tool", "settings.yaml")
 
