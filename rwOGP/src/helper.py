@@ -49,9 +49,10 @@ def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
     return angle
 
 def calc_HDfull_angle(fdpoints, comp_type, is_second=False) -> float:
-    sign = -1 if is_second else 1
-    points_diff = fdpoints[1] - fdpoints[0] # vector from FD1 to FD2
-    angle = np.degrees(np.arctan2(
+    if fdpoints[0][1] >= 200: points_diff = fdpoints[1] - fdpoints[0]; B = 1;  # vector from FD1 to FD2
+    else: points_diff = fdpoints[0] - fdpoints[1]; B = -1; # vector from FD2 to FD1
+    sign = 1 if is_second else -1
+    angle = B*np.degrees(np.arctan2(
         sign * points_diff[0],
         sign * points_diff[1]))
     print(f"Angle of FD1 -> FD2: {angle}")
