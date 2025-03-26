@@ -48,6 +48,7 @@ if __name__ == "__main__":
     parser.add_argument("--updatedir", action='store_true', help="Update the directory paths for OGP outputs/processing in the configuration file.")
     parser.add_argument("--type", type=str, default='', help="Specify the type of component to process and upload. If not specified, all components will be processed.")
     parser.add_argument("--debug", action='store_true', help="Print debug messages.")
+    parser.add_argument("--disable", action='store_true', help="Disable the program from uploading.")
 
     args = parser.parse_args()
 
