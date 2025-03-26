@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import send2trash, yaml, os
+import send2trash, yaml, os, logging
 import matplotlib
 matplotlib.use('Agg')
 from src.ogp_height_plotter import PlotTool, grade, ValueMissingError, ValueRangeError
@@ -34,7 +34,7 @@ class SurveyProcessor():
             os.makedirs(im_dir)
         self.im_dir = im_dir
         self.tray_dir = yamlconfig.get('ogp_tray_dir')
-        print("Using tray files from directory:", self.tray_dir)
+        logging.debug("Using tray files from directory: %s", self.tray_dir)
 
         self.client = DBClient(yamlconfig)
         pass
@@ -65,8 +65,9 @@ class SurveyProcessor():
         plotter = PlotTool(metadata, comp_type, df, self.tray_dir, pjoin(self.im_dir, comp_type))
         filesuffix = pbase(ex_file).split('.')[0]
 
-        print("=" * 100)
-        print(f"###### Calculating offsets for {comp_type} {compID} #######")
+        logging.info("=" * 100)
+        logging.info(f"###### Calculating offsets for {comp_type} {compID} #######")
+
         
         component_params = COMPONENT_PARAMS[singular_type]
         name_field = f'{COMP_PREFIX[singular_type]}_name'
@@ -76,10 +77,10 @@ class SurveyProcessor():
             Offset = metadata.get("Thickness_Offset", 0)
             report_thick = metadata.get("Thickness", None)
             if report_thick is not None:
-                print(f"Unconstrained thickness reported by OGP {report_thick} - Offset: {Offset}")
+                logging.info(f"Unconstrained thickness reported by OGP {report_thick} - Offset: {Offset}")
                 report_thick -= Offset
             avg_thick = np.round(np.mean(plotter.z_points), 3) - Offset
-            print(f"Thickness by averaging reported points after subtracting offset {Offset}: {avg_thick}")
+            logging.info(f"Thickness by averaging reported points after subtracting offset {Offset}: {avg_thick}")
             db_upload.update({'flatness': np.round(metadata['Flatness'],3), 'thickness': avg_thick})
         elif singular_type == 'protomodule' or singular_type == 'module':
             XOffset, YOffset, AngleOff = plotter.get_offsets()
@@ -93,7 +94,7 @@ class SurveyProcessor():
             else:
                 PCBXOffset, PCBYOffset, PCBAngleOff = 0, 0, 0 
                 SensorXOffset, SensorYOffset, SensorAngleOff = int(XOffset*1000), int(YOffset*1000), AngleOff
-            print("Making Accuracy Plot With Sensor Offsets", SensorXOffset, SensorYOffset, SensorAngleOff)
+            logging.debug(f"Making Accuracy Plot With Sensor Offsets {SensorXOffset}, {SensorYOffset}, {SensorAngleOff}")
             acc_bytes = make_accuracy_plot(compID, pjoin(self.im_dir, comp_type), SensorXOffset, SensorYOffset, SensorAngleOff, PCBXOffset, PCBYOffset, PCBAngleOff)
             db_upload.update({"offsetplot": acc_bytes})
         else:
@@ -103,7 +104,8 @@ class SurveyProcessor():
                    "new_angle": component_params['new_angle'], "savename": pjoin(self.im_dir, comp_type, f"{filesuffix}_heights"),
                    "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": False}
         
-        print("###### Generating Image for", compID, " #######")
+        logging.debug(f"###### Generating Image for {compID} #######")
+        
         im_bytes = plotter(**im_args)
 
         db_upload.update({'x_points':(plotter.x_points).tolist(), 'y_points':(plotter.y_points).tolist(), 
@@ -128,8 +130,8 @@ class SurveyProcessor():
             try: 
                 db_upload, comp_params, compID = await self.__getArgs__(ex_file, meta_file, comp_type)
             except ValueMissingError as e:
-                print("!" * 90)
-                print(f"Error in {ex_file}: {e}")
+                logging.error("! " * 90)
+                logging.error(f"Error in {ex_file}: {e}")
                 return False, last_successful_index
             except ValueRangeError as e:
                 print("!" * 90)

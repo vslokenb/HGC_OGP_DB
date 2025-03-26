@@ -1,4 +1,4 @@
-import os, yaml
+import os, yaml, logging
 from ttp import ttp
 import pandas as pd
 from io import StringIO
@@ -35,11 +35,11 @@ class DataParser():
         
         try:
             if not os.path.exists(output_dir):
-                print("Creating parsed output directory:", output_dir)
+                logging.debug("Creating parsed output directory:", output_dir)
                 os.makedirs(output_dir)
             
             if not os.path.exists(self.backup_dir):
-                print("Creating backup directory:", self.backup_dir)
+                logging.debug(f"Creating backup directory: {self.backup_dir}")
                 os.makedirs(self.backup_dir)
             
         except OSError as e:
@@ -53,11 +53,11 @@ class DataParser():
         - gen_features (list): List of feature files generated."""
         gen_meta = []
         gen_features = []
-        print("=== Parsing OGP Data ===")
+        logging.info("=== Parsing OGP Data ===")
         for filename in self.data_file:
             with open(filename, 'r') as f:
                 self.data = f.read()
-            print("Parsing data file:", pbase(filename))
+            logging.info(f"Parsing data file: {pbase(filename)}")
 
             backup_file = pjoin(self.backup_dir, pbase(filename))
             if not os.path.exists(backup_file):
@@ -117,10 +117,11 @@ class DataParser():
     def check_missing_keys(self, header_dict):
         """Check for missing keys in the parsed header. 
         If missing, adopt default values for the missing keys or exit the program."""
-        if set(required_keys) - set(header_dict.keys()):
-            print("DataParser did not parse all the required keys due to mismatching in naming or missing data.")
-            print("Parsed data: ", header_dict)
-            print("Missing keys: ", set(required_keys) - set(header_dict.keys()))
+        missing_keys = set(required_keys) - set(header_dict.keys())
+        if missing_keys:
+            logging.error("DataParser did not parse all the required keys due to mismatching in naming or missing data.")
+            logging.info("Parsed data: ", header_dict)
+            logging.error("Missing keys: ", missing_keys)
             header_dict = self.adopt_default(header_dict)
             user_input = input("Do you want to enter values for the missing keys? (y/n): ")
             if user_input.lower() != 'y':
@@ -131,8 +132,8 @@ class DataParser():
                     header_dict[key] = value
 
         if set(warning_keys) - set(header_dict.keys()):
-            print("DataParser did not parse all the optional keys due to mismatching in naming or missing data.")
-            print("Missing keys: ", set(warning_keys) - set(header_dict.keys()))
+            logging.warning(f"DataParser did not parse all the optional keys due to mismatching in naming or missing data.")
+            logging.warning(f"Missing keys: {set(warning_keys) - set(header_dict.keys())}")
         
         return header_dict
     
@@ -145,10 +146,9 @@ class DataParser():
             has_illegal = any(char in header_dict[field] for char in illegal_chars)
             if has_illegal:
                 original = header_dict[field]
-                print("!" * 90)
-                print(f"WARNINGS: Unconventional character(s) detected in {field}: {original}")
+                logging.warning(f"Unconventional character(s) detected in {field}: {original}")
                 found_chars = [char for char in illegal_chars if char in original]
-                print(f"Found illegal characters: {found_chars}")
+                logging.warning(f"Found illegal characters: {found_chars}")
                 user_in = input("Would you want to remove these characters? If not the parsing might not continue correctly. (y/n): ")
                 if user_in.lower() == 'y':
                     cleaned_value = original
@@ -164,14 +164,14 @@ class DataParser():
         Geometry = header_dict['Geometry']
         density = header_dict['Density']
         if pin_mapping.get(Geometry) is None:
-            print(f"Geometry {Geometry} not recognized. Default to Full.")
+            logging.warning(f"Geometry {Geometry} not recognized. Default to Full.")
             user_input = input("Do you want to adopt the default values for Geometry? (y/n): ")
             if user_input.lower() != 'y':
                 raise ParserKeyException("Exiting... Please check the Geometry value or update the pin mapping in param.py.")
             header_dict['Geometry'] = 'Full'
             Geometry = 'Full'
         if pin_mapping.get(Geometry).get(density) is None:
-            print(f"Density {density} not recognized for Geometry {Geometry}. Default to LD.")
+            logging.warning(f"Density {density} not recognized for Geometry {Geometry}. Default to LD.")
             user_input = input("Do you want to adopt the default values for Density? (y/n): ")
             if user_input.lower() != 'y':
                 raise ParserKeyException("Exiting... Please check the Density value or update the pin mapping in param.py.")
@@ -194,7 +194,7 @@ class DataParser():
     def adopt_default(self, header_dict):
         """Adopt default values for the missing keys."""
         for key in set(required_keys) - set(header_dict.keys()):
-            print(f"Default value {default_params[key]} will be adopted for missing key: ", key)
+            logging.info(f"Default value {default_params[key]} will be adopted for missing key: ", key)
             header_dict[key] = default_params[key]
         return header_dict
     

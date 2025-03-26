@@ -1,15 +1,99 @@
 import os, yaml
 from os.path import join as pjoin
 import logging
+from rich.logging import RichHandler
+from rich.console import Console
+from rich.theme import Theme
 
-def setup_loggings(level=logging.INFO):
-    formatter = logging.Formatter('%(levelname)s: %(message)s')
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
+def setup_logging(level=logging.INFO, show_time=True, show_path=False):
+    """
+    Set up logging with rich formatting and styling.
+    
+    Parameters
+    ----------
+    level : int
+        The logging level (e.g., logging.DEBUG, logging.INFO, etc.)
+    show_time : bool
+        Whether to show timestamps in logs (default: True)
+    show_path : bool
+        Whether to show file path in logs (default: False)
+    
+    Examples
+    --------
+    >>> setup_logging(level=logging.DEBUG)
+    >>> logging = logging.getlogger(__name__)
+    >>> logging.debug("Debug message")
+    >>> logging.info("Info message")
+    >>> logging.warning("Warning message")
+    >>> logging.error("Error message")
+    >>> logging.critical("Critical message")
+    """
+    # Custom theme for rich
+    custom_theme = Theme({
+        "logging.level.debug": "cyan",
+        "logging.level.info": "green",
+        "logging.level.warning": "yellow",
+        "logging.level.error": "red",
+        "logging.level.critical": "red bold reverse",
+    })
+    
+    console = Console(theme=custom_theme)
+    
+    # Configure rich handler
+    rich_handler = RichHandler(
+        console=console,
+        show_time=show_time,
+        show_path=show_path,
+        rich_tracebacks=True,
+        tracebacks_show_locals=True,
+    )
 
-    root_logger = logging.getLogger()
-    root_logger.setLevel(level)
-    root_logger.addHandler(console_handler)
+    # Set format pattern
+    logging.basicConfig(
+        level=level,
+        format="%(message)s",  # Rich handles the formatting
+        datefmt="[%X]",  # Time format
+        handlers=[rich_handler]
+    )
+
+def log_process_status(process_name, status, data=None):
+    """
+    Helper function for consistent process logging with rich formatting.
+    
+    Parameters
+    ----------
+    process_name : str
+        Name of the process being logged
+    status : str
+        Status of the process ('start', 'complete', 'error', 'warning')
+    data : Any, optional
+        Additional data to log (e.g., error message, warning details)
+    
+    Examples
+    --------
+    >>> logger = logging.getLogger(__name__)
+    >>> log_process_status(logger, "data processing", "start")
+    >>> try:
+    >>>     # do something
+    >>>     log_process_status(logger, "data processing", "complete")
+    >>> except Exception as e:
+    >>>     log_process_status(logger, "data processing", "error", e)
+    """
+    if status == "start":
+        logging.info(f"[bold blue]Starting[/bold blue] {process_name}...")
+    elif status == "complete":
+        logging.info(f"[bold green]Completed[/bold green] {process_name}")
+    elif status == "error":
+        logging.error(f"[bold red]Error[/bold red] in {process_name}")
+        if data:
+            # Log the exception with traceback
+            if isinstance(data, Exception):
+                logging.exception(f"Details for {process_name} error:", exc_info=data)
+            else:
+                logging.error(f"Error details: {data}")
+    elif status == "warning":
+        logging.warning(f"[bold yellow]Warning[/bold yellow] in {process_name}: {data}")
+
 
 SETTINGS_FILE = pjoin(os.path.expanduser('~'), ".my-cli-tool", "settings.yaml")
 

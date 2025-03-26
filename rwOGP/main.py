@@ -1,5 +1,4 @@
-import os, yaml, sys, asyncio
-import argparse
+import os, yaml, sys, asyncio, logging, argparse
 
 pjoin = os.path.join
 
@@ -9,7 +8,7 @@ if src_dir not in sys.path:
     sys.path.append(src_dir)
 
 from src.auto_upload import InventoryUpdater
-from src.config_utils import load_config, create_default_config, update_credentials, update_directorys, verify_config, setup_loggings
+from src.config_utils import load_config, create_default_config, update_credentials, update_directorys, verify_config, setup_logging
 from src.invent_utils import invent_print, clear_invent
 
 program_descriptions = """This program is used to automatically upload results to the OGP database. 
@@ -48,10 +47,14 @@ if __name__ == "__main__":
     parser.add_argument("--updatedb", action='store_true', help="Update the credentials in the configuration file.")
     parser.add_argument("--updatedir", action='store_true', help="Update the directory paths for OGP outputs/processing in the configuration file.")
     parser.add_argument("--type", type=str, default='', help="Specify the type of component to process and upload. If not specified, all components will be processed.")
+    parser.add_argument("--debug", action='store_true', help="Print debug messages.")
 
     args = parser.parse_args()
 
-    setup_loggings()
+    if args.debug:
+        setup_logging(logging.DEBUG)
+    else:
+        setup_logging()
     
     if args.print:
         invent_print()
