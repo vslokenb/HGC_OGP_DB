@@ -1,6 +1,8 @@
 import os, subprocess, json, sys, logging
 from .parse_data import DataParser, ParserKeyException
 from .process_survey import SurveyProcessor
+from rich.table import Table
+from rich.console import Console
 
 pexist = os.path.exists
 pjoin = os.path.join
@@ -21,6 +23,48 @@ class InventoryUpdater():
         logging.debug("Parsing OGP survey files from directory:", self.checkdir)
         logging.debug("Saving parsed data to directory:", self.parsed_dir)
     
+    def display_file_changes(self, new_inventory, removed_inventory, successful_uploads):
+        """Display a table of file changes using rich.Table"""
+        table = Table(title="OGP Survey File Changes Summary")
+        
+        # Add columns
+        table.add_column("Component Type", style="cyan")
+        table.add_column("New Files", style="green")
+        table.add_column("Removed Files", style="red")
+        table.add_column("Successfully Uploaded", style="blue")
+
+        # Get all unique component types
+        all_components = set(list(new_inventory.keys()) + 
+                           list(removed_inventory.keys()) + 
+                           list(successful_uploads.keys()))
+
+        # Add rows for each component
+        for component in sorted(all_components):
+            new_files = new_inventory.get(component, [])
+            removed_files = removed_inventory.get(component, [])
+            uploaded_files = successful_uploads.get(component, [])
+            
+            table.add_row(
+                component,
+                "\n".join(new_files) if new_files else "-",
+                "\n".join(removed_files) if removed_files else "-",
+                "\n".join(uploaded_files) if uploaded_files else "-"
+            )
+
+        # Add summary row
+        table.add_row(
+            "Total",
+            str(sum(len(files) for files in new_inventory.values())),
+            str(sum(len(files) for files in removed_inventory.values())),
+            str(sum(len(files) for files in successful_uploads.values())),
+            style="bold"
+        )
+
+        # Print the table
+        self.console.print("\n")
+        self.console.print(table)
+        self.console.print("\n")
+    
     async def __call__(self):
         if not pexist(self.inventory_p):
             self.__deal_empty()
@@ -31,7 +75,6 @@ class InventoryUpdater():
         
         new_files, removed_files = self.__check_inventory()
         self.__update_removed(removed_files)
-        
         status = await self.upload_and_update(new_files)
         
         if status:
@@ -166,12 +209,6 @@ class InventoryUpdater():
                 removed_inventory[subdir] = old_inventory[subdir]
                 total_removed_files += len(old_inventory[subdir])
 
-        logging.info("\n=== Summary of Changes ===")
-        if new_subdirs:
-            logging.debug(f"New subdirectories detected: {', '.join(new_subdirs)}")
-        logging.debug(f"Total new files to process: {total_new_files}")
-        logging.debug(f"Total files removed: {total_removed_files}")
-
         return changed_inventory, removed_inventory
     
     async def upload_and_update(self, invent) -> bool:
@@ -214,6 +251,9 @@ class InventoryUpdater():
                     self.__update_inven(successful_uploads)
             else:
                 logging.warning(f"No files from {subdir} to process/upload to database.")
+            
+        if invent:
+            self.display_file_changes(invent, {}, successful_uploads)
         
         return status
         

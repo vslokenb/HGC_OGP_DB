@@ -23,14 +23,15 @@ if __name__ == '__main__':
         
     setup_logging()
 
-    # feature_df = pd.read_csv(features[0])
-    # PT = PlotTool(metadata, "protomodules", feature_df, 'rwOGP/templates/trays', 'tests')
+    feature_df = pd.read_csv(features[0])
+    PT = PlotTool(metadata, "protomodules", feature_df, 'rwOGP/templates/trays', 'tests')
     
-    # im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
-    #         "new_angle": component_params['new_angle'], "savename": "ex_heights",
-    #         "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": True}
+    im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
+            "new_angle": component_params['new_angle'], "savename": "ex_heights",
+            "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": True}
 
-    # XOffset, Yoffset, AngleOff = PT.get_offsets()
+    XOffset, Yoffset, AngleOff = PT.get_offsets()
+    logging.info(f"XOffset: {XOffset}, YOffset: {Yoffset}, AngleOff: {AngleOff}")
     # make_accuracy_plot(metadata['ComponentID'], XOffset, Yoffset, AngleOff, 0, 0, 0)
 
     # PT(**im_args)

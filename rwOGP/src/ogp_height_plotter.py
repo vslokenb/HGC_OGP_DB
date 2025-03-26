@@ -246,7 +246,7 @@ class PlotTool:
 
         XOffset = FDCenter[0]-Hole[0]-adjustmentX
         YOffset = FDCenter[1]-Hole[1]-adjustmentY
-        logging.debug(f"Hole Vs FDCenter: {Hole} vs {FDCenter}")
+        logging.info(f"Hole Vs FDCenter: {Hole} vs {FDCenter}")
 
         logging.info(f"Assembly Survey X Offset: {XOffset:.3f} mm.")
         logging.info(f"Assembly Survey Y Offset: {YOffset:.3f} mm.")

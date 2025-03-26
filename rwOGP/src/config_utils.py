@@ -6,33 +6,12 @@ from rich.console import Console
 from rich.theme import Theme
 
 def setup_logging(level=logging.INFO, show_time=True, show_path=False):
-    """
-    Set up logging with rich formatting and styling.
-    
-    Parameters
-    ----------
-    level : int
-        The logging level (e.g., logging.DEBUG, logging.INFO, etc.)
-    show_time : bool
-        Whether to show timestamps in logs (default: True)
-    show_path : bool
-        Whether to show file path in logs (default: False)
-    
-    Examples
-    --------
-    >>> setup_logging(level=logging.DEBUG)
-    >>> logging = logging.getlogger(__name__)
-    >>> logging.debug("Debug message")
-    >>> logging.info("Info message")
-    >>> logging.warning("Warning message")
-    >>> logging.error("Error message")
-    >>> logging.critical("Critical message")
-    """
+    """Set up logging with rich formatting and styling."""
     # Custom theme for rich
     custom_theme = Theme({
         "logging.level.debug": "cyan",
         "logging.level.info": "green",
-        "logging.level.warning": "orange",
+        "logging.level.warning": "yellow bold",
         "logging.level.error": "red",
         "logging.level.critical": "red bold reverse",
     })
@@ -46,15 +25,20 @@ def setup_logging(level=logging.INFO, show_time=True, show_path=False):
         show_path=show_path,
         rich_tracebacks=True,
         tracebacks_show_locals=True,
+        markup=False  # Disable markup interpretation
     )
 
     # Set format pattern
     logging.basicConfig(
         level=level,
-        format="%(message)s",  # Rich handles the formatting
-        datefmt="[%X]",  # Time format
-        handlers=[rich_handler]
+        format="%(message)s",  # Include logger name
+        datefmt="[%X]",
+        handlers=[rich_handler],
+        force=True  # Force reconfiguration
     )
+    
+    # Return a logger for the module
+    return logging.getLogger(__name__)
 
 def log_process_status(process_name, status, data=None):
     """
@@ -402,7 +386,7 @@ async def update_credentials():
     confirm_password = getpass.getpass("Confirm password: ").strip()
 
     if new_password != confirm_password:
-        print("Passwords do not match!")
+        logging.error("Passwords do not match!")
         return False
 
     if not await verify_db_credentials(new_host, new_database, new_user, new_password):
@@ -411,7 +395,7 @@ async def update_credentials():
     if not update_config_file(new_host, new_database, new_user, new_password):
         return False
 
-    print("Configuration updated successfully!")
+    logging.info("Configuration updated successfully!")
     return True
 
 def create_settings_file(config_file):
