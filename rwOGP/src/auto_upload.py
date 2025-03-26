@@ -1,4 +1,4 @@
-import os, subprocess, json, sys
+import os, subprocess, json, sys, logging
 from .parse_data import DataParser, ParserKeyException
 from .process_survey import SurveyProcessor
 
@@ -17,9 +17,9 @@ class InventoryUpdater():
         self.checkdir = self.config.get('ogp_survey_dir')
         self.parsed_dir = self.config.get('ogp_parsed_dir')
         self.comp_type = comp_type
-        print("Reading inventory from:", self.inventory_p)
-        print("Parsing OGP survey files from directory:", self.checkdir)
-        print("Saving parsed data to directory:", self.parsed_dir)
+        logging.debug("Reading inventory from:", self.inventory_p)
+        logging.debug("Parsing OGP survey files from directory:", self.checkdir)
+        logging.debug("Saving parsed data to directory:", self.parsed_dir)
     
     async def __call__(self):
         if not pexist(self.inventory_p):
@@ -35,11 +35,9 @@ class InventoryUpdater():
         status = await self.upload_and_update(new_files)
         
         if status:
-            print("All new files were successfully processed and uploaded to the database.")
-            print("\n=== Inventory Update Complete ===\n")
+            logging.info("===All new files were successfully processed and uploaded to the database.===")
         else:
-            print("!" * 100)
-            print("Some files failed to upload to the database.\n")
+            logging.error("Some files failed to upload to the database.\n")
 
     def __update_removed(self, removed_invent):
         for subdir, files in removed_invent.items():
@@ -51,8 +49,8 @@ class InventoryUpdater():
         with open(self.inventory_p, 'w') as f:
             json.dump(self.inventory, f)
         
-        print("\n=== Inventory Update Alert ===")
-        print(f"Removed {sum(len(files) for files in removed_invent.values())} files from inventory")
+        logging.warning("\n=== Inventory Update Alert ===")
+        logging.warning(f"Removed {sum(len(files) for files in removed_invent.values())} files from inventory")
 
     def __update_inven(self, success_invent):
         """Update the inventory with the successfully uploaded files."""
@@ -66,8 +64,8 @@ class InventoryUpdater():
         with open(self.inventory_p, 'w') as f:
             json.dump(self.inventory, f)
         
-        print("\n=== Inventory Update Alert ===")
-        print(f"Successfully updated inventory with {sum(len(files) for files in success_invent.values())} new files")
+        logging.info("\n=== Inventory Update Alert ===")
+        logging.info(f"Successfully updated inventory with {sum(len(files) for files in success_invent.values())} new files")
 
     def __create_new(self) -> dict:
         """Create a new inventory dictionary. 
@@ -99,15 +97,15 @@ class InventoryUpdater():
         with open(self.inventory_p, 'w') as f:
             json.dump(txt_files_by_subdir, f)
 
-        print("Initialize Inventory of OGP results for the first time...Would you like to process and upload all the existing OGP results to database? (Y/N)")
+        logging.info("Initialize Inventory of OGP results for the first time...Would you like to process and upload all the existing OGP results to database? (Y/N)")
         choice = input().strip().lower()
 
         if choice == 'y':
-            print("Uploading all existing OGP results to database...")
+            logging.info("Uploading all existing OGP results to database...")
             await self.upload_files(txt_files_by_subdir)
             return True
         else:
-            print("Exiting...")
+            logging.info("Exiting...")
             return False
     
     def __check_inventory(self) -> tuple[dict, dict]:
@@ -118,7 +116,7 @@ class InventoryUpdater():
         - dict: Subdirectories and their corresponding new files to be processed.
         - dict: Subdirectories and their corresponding removed files.
         """
-        print("\n=== Checking for OGP Survey File Changes ===")
+        logging.info("\n=== Checking for OGP Survey File Changes ===")
         new_inventory = self.__create_new()
         old_inventory = self.inventory.copy()
         changed_inventory = {}
@@ -133,7 +131,7 @@ class InventoryUpdater():
                 new_inventory = {self.comp_type: new_inventory[self.comp_type]}
             else:
                 new_inventory = {}
-                print("No new files to process for component type:", self.comp_type)
+                logging.info("No new files to process for component type:", self.comp_type)
                 sys.exit()
             if self.comp_type in old_inventory:
                 old_inventory = {self.comp_type: old_inventory[self.comp_type]}
@@ -149,12 +147,12 @@ class InventoryUpdater():
                 new_files = set(files) - set(old_inventory[subdir])
                 removed_files = set(old_inventory[subdir]) - set(files)
                 if new_files or removed_files:
-                    print(f"\nChanges in subdirectory '{subdir}':")
+                    logging.info(f"\nChanges in subdirectory '{subdir}':")
                     if new_files:
-                        print(f"  + Added: {', '.join(sorted(new_files))}")
+                        logging.info(f"  + Added: {', '.join(sorted(new_files))}")
                         total_new_files += len(new_files)
                     if removed_files:
-                        print(f"  - Removed: {', '.join(sorted(removed_files))}")
+                        logging.info(f"  - Removed: {', '.join(sorted(removed_files))}")
                         total_removed_files += len(removed_files)
 
                 if new_files:
@@ -168,11 +166,11 @@ class InventoryUpdater():
                 removed_inventory[subdir] = old_inventory[subdir]
                 total_removed_files += len(old_inventory[subdir])
 
-        print("\n=== Summary of Changes ===")
+        logging.info("\n=== Summary of Changes ===")
         if new_subdirs:
-            print(f"New subdirectories detected: {', '.join(new_subdirs)}")
-        print(f"Total new files to process: {total_new_files}")
-        print(f"Total files removed: {total_removed_files}")
+            logging.debug(f"New subdirectories detected: {', '.join(new_subdirs)}")
+        logging.debug(f"Total new files to process: {total_new_files}")
+        logging.debug(f"Total files removed: {total_removed_files}")
 
         return changed_inventory, removed_inventory
     
@@ -205,17 +203,17 @@ class InventoryUpdater():
                     successful_files = files[:indx+1]
                     if successful_files:  # Only add if there were successful uploads
                         successful_uploads[subdir] = successful_files
-                    print(f"Failed to upload file: {inputs[indx + 1]}")
+                    logging.warning(f"Failed to upload file: {inputs[indx + 1]}")
                     status = False
                 else:
                     status = False
-                    print(f"Failed to upload files from {subdir}")
+                    logging.warning(f"Failed to upload files from {subdir}")
                 
                 if successful_uploads: 
-                    print("These files were successfully uploaded:", successful_uploads)
+                    logging.info("These files were successfully uploaded:", successful_uploads)
                     self.__update_inven(successful_uploads)
             else:
-                print(f"No files from {subdir} to process/upload to database.")
+                logging.warning(f"No files from {subdir} to process/upload to database.")
         
         return status
         
@@ -238,6 +236,4 @@ class InventoryUpdater():
                 data = json.load(f)
                 return data
             except json.JSONDecodeError:
-                print("!" * 90)
-                print(f"Corrupt json file: {json_path}")
-                print("Please remove the file and run the program again.")
+                logging.error(f"Corrupt json file: {json_path}. Please remove the file and run the program again.")

@@ -131,12 +131,10 @@ class SurveyProcessor():
             try: 
                 db_upload, comp_params, compID = await self.__getArgs__(ex_file, meta_file, comp_type)
             except ValueMissingError as e:
-                logging.error("! " * 90)
                 logging.error(f"Error in {ex_file}: {e}")
                 return False, last_successful_index
             except ValueRangeError as e:
-                print("!" * 90)
-                print(f"Error in {ex_file}: {e}")
+                logging.error(f"Error in {ex_file}: {e}")
                 return False, last_successful_index
             self.print_db_msg(comp_type, compID)
             status = await self.client.link_and_update_table(comp_params, db_upload)
@@ -147,8 +145,7 @@ class SurveyProcessor():
                 else:
                     status = await self.client.upload_PostgreSQL(comp_params, db_upload)
                     if status == False:
-                        print("!" * 90)
-                        print("No more uploading will be done due to the error. Please double check the data and try again.")
+                        logging.error("No more uploading will be done due to the error. Please double check the data and try again.")
                         return False, last_successful_index
             last_successful_index = idx
         return True, last_successful_index  # Return True and last index if all files were processed successfully
@@ -157,9 +154,8 @@ class SurveyProcessor():
         
     @staticmethod
     def print_db_msg(comp_type, modname):
-        print('')
-        print(f"###### NEW {comp_type} UPLOAD #######")
-        print(f"###### FROM: {modname} #######")
+        logging.info(f"###### UPLOADING {comp_type} #######")
+        logging.info(f"###### FROM: {modname} #######")
 
     @staticmethod
     def getDateTime(metadata):

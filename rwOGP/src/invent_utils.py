@@ -6,9 +6,7 @@ def invent_print():
     """Print the current inventory."""
     settings = load_config()
     if settings is None:
-        print("=" * 90)
-        print("No configuration file found.")
-        print("Program will now exit. Please run without arguments first!")
+        logging.warning("No configuration file found. Program will now exit. Please run without arguments first!")
     else:
         invent_path = settings['inventory_path']
         print(f"Printing the current inventory {invent_path}...")

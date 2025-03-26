@@ -55,7 +55,7 @@ def calc_HDfull_angle(fdpoints, comp_type, is_second=False) -> float:
     angle = B*np.degrees(np.arctan2(
         sign * points_diff[0],
         sign * points_diff[1]))
-    print(f"Angle of FD1 -> FD2: {angle}")
+    logging.debug(f"Angle of FD1 -> FD2: {angle}")
     return angle
 
 

@@ -32,7 +32,7 @@ def setup_logging(level=logging.INFO, show_time=True, show_path=False):
     custom_theme = Theme({
         "logging.level.debug": "cyan",
         "logging.level.info": "green",
-        "logging.level.warning": "yellow",
+        "logging.level.warning": "orange",
         "logging.level.error": "red",
         "logging.level.critical": "red bold reverse",
     })
@@ -117,7 +117,7 @@ def write_config_file(config_file, config_data):
             yaml.dump(config_data, f, default_flow_style=False)
         return True
     except (IOError, yaml.YAMLError) as e:
-        print(f"Error updating configuration file: {e}")
+        logging.error(f"Error updating configuration file: {e}")
         return False
 
 def validate_directory(dir_path):
@@ -126,20 +126,20 @@ def validate_directory(dir_path):
     dir_path = os.path.abspath(dir_path)
     
     if not os.path.exists(dir_path):
-        print(f"\nDirectory does not exist: {dir_path}")
+        logging.warning(f"\nDirectory does not exist: {dir_path}")
         create = input("Would you like to create it? (y/n): ").strip().lower()
         if create == 'y':
             try:
                 os.makedirs(dir_path, exist_ok=True)
-                print(f"Created directory: {dir_path}")
+                logging.info(f"Created directory: {dir_path}")
             except OSError as e:
-                print(f"Error creating directory: {e}")
+                logging.error(f"Error creating directory: {e}")
                 return None
         else:
             return None
     
     if not os.access(dir_path, os.W_OK):
-        print(f"Warning: No write permission for directory: {dir_path}")
+        logging.warning(f"Warning: No write permission for directory: {dir_path}")
         proceed = input("Continue anyway? (y/n): ").strip().lower()
         if proceed != 'y':
             return None
@@ -150,7 +150,7 @@ async def verify_db_credentials(host, database, user, password):
     """Helper function to verify database credentials."""
     import asyncpg
     conn = None
-    print(f"Connecting to database {database} at {host} using provided credentials ...")
+    logging.debug(f"Connecting to database {database} at {host} using provided credentials ...")
     try:
         conn = await asyncpg.connect(
             host=host,
@@ -160,7 +160,7 @@ async def verify_db_credentials(host, database, user, password):
         )
         return True
     except Exception as e:
-        print(f"Authentication failed: {e}")
+        logging.error(f"Authentication failed: {e}")
         return False
     finally:
         if conn is not None:
@@ -174,7 +174,7 @@ def get_config_location():
     home_dir = os.path.expanduser('~')
 
     if choice == 'y':
-        print("Please enter the directory where you want to create the config file:")
+        logging.info("Please enter the directory where you want to create the config file:")
         custom_path = os.path.expanduser(input().strip())
         if os.path.isdir(custom_path):
             return pjoin(custom_path, "rwOGP_DBconfig.yaml")
@@ -266,10 +266,9 @@ async def update_directorys():
         default_path = '/path/to/ogp/' + key.replace('ogp_', '').replace('_dir', '')
         current_config[key] = default_path
         if write_config_file(config_file, current_config):
-            print(f"Using default path: {default_path}")
-            print("You can update this later using the directory update menu.")
+            logging.info(f"Using default path: {default_path}. You can update this later using the directory update menu.")
             return True
-        print("Failed to save configuration file")
+        logging.error("Failed to save configuration file")
         return False
 
     def handle_directory_setup(key, desc, max_attempts=3):
@@ -278,39 +277,39 @@ async def update_directorys():
             new_path = input(f"Enter path for {desc}: ").strip()
 
             if not new_path:
-                print("Path cannot be empty. Please enter a valid path.")
+                logging.error("Path cannot be empty. Please enter a valid path.")
                 continue
 
             validated_path = validate_directory(new_path)
             if validated_path:
                 current_config[key] = validated_path
                 if write_config_file(config_file, current_config):
-                    print(f"Successfully set {desc} to: {validated_path}")
+                    logging.info(f"Successfully set {desc} to: {validated_path}")
                     return True
-                print("Failed to save configuration file")
+                logging.warning("Failed to save configuration file")
                 return False
 
             if attempt < max_attempts - 1:
                 if input("Would you like to try another path? (y/n): ").strip().lower() != 'y':
                     return set_default_path(key)
 
-        print("Max attempts reached. Skipping directory setup.")
+        logging.error("Max attempts reached. Skipping directory setup.")
         return set_default_path(key)
 
     # Display current configuration
-    print("\nCurrent directory configurations:")
+    logging.info("\nCurrent directory configurations:")
     missing_dirs = []
     for key, desc in dir_configs.items():
         if key not in current_config:
             missing_dirs.append(key)
         else:
-            print(f"{desc}: {current_config[key]}")
+            logging.info(f"{desc}: {current_config[key]}")
 
     # Handle missing directories
     if missing_dirs:
-        print("\nWARNING: The following required directories were missing from config and have been added with default values:")
+        logging.warning("\nThe following required directories were missing from config and have been added with default values:")
         for key in missing_dirs:
-            print(f"\nSetting up {dir_configs[key]} directory")
+            logging.warning(f"\nSetting up {dir_configs[key]} directory")
             if not handle_directory_setup(key, dir_configs[key]):
                 return False
 

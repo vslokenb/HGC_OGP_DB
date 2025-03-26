@@ -22,19 +22,19 @@ async def main_func(comp_type):
     """Main function to run the program."""
     settings = load_config()
     if settings is None:
-        print("Program will now exit. Please update the configuration file and run the program again.")
+        logging.error("Program will now exit. Please update the configuration file and run the program again.")
         create_default_config()
         return
     else:
         config_path = settings['config_path']
         invent_path = settings['inventory_path']
-        print("\n \nUsing configuration file to create database client...")
+        logging.debug(f"Using configuration file: {config_path} to create database client.")
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
         
         status, message = verify_config(config)
         if not status:
-            print(message)
+            logging.warning(message)
             return
     
     updater = InventoryUpdater(invent_path, config, comp_type)
@@ -61,15 +61,15 @@ if __name__ == "__main__":
         invent_print()
         sys.exit(0)
     if args.clear:
-        print("Clearing the current inventory...")
+        logging.info("Clearing the current inventory...")
         clear_invent()
         sys.exit(0)
     if args.updatedb:
-        print("Updating credentials...")
+        logging.info("Updating credentials...")
         result = asyncio.run(update_credentials())
         sys.exit(0)
     if args.updatedir:
-        print("Updating directory paths...")
+        logging.info("Updating directory paths...")
         result = asyncio.run(update_directorys())
         sys.exit(0)
 

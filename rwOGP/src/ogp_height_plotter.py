@@ -43,15 +43,15 @@ class PlotTool:
     def __check_save_dir(self):
         if self.save_dir is not None:
             if not os.path.exists(self.save_dir):
-                print(f"Directory {self.save_dir} does not exist.")
-                print("Creating save directory:", self.save_dir)
+                logging.warning(f"Directory {self.save_dir} does not exist.")
+                logging.warning("Creating save directory:", self.save_dir)
                 os.makedirs(self.save_dir)
     
     def get_center(self) -> int:
         """Get the index of the fiducial center in the dataframe by taking the average of the x and y coordinates."""
         center_x = (max(self.x_points) + min(self.x_points)) / 2
         center_y = (max(self.y_points) + min(self.y_points)) / 2
-        print(f"Center = ({center_x:.3f}, {center_y:.3f}) mm")
+        logging.debug(f"Center = ({center_x:.3f}, {center_y:.3f}) mm")
         return (center_x, center_y)
     
     @staticmethod
@@ -179,7 +179,7 @@ class PlotTool:
         """
         points_to_average = FDPoints[fd_indices]
         if np.any(np.isnan(points_to_average)):
-            print(f"NaN values found in FD points {[i+1 for i in fd_indices]} used for default calculation.")
+            logging.warning(f"NaN values found in FD points {[i+1 for i in fd_indices]} used for default calculation.")
             userinput = input(f"Would you like to continue with the available points? (y/n): ")
             if userinput.lower() != 'y':
                 raise ValueMissingError("Exiting... Please check the FD points and try again.")
@@ -283,18 +283,18 @@ class PlotTool:
         x_y_coords = FD_points[['X_coordinate', 'Y_coordinate']].values
         num_FDs = len(x_y_coords)
         if not num_FDs in {2, 4, 6, 8}:
-            print("The number of fiducial points measured must be 2, 4, 6, or 8.")
-            print(f"Measured {len(FD_names)} FDs:", FD_names)
-            print("This program looks for keyword 'FD' in file output. Make sure you rename your routine to include 'FD' in the name.")
+            logging.warning("The number of fiducial points measured must be 2, 4, 6, or 8.")
+            logging.warning(f"Measured {len(FD_names)} FDs:", FD_names)
+            logging.warning("This program looks for keyword 'FD' in file output. Make sure you rename your routine to include 'FD' in the name.")
             raise ValueMissingError("Exiting... Please check the FD points and try again.")
         
         sort_indices = np.argsort(FD_numbers)
         FD_points = x_y_coords[sort_indices]
-        print(f"Found {num_FDs} fiducial points: {FD_names}")
+        logging.info(f"Found {num_FDs} fiducial points: {FD_names}")
 
         FD_array = np.full((8,2), np.nan)
         for i, (x,y) in zip(FD_numbers, FD_points):
-            print(f"FD{i}: ({x:.3f}, {y:.3f})")
+            logging.debug(f"FD{i}: ({x:.3f}, {y:.3f})")
             FD_array[i-1] = [x,y]
 
         return FD_array
@@ -359,8 +359,8 @@ class PlotTool:
         max_h = max(zheight)
         min_h = min(zheight)
 
-        print(f"Average Height = {mean_h:.3f} mm; Maximum Height = {max_h:.3f} mm; Minimum Height = {min_h:.3f} mm")
-        print(f"Height = {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm. \n")
+        logging.debug(f"Average Height = {mean_h:.3f} mm; Maximum Height = {max_h:.3f} mm; Minimum Height = {min_h:.3f} mm")
+        logging.debug(f"Height = {mean_h:.3f} + ({max_h - mean_h:.3f}) - ({mean_h - min_h:.3f}) mm. \n")
 
         return mean_h, std_h, max_h, min_h
 
@@ -412,7 +412,7 @@ def plotFD(FDpoints:np.array, holeXY:tuple, slotXY:tuple, save=False, save_name=
     plt.title("Fiducial Points")
     if save:
         plt.savefig(save_name)
-        print("Saved FD plot to", save_name)
+        logging.debug("Saved FD plot to", save_name)
     else: plt.show()
     plt.close()
 

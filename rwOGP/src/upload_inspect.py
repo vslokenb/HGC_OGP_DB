@@ -1,4 +1,4 @@
-import sys, asyncpg
+import sys, asyncpg, logging
 sys.path.append('../')
 
 from src.param import COMP_PREFIX
@@ -117,7 +117,7 @@ class DBClient():
         - db_upload_data (dict): Dictionary containing the data to upload."""
         try:
             conn = await asyncpg.connect(**self._connect_params)
-            print('Connection successful. \n')
+            logging.debug('Connection successful. \n')
             table_name = comp_params['db_table_name']
 
             schema_name = 'public'
@@ -129,21 +129,18 @@ class DBClient():
                 AND table_name = $2
             );
             """
-            print(f"Attempting to upload to Table {table_name}...")
+            logging.debug(f"Attempting to upload to Table {table_name}...")
             table_exists = await conn.fetchval(table_exists_query, schema_name, table_name)  ### Returns True/False
             if table_exists:
                 query = get_query_write(table_name, db_upload_data.keys())
                 await conn.execute(query, *db_upload_data.values())
-                print(f'Data successfully uploaded to the {table_name}!')
+                logging.info(f'Data successfully uploaded to the {table_name}!')
                 return True
             else:
-                print(f'Table {table_name} does not exist in the database.')
-                print("Please create the table before uploading data or double check the table name.")
+                logging.warning(f'Table {table_name} does not exist in the database. Please create the table before uploading data.')
                 return False
         except Exception as e:
-            print("!" * 90)
-            print("Error encountered when uploading to the database.")
-            print(e)
+            logging.error(f"Error encountered when uploading to the database: {e}")
             return False
         finally: 
             await conn.close()
@@ -153,19 +150,17 @@ class DBClient():
         conn = await asyncpg.connect(**self._connect_params)
         try:
             prequery, name, query, values = get_query_write_link(comp_params, db_upload_data)
-            print("Executing pre-query...")
+            logging.debug("Executing pre-query...")
             status = await conn.fetchval(prequery, name)
             if not status:
-                print(f"Component {name} not found in the mother table {comp_params['mother_table']}.")
+                logging.warning(f"Component {name} not found in the mother table {comp_params['mother_table']}.")
                 return False
             else:
                 await conn.execute(query, *values)
-                print('Data successfully uploaded and linked to the mother table!')
+                logging.info('Data successfully uploaded and linked to the mother table!')
                 return True
         except Exception as e:
-            print("!" * 90)
-            print("Error encountered when linking to the mother table.")
-            print(e)
+            logging.error(f"Error encountered when linking to the mother table: {e}")
             return False
         
     async def GrabSensorOffsets(self, name: str) -> tuple[float, float, float]:
@@ -188,10 +183,9 @@ class DBClient():
             row = await conn.fetchrow(query, name.replace('ML', 'PL', 1))
             return row['x_offset_mu'], row['y_offset_mu'], row['ang_offset_deg']
         except Exception as e:
-            print("!" * 90)
-            print("Error encountered when grabbing Protomodule offsets from database.")
-            print("Accuracy Plot: PM offsets set to 0, 0, 0, due to failed data pull.")
-            print(e)
+            logging.error("Error encountered when grabbing Protomodule offsets from database.")
+            logging.error("Accuracy Plot: PM offsets set to 0, 0, 0, due to failed data pull.")
+            logging.error(e)
             return 0.0, 0.0, 0.0
         finally:
             if conn:
