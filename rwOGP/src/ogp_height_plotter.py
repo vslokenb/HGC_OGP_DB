@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
-import os, re, yaml, sys, logging
+import os, re, yaml, logging
+from rich.console import Console
+from rich.table import Table
 import matplotlib.pyplot as plt
 import matplotlib.colors as cls
 from src.parse_data import DataParser
@@ -246,10 +248,22 @@ class PlotTool:
 
         XOffset = FDCenter[0]-Hole[0]-adjustmentX
         YOffset = FDCenter[1]-Hole[1]-adjustmentY
-        logging.info(f"Hole Vs FDCenter: {Hole} vs {FDCenter}")
 
-        logging.info(f"Assembly Survey X Offset: {XOffset:.3f} mm.")
-        logging.info(f"Assembly Survey Y Offset: {YOffset:.3f} mm.")
+        # Create a rich table to display the offsets
+        console = Console()
+        table = Table(title="Assembly Survey Measurements")
+        table.add_column("Measurement", justify="left", style="cyan")
+        table.add_column("Value", justify="right", style="green")
+        table.add_column("Units", justify="left", style="yellow")
+
+        # Add measurements to the table
+        table.add_row("Hole Position", f"({Hole[0]:.3f}, {Hole[1]:.3f})", "mm")
+        table.add_row("FD Center", f"({FDCenter[0]:.3f}, {FDCenter[1]:.3f})", "mm")
+        table.add_row("X Offset", f"{XOffset:.3f}", "mm")
+        table.add_row("Y Offset", f"{YOffset:.3f}", "mm")
+
+        # Display the table
+        console.print(table)
 
         CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
 
@@ -297,6 +311,26 @@ class PlotTool:
         for i, (x,y) in zip(FD_numbers, FD_points):
             logging.debug(f"FD{i}: ({x:.3f}, {y:.3f})")
             FD_array[i-1] = [x,y]
+        
+        # Create a rich table to display FD_points only if debug level or lower is enabled
+        if logging.getLogger().getEffectiveLevel() <= logging.INFO:
+            console = Console()
+            table = Table(title="Fiducial Points")
+            table.add_column("Point #", justify="center", style="cyan")
+            table.add_column("X", justify="right", style="green")
+            table.add_column("Y", justify="right", style="green")
+
+            # Add each FD point to the table
+            for i, point in enumerate(FD_points):
+                table.add_row(
+                    f"FD {i+1}",
+                    f"{point[0]:.3f}",
+                    f"{point[1]:.3f}"
+                )
+
+            # Log the regular message and display the table
+            logging.debug("Fiducial points retrieved:")
+            console.print(table)
 
         return FD_array
 
@@ -327,7 +361,7 @@ class PlotTool:
         density = meta['Density']
         tray_no = meta['TrayNo']
         tray_file = pjoin(tray_dir, f"Tray{tray_no}.yaml")
-        logging.info(f"Using Tray {tray_no} info...")
+        logging.debug(f"Using Tray {tray_no} info...")
         logging.debug(f"Geometry: {geometry}; Density: {density}; PositionID: {position_id}")
 
         with open(tray_file, 'r') as f:
@@ -341,8 +375,8 @@ class PlotTool:
         hole_pin_xy = tuple(trayinfo[f'{hole_pin}_xy'])
         slot_pin_xy = tuple(trayinfo[f'{slot_pin}_xy'])
 
-        logging.debug("Hole Pin:", hole_pin, hole_pin_xy)
-        logging.debug("Slot Pin:", slot_pin, slot_pin_xy)
+        logging.debug(f"Hole Pin: {hole_pin}, {hole_pin_xy}")
+        logging.debug(f"Slot Pin: {slot_pin}, {slot_pin_xy}")
 
         return hole_pin_xy, slot_pin_xy
     

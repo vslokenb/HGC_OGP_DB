@@ -21,38 +21,19 @@ from rich.table import Table
 def test_angle_calculations(sample_name):
     """Compare angle calculations between legacy and new implementation."""
     # Setup the same test data used in both functions
-    logging.info("New Method results ...")
+    logging.warning("New Method results ...")
     parser = DataParser(pjoin('rwOGP', 'templates', 'samples', sample_name), 'tests')
     meta, features = parser()
 
     with open(meta[0], 'r') as f:
         metadata = yaml.safe_load(f)
         
-    setup_logging()
+    setup_logging(level=logging.INFO)
     feature_df = pd.read_csv(features[0])
     
     # Get results from new implementation (PlotTool)
     PT = PlotTool(metadata, "protomodules", feature_df, 'rwOGP/templates/trays', 'tests')
     FD_points = PT.get_FDs()
-    
-    # Create a rich table to display FD_points
-    console = Console()
-    table = Table(title="Fiducial Points")
-    table.add_column("Point #", justify="center", style="cyan")
-    table.add_column("X", justify="right", style="green")
-    table.add_column("Y", justify="right", style="green")
-
-    # Add each FD point to the table
-    for i, point in enumerate(FD_points):
-        table.add_row(
-            f"FD {i+1}",
-            f"{point[0]:.3f}",
-            f"{point[1]:.3f}"
-        )
-
-    # Log the regular message and display the table
-    logging.info("Fiducial points retrieved:")
-    console.print(table)
 
     hole_xy, slot_xy = PT.get_pin_coordinates()
     position = PT.meta['PositionID']

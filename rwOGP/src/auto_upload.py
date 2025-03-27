@@ -19,9 +19,9 @@ class InventoryUpdater():
         self.checkdir = self.config.get('ogp_survey_dir')
         self.parsed_dir = self.config.get('ogp_parsed_dir')
         self.comp_type = comp_type
-        logging.debug("Reading inventory from:", self.inventory_p)
-        logging.debug("Parsing OGP survey files from directory:", self.checkdir)
-        logging.debug("Saving parsed data to directory:", self.parsed_dir)
+        logging.debug(f"Reading inventory from: {self.inventory_p}", self.inventory_p)
+        logging.debug(f"Parsing OGP survey files from directory: {self.checkdir}")
+        logging.debug(f"Saving parsed data to directory: {self.parsed_dir}")
     
     def display_file_changes(self, new_inventory, removed_inventory, successful_uploads):
         """Display a table of file changes using rich.Table"""

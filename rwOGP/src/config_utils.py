@@ -9,7 +9,7 @@ def setup_logging(level=logging.INFO, show_time=True, show_path=False):
     """Set up logging with rich formatting and styling."""
     # Custom theme for rich
     custom_theme = Theme({
-        "logging.level.debug": "cyan",
+        "logging.level.debug": "dim cyan italic",  # Make debug messages italic, dimmed and cyan
         "logging.level.info": "green",
         "logging.level.warning": "yellow bold",
         "logging.level.error": "red",
@@ -18,8 +18,14 @@ def setup_logging(level=logging.INFO, show_time=True, show_path=False):
     
     console = Console(theme=custom_theme)
     
-    # Configure rich handler
-    rich_handler = RichHandler(
+    class CustomRichHandler(RichHandler):
+        def render_message(self, record, message):
+            if record.levelno == logging.DEBUG:
+                # Add special formatting for debug messages
+                return f"🔍 {message}"  # Prefix debug messages with a magnifying glass
+            return message
+
+    rich_handler = CustomRichHandler(
         console=console,
         show_time=show_time,
         show_path=show_path,
