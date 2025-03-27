@@ -267,6 +267,7 @@ class PlotTool:
             raise ValueError(f"Invalid configuration for geometry={geometry}, density={density}, position={position}")
 
         AngleOffset = angle_FD - angle_Pin
+        logging.info(f"Assembly Survey Rotational Offset is {AngleOffset:.5f} degrees.")
 
         return CenterOffset, AngleOffset, XOffset, YOffset
 
