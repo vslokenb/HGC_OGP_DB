@@ -299,7 +299,52 @@ class PlotTool:
 
         return FD_array
 
+    def get_pin_coordinates(self):
+        """Get the coordinates of the hole and slot pins from the tray file.
 
+        Parameters
+        ----------
+        tray_dir : str
+            Directory containing tray files
+        meta : dict
+            Dictionary containing component metadata including:
+            - PositionID
+            - Geometry
+            - Density
+            - TrayNo
+
+        Returns
+        -------
+        tuple
+            ((hole_x, hole_y), (slot_x, slot_y)) coordinates of the hole and slot pins
+        """
+        meta = self.meta
+        tray_dir = self.tray_dir
+        
+        position_id = meta['PositionID']
+        geometry = meta['Geometry']
+        density = meta['Density']
+        tray_no = meta['TrayNo']
+        tray_file = pjoin(tray_dir, f"Tray{tray_no}.yaml")
+        logging.info(f"Using Tray {tray_no} info...")
+        logging.debug(f"Geometry: {geometry}; Density: {density}; PositionID: {position_id}")
+
+        with open(tray_file, 'r') as f:
+                trayinfo = yaml.safe_load(f)
+
+        hole_pin, slot_pin = pin_mapping.get(geometry, {}).get(density, {}).get(position_id, ('', ''))
+
+        if hole_pin == '' or slot_pin == '':
+            logging.warning(f"Could not find the HolePin and SlotPin for the given Geometry: {geometry} and Density: {density}.")
+
+        hole_pin_xy = tuple(trayinfo[f'{hole_pin}_xy'])
+        slot_pin_xy = tuple(trayinfo[f'{slot_pin}_xy'])
+
+        logging.debug("Hole Pin:", hole_pin, hole_pin_xy)
+        logging.debug("Slot Pin:", slot_pin, slot_pin_xy)
+
+        return hole_pin_xy, slot_pin_xy
+    
     def get_offsets(self):
         """Get the offsets of the sensor from the tray fiducials.
 
@@ -307,24 +352,10 @@ class PlotTool:
         - `XOffset`: x-offset of the sensor from the tray center
         - `YOffset`: y-offset of the sensor from the tray center
         - `AngleOff`: angle of the sensor from the tray fiducials"""
-
-        PositionID, Geometry, density, TrayNo = self.meta['PositionID'], self.meta['Geometry'], self.meta['Density'], self.meta['TrayNo']
-
-        TrayFile = pjoin(self.tray_dir, f"Tray{TrayNo}.yaml")
-        logging.info(f"Using Tray {TrayNo} info...")
-
-        logging.debug(f"Geometry: {Geometry}; Density: {density}; PositionID: {PositionID}; Comp_Type: {self.comp_type}")
-
-        with open(TrayFile, 'r') as f:
-            trayinfo = yaml.safe_load(f)
-
-        HolePin, SlotPin = pin_mapping.get(Geometry, {}).get(density, {}).get(PositionID, ('', ''))
-
-        if HolePin == '' or SlotPin == '':
-            logging.warning(f"Could not find the HolePin and SlotPin for the given Geometry: {Geometry} and Density: {density}.")
-
-        HolePin_xy = tuple(trayinfo[f'{HolePin}_xy'])
-        SlotPin_xy = tuple(trayinfo[f'{SlotPin}_xy'])
+        
+        HolePin_xy, SlotPin_xy = self.get_pin_coordinates()
+        PositionID = self.meta['PositionID']
+        HolePin, SlotPin = self.meta['HolePin'], self.meta['SlotPin']
 
         FD_points = self.get_FDs()
 

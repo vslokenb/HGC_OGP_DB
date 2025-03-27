@@ -16,9 +16,9 @@ p1K_xy:
 p1L_xy:
 p1M_xy: 
 p1N_xy: 
-p1O_xy: [66.13457, 287.90542] 
+p1O_xy: [66.13457, 287.90542] # Offcenter pin
 p1P_xy:
-p1_center_pin_xy: [141.07676, 288.22566]
+p1_center_pin_xy: [141.07676, 288.22566] # Center pin
 p2A_xy: 
 p2B_xy: 
 p2C_xy: 
