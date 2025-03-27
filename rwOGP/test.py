@@ -67,6 +67,7 @@ def test_angle_calculations():
         "OffCenter.X": slot_xy[0],
         "OffCenter.Y": slot_xy[1]
     }
+    
     # Add FD points
     for i in range(4):
         legacy_points[i] = FD_points[i]
