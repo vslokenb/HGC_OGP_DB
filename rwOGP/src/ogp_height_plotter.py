@@ -378,6 +378,10 @@ class PlotTool:
         logging.debug(f"Hole Pin: {hole_pin}, {hole_pin_xy}")
         logging.debug(f"Slot Pin: {slot_pin}, {slot_pin_xy}")
 
+        self.meta['HolePin'] = hole_pin
+        self.meta['SlotPin'] = slot_pin
+        self.meta['PositionID'] = position_id
+
         return hole_pin_xy, slot_pin_xy
     
     def get_offsets(self):
