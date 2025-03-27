@@ -18,10 +18,11 @@ from rich.console import Console
 from rich.table import Table
 # from src.make_accuracy_plot import make_accuracy_plot
 
-def test_angle_calculations():
+def test_angle_calculations(sample_name):
     """Compare angle calculations between legacy and new implementation."""
     # Setup the same test data used in both functions
-    parser = DataParser(pjoin('rwOGP', 'templates', 'samples', '320PLF3W2CM0121.txt'), 'tests')
+    logging.info("New Method results ...")
+    parser = DataParser(pjoin('rwOGP', 'templates', 'samples', sample_name), 'tests')
     meta, features = parser()
 
     with open(meta[0], 'r') as f:
@@ -31,7 +32,6 @@ def test_angle_calculations():
     feature_df = pd.read_csv(features[0])
     
     # Get results from new implementation (PlotTool)
-
     PT = PlotTool(metadata, "protomodules", feature_df, 'rwOGP/templates/trays', 'tests')
     FD_points = PT.get_FDs()
     
@@ -59,6 +59,8 @@ def test_angle_calculations():
     
     # Calculate using new method
     centeroff_new, angleoff_new, xoff_new, yoff_new = PT.angle(hole_xy, slot_xy, FD_points)
+
+    logging.warning("Legacy function results ...")
     
     # Prepare data for legacy function
     legacy_points = {
@@ -87,7 +89,11 @@ def test_angle_calculations():
     logging.info(f"{'Angle Offset (deg)':20} {angleoff_new:10.3f} {angleoff_legacy:10.3f} {abs(angleoff_new-angleoff_legacy):10.3f}")
 
 if __name__ == '__main__':
-    test_angle_calculations()
+    logging.info("Running tests for 320PLF3W2CM0121.txt")
+    test_angle_calculations("320PLF3W2CM0121.txt")
+    
+    logging.info("Running tests for 320PLF3W2CM0122.txt")
+    test_angle_calculations("320PLF3W2CM0122.txt")
     
 #     parser = DataParser(pjoin('rwOGP', 'templates', 'samples', '320PLF3W2CM0121.txt'), 'tests')
     # meta, features = parser()
