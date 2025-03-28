@@ -12,16 +12,19 @@
 
 # Version 1.0 FOR USE IN CMU's READ_WRITE_OGP DATABASE     9/19/24
 
-import os
+import os, logging
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.ticker import MultipleLocator
 import matplotlib.patches as patches
-from io import BytesIO  
+from io import BytesIO
 
 mpl.use('Agg')
+plt.rcParams['figure.constrained_layout.use'] = True
+plt.rcParams['figure.constrained_layout.h_pad'] = 0.1
+plt.rcParams['figure.constrained_layout.w_pad'] = 0.1
 
 def limit_func(x):
     """Limit function to constrain values between -115 and 115"""
@@ -80,6 +83,12 @@ def make_accuracy_plot(
         Relative angle of PCB w.r.t. baseplate (degrees)
     """
     # Create main plot
+    plt.rcParams['font.size'] = 10  # Set a minimum font size
+    plt.rcParams['axes.titlesize'] = 20
+    plt.rcParams['axes.labelsize'] = 18
+    plt.rcParams['xtick.labelsize'] = 12
+    plt.rcParams['ytick.labelsize'] = 12
+    
     fig, ax = plt.subplots(figsize=(6,6), layout='constrained')
     ax.set_box_aspect(1)
     ax.set_title(f'{module_name} accuracy plot', y=1.15, fontsize=20)
@@ -239,12 +248,14 @@ def make_accuracy_plot(
 
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, f'{module_name}_accuracy.png')
-    plt.savefig(output_path)
-    print(f'Accuracy plot saved to: {output_path}')
+    plt.savefig(output_path, dpi=100, bbox_inches='tight')
+    logging.info(f'Accuracy plot saved to: {output_path}')
 
     # Return plot as bytes
     buffer = BytesIO()
-    plt.savefig(buffer, format='png', bbox_inches='tight')
+    # Modified code with DPI and size constraints
+
+    plt.savefig(buffer, format='png', dpi=100, bbox_inches='tight')
     buffer.seek(0)
     plt.close()
     return buffer.read()
