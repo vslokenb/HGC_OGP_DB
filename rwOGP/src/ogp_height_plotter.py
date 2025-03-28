@@ -129,7 +129,7 @@ class PlotTool:
         x, y = PlotTool._prepare_coordinates(x, y, centerxy, rotate, new_angle)
         
         # Create plot
-        fig = plt.figure(dpi=150, figsize=(12,7))
+        fig = plt.figure(dpi=150, figsize=(9,5))
         axs = fig.add_subplot(111)
         axs.set_aspect('equal')
         
