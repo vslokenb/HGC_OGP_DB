@@ -56,18 +56,60 @@ def test_angle_calculations(sample_name):
         legacy_points[i] = FD_points[i]
     
     # Calculate using legacy method
-    centeroff_legacy, angleoff_legacy = calculate_sensor_alignment(
+    centeroff_legacy, angleoff_legacy, x_off, y_off = calculate_sensor_alignment(
         legacy_points, 
         FDpoints=4,
         OffCenterPin="Left" if position == 1 else "Right"
     )
     
-    # Compare results
-    logging.info("\nComparison of angle calculation methods:")
-    logging.info(f"{'':20} {'New':>10} {'Legacy':>10} {'Diff':>10}")
-    logging.info("-" * 50)
-    logging.info(f"{'Center Offset (mm)':20} {centeroff_new:10.3f} {centeroff_legacy:10.3f} {abs(centeroff_new-centeroff_legacy):10.3f}")
-    logging.info(f"{'Angle Offset (deg)':20} {angleoff_new:10.3f} {angleoff_legacy:10.3f} {abs(angleoff_new-angleoff_legacy):10.3f}")
+    # Compare results using rich table and convert distances to micrometers
+    console = Console()
+    table = Table(title="Comparison of Angle Calculation Methods")
+
+    # Add columns
+    table.add_column("Measurement", style="cyan")
+    table.add_column("New", justify="right", style="green")
+    table.add_column("Legacy", justify="right", style="yellow")
+    table.add_column("Difference", justify="right", style="red")
+
+    # Convert center offsets to micrometers (multiply by 1000)
+    centeroff_new_um = centeroff_new * 1000
+    centeroff_legacy_um = centeroff_legacy * 1000
+    diff_center_um = abs(centeroff_new_um - centeroff_legacy_um)
+
+    # Convert x and y offsets to micrometers
+    xoff_new_um = xoff_new * 1000
+    yoff_new_um = yoff_new * 1000
+    x_off_um = x_off * 1000
+    y_off_um = y_off * 1000
+
+    # Add rows
+    table.add_row(
+        "Center Offset (µm)",
+        f"{centeroff_new_um:.1f}",
+        f"{centeroff_legacy_um:.1f}",
+        f"{diff_center_um:.1f}"
+    )
+    table.add_row(
+        "Angle Offset (deg)",
+        f"{angleoff_new:.3f}",
+        f"{angleoff_legacy:.3f}",
+        f"{abs(angleoff_new-angleoff_legacy):.3f}"
+    )
+    table.add_row(
+        "X Offset (µm)",
+        f"{xoff_new_um:.1f}",
+        f"{x_off_um:.1f}",
+        f"{abs(xoff_new_um-x_off_um):.1f}"
+    )
+    table.add_row(
+        "Y Offset (µm)",
+        f"{yoff_new_um:.1f}",
+        f"{y_off_um:.1f}",
+        f"{abs(yoff_new_um-y_off_um):.1f}"
+    )
+    # Print the table
+    console.print(table)
 
 def test_workflow(sample_name):
     parser = DataParser(pjoin('rwOGP', 'templates', 'samples', sample_name), 'tests')

@@ -22,6 +22,7 @@ class InventoryUpdater():
         logging.debug(f"Reading inventory from: {self.inventory_p}", self.inventory_p)
         logging.debug(f"Parsing OGP survey files from directory: {self.checkdir}")
         logging.debug(f"Saving parsed data to directory: {self.parsed_dir}")
+
     def display_file_changes(self, new_inventory, removed_inventory, successful_uploads):
         """Display a table of file changes using rich.Table"""
         console = Console()

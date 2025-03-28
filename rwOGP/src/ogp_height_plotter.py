@@ -260,8 +260,8 @@ class PlotTool:
         # Add measurements to the table
         table.add_row("Hole Position", f"({Hole[0]:.3f}, {Hole[1]:.3f})", "mm")
         table.add_row("FD Center", f"({FDCenter[0]:.3f}, {FDCenter[1]:.3f})", "mm")
-        table.add_row("X Offset", f"{XOffset:.3f}", "mm")
-        table.add_row("Y Offset", f"{YOffset:.3f}", "mm")
+        table.add_row("X Offset", f"{XOffset*1000:.1f}", "μm")
+        table.add_row("Y Offset", f"{YOffset*1000:.1f}", "μm")
 
         # Display the table
         console.print(table)
@@ -421,14 +421,12 @@ class PlotTool:
 
         CenterOff, AngleOff, XOffset, YOffset = self.angle(HolePin_xy, SlotPin_xy, FD_points)
 
-        if PositionID == 1:
-            NEWY = XOffset*-1
-            NEWX = YOffset
-        elif PositionID == 2:
-            NEWY = XOffset
-            NEWX = YOffset*-1
-
-        logging.info(f"Rotational Offset is {AngleOff:.5f} degrees; Center Offset is {CenterOff:.3f} mm")
+        # if PositionID == 1:
+        #     NEWY = XOffset*-1
+        #     NEWX = YOffset
+        # elif PositionID == 2:
+        #     NEWY = XOffset
+        #     NEWX = YOffset*-1
 
         if abs(AngleOff) > 20:
             logging.error("The calculated angle offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
@@ -437,7 +435,7 @@ class PlotTool:
             logging.error("The calculated offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
             raise ValueRangeError("The calculated offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
 
-        return NEWX, NEWY, AngleOff
+        return XOffset, YOffset, AngleOff
 
     def _calculate_height_stats(zheight):
         """Calculate basic height statistics."""

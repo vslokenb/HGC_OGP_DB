@@ -61,11 +61,7 @@ def calculate_sensor_alignment(points, FDpoints=4, OffCenterPin="Left", details=
     AngleOffset = angle_FD1 - angle_Pin
     CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
 
-    logger.info(f"Assembly Survey X Offset: {XOffset:.3f} mm")
-    logger.info(f"Assembly Survey Y Offset: {YOffset:.3f} mm")
-    logger.info(f"Assembly Survey Rotational Offset is {AngleOffset:.5f} degrees")
-
     # if plot:
         # plotFD(FDpoints, FDCenter)  # Assuming plotFD is defined elsewhere
 
-    return CenterOffset, AngleOffset
+    return CenterOffset, AngleOffset, XOffset, YOffset
