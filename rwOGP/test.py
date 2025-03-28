@@ -112,6 +112,7 @@ def test_angle_calculations(sample_name):
     console.print(table)
 
 def test_workflow(sample_name):
+    setup_logging(level=logging.INFO)
     parser = DataParser(pjoin('rwOGP', 'templates', 'samples', sample_name), 'tests')
     meta, features = parser()
 
@@ -126,16 +127,17 @@ def test_workflow(sample_name):
     im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
             "new_angle": component_params['new_angle'], "savename": "ex_heights",
             "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": True}
-
+    
+    PT.get_offsets()
     PT(**im_args)
     # make_accuracy_plot(metadata['ComponentID'], XOffset, Yoffset, AngleOff, 0, 0, 0)
     
 if __name__ == '__main__':
-    logging.info("Running tests for 320PLF3W2CM0121.txt")
-    test_angle_calculations("320PLF3W2CM0121.txt")
+    # logging.info("Running tests for 320PLF3W2CM0121.txt")
+    # test_angle_calculations("320PLF3W2CM0121.txt")
     
-    logging.info("Running tests for 320PLF3W2CM0122.txt")
-    test_angle_calculations("320PLF3W2CM0122.txt")
+    # logging.info("Running tests for 320PLF3W2CM0122.txt")
+    # test_angle_calculations("320PLF3W2CM0122.txt")
     
     test_workflow("320PLF3W2CM0121.txt")
 

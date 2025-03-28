@@ -10,6 +10,8 @@ from src.param import pin_mapping, plot2d_dim, ADJUSTMENTS, angle_lookup, ANGLE_
 
 pjoin = os.path.join
 
+plt.rcParams.update({'font.size': 8})
+
 class ValueMissingError(Exception):
     pass
 
@@ -263,8 +265,6 @@ class PlotTool:
         table.add_row("X Offset", f"{XOffset*1000:.1f}", "μm")
         table.add_row("Y Offset", f"{YOffset*1000:.1f}", "μm")
 
-        # Display the table
-        console.print(table)
 
         CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
 
@@ -282,7 +282,11 @@ class PlotTool:
             raise ValueError(f"Invalid configuration for geometry={geometry}, density={density}, position={position}")
 
         AngleOffset = angle_FD - angle_Pin
-        logging.info(f"Assembly Survey Rotational Offset is {AngleOffset:.5f} degrees.")
+
+        table.add_row("Angle Offset", f"{AngleOffset:.5f}", "degrees")
+        table.add_row("Center Offset", f"{CenterOffset*1000:.1f}", "μm")
+
+        console.print(table)
 
         return CenterOffset, AngleOffset, XOffset, YOffset
 
