@@ -2,7 +2,9 @@ import os, yaml, logging
 from ttp import ttp
 import pandas as pd
 from io import StringIO
-
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
 from src.param import default_params, pin_mapping
 from src.parser_template import header_template, data_template, required_keys, warning_keys
 
@@ -118,22 +120,47 @@ class DataParser():
         """Check for missing keys in the parsed header. 
         If missing, adopt default values for the missing keys or exit the program."""
         missing_keys = set(required_keys) - set(header_dict.keys())
-        if missing_keys:
-            logging.error("DataParser did not parse all the required keys due to mismatching in naming or missing data.")
-            logging.info("Parsed data: ", header_dict)
-            logging.error("Missing keys: ", missing_keys)
-            header_dict = self.adopt_default(header_dict)
-            user_input = input("Do you want to enter values for the missing keys? (y/n): ")
-            if user_input.lower() != 'y':
-                raise ParserKeyException(f"Missing keys not resolved! Exiting...")
-            else:
-                for key in set(required_keys) - set(header_dict.keys()):
-                    value = input(f"Enter value for {key}: ")
-                    header_dict[key] = value
+        if missing_keys or set(warning_keys) - set(header_dict.keys()):
+            console = Console()
+            warning_text = Text()
 
-        if set(warning_keys) - set(header_dict.keys()):
-            logging.warning(f"DataParser did not parse all the optional keys due to mismatching in naming or missing data.")
-            logging.warning(f"Missing keys: {set(warning_keys) - set(header_dict.keys())}")
+            if missing_keys:
+                warning_text.append(f"\nMissing required keys:\n", style="red")
+                for key in missing_keys:
+                    warning_text.append(f"• {key}\n", style="red dim")
+
+                header_dict = self.adopt_default(header_dict)
+                console.print(Panel(
+                    warning_text,
+                    title="[red]Error[/red]",
+                    border_style="red",
+                    expand=False
+                ))
+
+                user_input = input("Do you want to enter values for the missing keys? (y/n): ")
+                if user_input.lower() != 'y':
+                    raise ParserKeyException(f"Missing keys not resolved! Exiting...")
+                else:
+                    for key in missing_keys:
+                        value = input(f"Enter value for {key}: ")
+                        header_dict[key] = value
+
+            # Handle optional keys
+            if set(warning_keys) - set(header_dict.keys()) and logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
+                missing_optional = set(warning_keys) - set(header_dict.keys())
+
+                warning_text = Text()
+                warning_text.append(f"DataParser did not parse all the optional keys for {header_dict['ComponentID']} due to mismatching in naming or missing data.\n", style="yellow")
+                warning_text.append("\nMissing optional keys:\n", style="yellow")
+                for key in missing_optional:
+                    warning_text.append(f"• {key}\n", style="yellow dim")
+
+                console.print(Panel(
+                    warning_text,
+                    title="[yellow]Warning[/yellow]",
+                    border_style="yellow",
+                    expand=False
+                ))
         
         return header_dict
     

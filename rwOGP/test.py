@@ -69,6 +69,25 @@ def test_angle_calculations(sample_name):
     logging.info(f"{'Center Offset (mm)':20} {centeroff_new:10.3f} {centeroff_legacy:10.3f} {abs(centeroff_new-centeroff_legacy):10.3f}")
     logging.info(f"{'Angle Offset (deg)':20} {angleoff_new:10.3f} {angleoff_legacy:10.3f} {abs(angleoff_new-angleoff_legacy):10.3f}")
 
+def test_workflow(sample_name):
+    parser = DataParser(pjoin('rwOGP', 'templates', 'samples', sample_name), 'tests')
+    meta, features = parser()
+
+    with open(meta[0], 'r') as f:
+        metadata = yaml.safe_load(f)
+        
+    setup_logging()
+
+    feature_df = pd.read_csv(features[0])
+    PT = PlotTool(metadata, "protomodules", feature_df, 'rwOGP/templates/trays', 'tests')
+    
+    im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
+            "new_angle": component_params['new_angle'], "savename": "ex_heights",
+            "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": True}
+
+    PT(**im_args)
+    # make_accuracy_plot(metadata['ComponentID'], XOffset, Yoffset, AngleOff, 0, 0, 0)
+    
 if __name__ == '__main__':
     logging.info("Running tests for 320PLF3W2CM0121.txt")
     test_angle_calculations("320PLF3W2CM0121.txt")
@@ -76,25 +95,6 @@ if __name__ == '__main__':
     logging.info("Running tests for 320PLF3W2CM0122.txt")
     test_angle_calculations("320PLF3W2CM0122.txt")
     
-#     parser = DataParser(pjoin('rwOGP', 'templates', 'samples', '320PLF3W2CM0121.txt'), 'tests')
-    # meta, features = parser()
-
-    # with open(meta[0], 'r') as f:
-        # metadata = yaml.safe_load(f)
-        
-    # setup_logging()
-
-    # feature_df = pd.read_csv(features[0])
-    # PT = PlotTool(metadata, "protomodules", feature_df, 'rwOGP/templates/trays', 'tests')
-    
-    # im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
-            # "new_angle": component_params['new_angle'], "savename": "ex_heights",
-            # "mod_flat": metadata['Flatness'], "title": metadata['ComponentID'], "show_plot": True}
-
-    # XOffset, Yoffset, AngleOff = PT.get_offsets()
-    # logging.info(f"XOffset: {XOffset}, YOffset: {Yoffset}, AngleOff: {AngleOff}")
-    # make_accuracy_plot(metadata['ComponentID'], XOffset, Yoffset, AngleOff, 0, 0, 0)
-
-    # PT(**im_args)
+    test_workflow("320PLF3W2CM0121.txt")
 
 
