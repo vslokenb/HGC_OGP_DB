@@ -129,7 +129,7 @@ class PlotTool:
         x, y = PlotTool._prepare_coordinates(x, y, centerxy, rotate, new_angle)
         
         # Create plot
-        fig = plt.figure(dpi=150, figsize=(9,5))
+        fig = plt.figure(dpi=150, figsize=(12,7))
         axs = fig.add_subplot(111)
         axs.set_aspect('equal')
         
@@ -155,7 +155,8 @@ class PlotTool:
         axs.text(1.3, 1.0, textstr, transform=axs.transAxes, fontsize=10, verticalalignment='top', bbox=props)
 
         for xi, yi, zi in zip(x, y, zheight):
-            axs.text(xi, yi, f"{zi:.2f}", fontsize=8, color='black', ha='center', va='bottom')
+            min_fontsize = max(8, 72.0 / fig.dpi)
+            axs.text(xi, yi, f"{zi:.2f}", fontsize=min_fontsize, color='black', ha='center', va='bottom')
         
         if show_plot:
             plt.show()

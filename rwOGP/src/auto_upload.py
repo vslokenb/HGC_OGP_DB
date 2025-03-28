@@ -22,9 +22,9 @@ class InventoryUpdater():
         logging.debug(f"Reading inventory from: {self.inventory_p}", self.inventory_p)
         logging.debug(f"Parsing OGP survey files from directory: {self.checkdir}")
         logging.debug(f"Saving parsed data to directory: {self.parsed_dir}")
-    
     def display_file_changes(self, new_inventory, removed_inventory, successful_uploads):
         """Display a table of file changes using rich.Table"""
+        console = Console()
         table = Table(title="OGP Survey File Changes Summary")
         
         # Add columns
@@ -61,9 +61,9 @@ class InventoryUpdater():
         )
 
         # Print the table
-        self.console.print("\n")
-        self.console.print(table)
-        self.console.print("\n")
+        console.print("\n")
+        console.print(table)
+        console.print("\n")
     
     async def __call__(self):
         if not pexist(self.inventory_p):
