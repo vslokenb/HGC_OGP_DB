@@ -55,7 +55,7 @@ if __name__ == "__main__":
     if args.debug:
         setup_logging(logging.DEBUG)
     else:
-        setup_logging()
+        setup_logging(logging.WARNING)
     
     if args.print:
         invent_print()

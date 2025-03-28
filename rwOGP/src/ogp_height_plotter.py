@@ -322,8 +322,8 @@ class PlotTool:
             logging.debug(f"FD{i}: ({x:.3f}, {y:.3f})")
             FD_array[i-1] = [x,y]
         
-        # Create a rich table to display FD_points only if debug level or lower is enabled
-        if logging.getLogger().getEffectiveLevel() <= logging.INFO:
+        # Create a rich table to display FD_points only if warning level or lower is enabled
+        if logging.getLogger().getEffectiveLevel() <= logging.WARNING:
             console = Console()
             table = Table(title="Fiducial Points")
             table.add_column("Point #", justify="center", style="cyan")
