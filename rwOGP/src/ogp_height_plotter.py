@@ -375,8 +375,30 @@ class PlotTool:
         hole_pin_xy = tuple(trayinfo[f'{hole_pin}_xy'])
         slot_pin_xy = tuple(trayinfo[f'{slot_pin}_xy'])
 
-        logging.debug(f"Hole Pin: {hole_pin}, {hole_pin_xy}")
-        logging.debug(f"Slot Pin: {slot_pin}, {slot_pin_xy}")
+        logging.debug(f"Calculating offsets with ...")
+
+        # Only create and display the table if log level is debug or lower
+        if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
+            console = Console()
+            table = Table(title="Pin Coordinates")
+            table.add_column("Pin Type", justify="left", style="cyan")
+            table.add_column("Pin Name", justify="left", style="green")
+            table.add_column("Coordinates", justify="right", style="yellow")
+        
+            # Add the pin information to the table
+            table.add_row(
+                "Hole Pin",
+                hole_pin,
+                f"({hole_pin_xy[0]:.3f}, {hole_pin_xy[1]:.3f})"
+            )
+            table.add_row(
+                "Slot Pin",
+                slot_pin,
+                f"({slot_pin_xy[0]:.3f}, {slot_pin_xy[1]:.3f})"
+            )
+
+            # Print the table
+            console.print(table)
 
         self.meta['HolePin'] = hole_pin
         self.meta['SlotPin'] = slot_pin
@@ -392,15 +414,13 @@ class PlotTool:
         - `YOffset`: y-offset of the sensor from the tray center
         - `AngleOff`: angle of the sensor from the tray fiducials"""
         
+        # Get the coordinates of the hole and slot 
         HolePin_xy, SlotPin_xy = self.get_pin_coordinates()
         PositionID = self.meta['PositionID']
-        HolePin, SlotPin = self.meta['HolePin'], self.meta['SlotPin']
 
         FD_points = self.get_FDs()
 
         plotFD(FD_points, HolePin_xy, SlotPin_xy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))
-
-        logging.debug(f'Calculating Angle and Offsets with:  {HolePin} @: {HolePin_xy} & {SlotPin} @: {SlotPin_xy}')
 
         CenterOff, AngleOff, XOffset, YOffset = self.angle(HolePin_xy, SlotPin_xy, FD_points)
 
