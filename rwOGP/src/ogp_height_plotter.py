@@ -113,8 +113,13 @@ class PlotTool:
         """
         from io import BytesIO
         buffer = BytesIO()
-        fig.savefig(savename, bbox_inches='tight')
-        fig.savefig(buffer, format='png', bbox_inches='tight')
+        
+        # Add minimum figure size and DPI settings
+        fig.set_size_inches(6, 4)  # or whatever minimum size is appropriate
+        dpi = 100  # adjust as needed
+        
+        fig.savefig(savename, bbox_inches='tight', dpi=dpi)
+        fig.savefig(buffer, format='png', bbox_inches='tight', dpi=dpi)
         buffer.seek(0)
         image_bytes = buffer.read()
         buffer.close()
