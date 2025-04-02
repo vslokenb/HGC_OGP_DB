@@ -30,6 +30,7 @@ def test_angle_calculations(sample_name, comp_type):
         metadata = yaml.safe_load(f)
         
     setup_logging(level=logging.INFO)
+    logging.info(f"Running comparison for {sample_name} with component type {comp_type}")
     feature_df = pd.read_csv(features[0])
     
     # Get results from new implementation (PlotTool)
@@ -136,11 +137,9 @@ def test_workflow(sample_name, comp_type):
     # make_accuracy_plot(metadata['ComponentID'], XOffset, Yoffset, AngleOff, 0, 0, 0)
     
 if __name__ == '__main__':
-    # logging.info("Running tests for 320PLF3W2CM0121.txt")
     test_angle_calculations("320MLF3W2CM0122.txt", "modules")
     
-    # logging.info("Running tests for 320PLF3W2CM0122.txt")
-    # test_angle_calculations("320PLF3W2CM0122.txt", "protomodules")
+    test_angle_calculations("320MLF3W2CM0121.txt", "modules")
     
     # test_workflow("320MLF3W2CM0121.txt", "modules")
 
