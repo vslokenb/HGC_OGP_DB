@@ -301,10 +301,13 @@ class PlotTool:
         
         Return 
         - `FD_points`: 8 by 2 array of fiducial points, empty points are filled with np.nan"""
-        FD_points = self.features[self.features['FeatureName'].str.contains('FD')].copy()
-        FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(lambda x: int(re.search(r'FD(\d+)', x).group(1)) if re.search(r'FD(\d+)', x) else 0)
+        FD_points = self.features[self.features['FeatureName'].str.contains('FD', case=False)].copy()
+        FD_points.loc[:, 'FD_number'] = FD_points['FeatureName'].apply(
+            lambda x: int(re.search(r'FD(\d+)', x, re.IGNORECASE).group(1)) if re.search(r'FD(\d+)', x, re.IGNORECASE) else 0
+        )
         FD_names = FD_points['FeatureName'].values
         FD_numbers = FD_points['FD_number'].values
+        logging.debug(f"Found fiducial positions in {FD_names} with numbers {FD_numbers}")
         x_y_coords = FD_points[['X_coordinate', 'Y_coordinate']].values
         num_FDs = len(x_y_coords)
         if not num_FDs in {2, 4, 6, 8}:
@@ -322,7 +325,7 @@ class PlotTool:
             logging.debug(f"FD{i}: ({x:.3f}, {y:.3f})")
             FD_array[i-1] = [x,y]
         
-        # Create a rich table to display FD_points only if warning level or lower is enabled
+        # Create a rich table to display non-NaN FD_array points only if warning level or lower is enabled
         if logging.getLogger().getEffectiveLevel() <= logging.WARNING:
             console = Console()
             table = Table(title="Fiducial Points")
@@ -330,13 +333,14 @@ class PlotTool:
             table.add_column("X", justify="right", style="green")
             table.add_column("Y", justify="right", style="green")
 
-            # Add each FD point to the table
-            for i, point in enumerate(FD_points):
-                table.add_row(
-                    f"FD {i+1}",
-                    f"{point[0]:.3f}",
-                    f"{point[1]:.3f}"
-                )
+            # Add only non-NaN FD points to the table
+            for i, point in enumerate(FD_array):
+                if not np.isnan(point).any():  # Check if the point contains any NaN values
+                    table.add_row(
+                        f"FD {i+1}",
+                        f"{point[0]:.3f}",
+                        f"{point[1]:.3f}"
+                    )
 
             # Log the regular message and display the table
             logging.debug("Fiducial points retrieved:")

@@ -65,6 +65,8 @@ ADJUSTMENTS = {
     }
 }
 
+
+# Define the angle calculation of FD points
 ANGLE_CALC_CONFIG = {
     'Bottom': lambda fd3to1, *_: calc_basic_angle(fd3to1),
     'Top': {
@@ -112,6 +114,8 @@ def calc_ref_angle(pinx, pinY, sign):
         logging.debug("Using Angle of Slot(OffCenter) --> Hole(Center) for rotational reference")
     return np.degrees(np.arctan2(sign * pinY, sign * pinx))
 
+
+# Define the hole-to-slot angle calculation functions
 angle_lookup = {
     'Full': {
         'HD': {
@@ -191,6 +195,7 @@ def calc_five_angle(fd3to1, is_second=False) -> float:
     return np.degrees(np.arctan2(sign * fd3to1[1], sign * fd3to1[0]))
 
 def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
+    """Calculate the reference angle of FD points"""
     sign = -1 if is_second else 1
     if comp_type == 'protomodule':
         points_diff = fdpoints[1] - fdpoints[0] # vector from FD1 to FD2
@@ -205,7 +210,7 @@ def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
         points_diff = fdpoints[2] - fdpoints[5] # vector from FD6 to FD3
         angle = np.degrees(np.arctan2(
             sign * points_diff[1],
-            sign * points_diff[0]) * -1)
+            sign * points_diff[0])) - 90
         if sign == 1:
             logging.debug(f"Using Angle of FD6 -> FD3 for rotational offset: {angle}")
     return angle

@@ -1,4 +1,5 @@
 import os, yaml, sys, logging
+import numpy as np
 import pandas as pd
 
 pjoin = os.path.join
@@ -18,7 +19,7 @@ from rich.console import Console
 from rich.table import Table
 # from src.make_accuracy_plot import make_accuracy_plot
 
-def test_angle_calculations(sample_name):
+def test_angle_calculations(sample_name, comp_type):
     """Compare angle calculations between legacy and new implementation."""
     # Setup the same test data used in both functions
     logging.warning("New Method results ...")
@@ -32,8 +33,11 @@ def test_angle_calculations(sample_name):
     feature_df = pd.read_csv(features[0])
     
     # Get results from new implementation (PlotTool)
-    PT = PlotTool(metadata, "protomodules", feature_df, 'rwOGP/templates/trays', 'tests')
+    PT = PlotTool(metadata, comp_type, feature_df, 'rwOGP/templates/trays', 'tests')
     FD_points = PT.get_FDs()
+
+    FD_x = FD_points[:,0]
+    len_non_nan = len(FD_x[~np.isnan(FD_x)])
 
     hole_xy, slot_xy = PT.get_pin_coordinates()
     position = PT.meta['PositionID']
@@ -51,14 +55,13 @@ def test_angle_calculations(sample_name):
         "OffCenter.Y": slot_xy[1]
     }
     
-    # Add FD points
-    for i in range(4):
-        legacy_points[i] = FD_points[i]
+    for i, point in enumerate(FD_points[~np.isnan(FD_x)]):
+        legacy_points[i] = point
     
     # Calculate using legacy method
     centeroff_legacy, angleoff_legacy, x_off, y_off = calculate_sensor_alignment(
         legacy_points, 
-        FDpoints=4,
+        FDpoints=len_non_nan,
         OffCenterPin="Left" if position == 1 else "Right"
     )
     
@@ -111,7 +114,7 @@ def test_angle_calculations(sample_name):
     # Print the table
     console.print(table)
 
-def test_workflow(sample_name):
+def test_workflow(sample_name, comp_type):
     setup_logging(level=logging.INFO)
     parser = DataParser(pjoin('rwOGP', 'templates', 'samples', sample_name), 'tests')
     meta, features = parser()
@@ -122,7 +125,7 @@ def test_workflow(sample_name):
     setup_logging()
 
     feature_df = pd.read_csv(features[0])
-    PT = PlotTool(metadata, "protomodules", feature_df, 'rwOGP/templates/trays', 'tests')
+    PT = PlotTool(metadata, comp_type, feature_df, 'rwOGP/templates/trays', 'tests')
     
     im_args = {"vmini":component_params['vmini'], "vmaxi":component_params['vmaxi'], 
             "new_angle": component_params['new_angle'], "savename": "ex_heights",
@@ -134,11 +137,11 @@ def test_workflow(sample_name):
     
 if __name__ == '__main__':
     # logging.info("Running tests for 320PLF3W2CM0121.txt")
-    # test_angle_calculations("320PLF3W2CM0121.txt")
+    test_angle_calculations("320MLF3W2CM0122.txt", "modules")
     
     # logging.info("Running tests for 320PLF3W2CM0122.txt")
-    # test_angle_calculations("320PLF3W2CM0122.txt")
+    # test_angle_calculations("320PLF3W2CM0122.txt", "protomodules")
     
-    test_workflow("320PLF3W2CM0121.txt")
+    # test_workflow("320MLF3W2CM0121.txt", "modules")
 
 
