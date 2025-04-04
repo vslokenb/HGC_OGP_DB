@@ -19,7 +19,7 @@ class InventoryUpdater():
         self.checkdir = self.config.get('ogp_survey_dir')
         self.parsed_dir = self.config.get('ogp_parsed_dir')
         self.comp_type = comp_type
-        logging.debug(f"Reading inventory from: {self.inventory_p}", self.inventory_p)
+        logging.debug(f"Reading inventory from: {self.inventory_p}")
         logging.debug(f"Parsing OGP survey files from directory: {self.checkdir}")
         logging.debug(f"Saving parsed data to directory: {self.parsed_dir}")
 

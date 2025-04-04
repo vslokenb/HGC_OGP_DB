@@ -37,7 +37,7 @@ class DataParser():
         
         try:
             if not os.path.exists(output_dir):
-                logging.debug("Creating parsed output directory:", output_dir)
+                logging.debug(f"Creating parsed output directory: {output_dir}")
                 os.makedirs(output_dir)
             
             if not os.path.exists(self.backup_dir):
