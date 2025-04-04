@@ -510,7 +510,7 @@ def plotFD(FDpoints:np.array, holeXY:tuple, slotXY:tuple, save=False, save_name=
     plt.title("Fiducial Points")
     if save:
         plt.savefig(save_name)
-        logging.debug("Saved FD plot to", save_name)
+        logging.debug(f"Saved FD plot to {save_name}")
     else: plt.show()
     plt.close()
 

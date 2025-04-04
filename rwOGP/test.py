@@ -137,10 +137,10 @@ def test_workflow(sample_name, comp_type):
     # make_accuracy_plot(metadata['ComponentID'], XOffset, Yoffset, AngleOff, 0, 0, 0)
     
 if __name__ == '__main__':
-    test_angle_calculations("320MLF3W2CM0122.txt", "modules")
+    # test_angle_calculations("320MLF3W2CM0122.txt", "modules")
     
-    test_angle_calculations("320MLF3W2CM0121.txt", "modules")
+    # test_angle_calculations("320MLF3W2CM0121.txt", "modules")
     
-    # test_workflow("320MLF3W2CM0121.txt", "modules")
+    test_workflow("320MLF3W2CM0121.txt", "modules")
 
 
