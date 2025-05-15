@@ -187,7 +187,7 @@ def fire_GUI(client: DBClient):
     image_label.pack(pady=10)  # Adjust padding of the image label
     image_display_frame.pack(pady=10)
 
-    refresh_button = tk.Button(tab1, text="Refresh", command=refresh_listbox)
+    refresh_button = tk.Button(tab1, text="Refresh", command=refresh_listbox(dbclient, subtab_label, image_lists))
     refresh_button.pack()
 
 
