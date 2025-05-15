@@ -68,7 +68,7 @@ class InventoryUpdater():
     
     async def __call__(self):
         if not pexist(self.inventory_p):
-            self.__deal_empty()
+            await self.__deal_empty()
             return
             
         with open(self.inventory_p, 'r') as f:
