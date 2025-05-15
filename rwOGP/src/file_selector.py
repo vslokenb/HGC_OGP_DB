@@ -126,6 +126,7 @@ def refresh_listbox(dbclient: DBClient, subtab_label, image_lists):
         
 def fire_GUI(client: DBClient):
     """Fire up the GUI. Provide a way to select files and process them."""
+    global file_paths_text, file_paths_scrollbar, output_text, output_scrollbar, root #POSSIBLE FIX
     global image_label, image_lists, nested_notebook, dbclient
 
     dbclient = client
