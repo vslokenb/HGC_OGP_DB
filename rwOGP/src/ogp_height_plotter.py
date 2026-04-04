@@ -114,9 +114,8 @@ class PlotTool:
         from io import BytesIO
         buffer = BytesIO()
         
-        # Add minimum figure size and DPI settings
-        fig.set_size_inches(6, 4)  # or whatever minimum size is appropriate
-        dpi = 100  # adjust as needed
+        fig.set_size_inches(6, 4)
+        dpi = 100
         
         fig.savefig(savename, bbox_inches='tight', dpi=dpi)
         fig.savefig(buffer, format='png', bbox_inches='tight', dpi=dpi)
@@ -128,9 +127,7 @@ class PlotTool:
     
     @staticmethod
     def plot2d(x, y, zheight, centerxy, vmini, vmaxi, new_angle, title, savename, mod_flat, show_plot, value=1, rotate=0):
-        """Plot 2D height map of the given data.
-        [... existing docstring ...]
-        """
+        """Plot 2D height map of the given data."""
         mean_h, std_h, max_h, min_h = PlotTool._calculate_height_stats(zheight)
         
         x, y = PlotTool._prepare_coordinates(x, y, centerxy, rotate, new_angle)
@@ -270,10 +267,9 @@ class PlotTool:
         table.add_row("X Offset", f"{XOffset*1000:.1f}", "μm")
         table.add_row("Y Offset", f"{YOffset*1000:.1f}", "μm")
 
-
         CenterOffset = np.sqrt(XOffset**2 + YOffset**2)
 
-        FD3to1 = FDPoints[0] - FDPoints[2]  #Vector from FD3 to FD1
+        FD3to1 = FDPoints[0] - FDPoints[2]  # Vector from FD3 to FD1
 
         try:
             config = ANGLE_CALC_CONFIG[geometry]
@@ -282,9 +278,12 @@ class PlotTool:
                 if isinstance(config, dict):
                     config = config[position]
 
-            angle_FD = config(FD3to1, FDPoints, CompType) # Angle of FD3 to FD1
+            # Pass angle_Pin as the 4th argument so calc_full_angle can resolve
+            # the FD3/FD6 direction ambiguity for any tray orientation (LR or TB).
+            angle_FD = config(FD3to1, FDPoints, CompType, angle_Pin)
+
         except (KeyError, TypeError) as e:
-            raise ValueError(f"Invalid configuration for geometry={geometry}, density={density}, position={position}")
+            raise ValueError(f"Invalid configuration for geometry={geometry}, density={density}, position={position}: {e}")
 
         AngleOffset = angle_FD - angle_Pin
 
@@ -352,16 +351,14 @@ class PlotTool:
             table.add_column("X", justify="right", style="green")
             table.add_column("Y", justify="right", style="green")
 
-            # Add only non-NaN FD points to the table
             for i, point in enumerate(FD_array):
-                if not np.isnan(point).any():  # Check if the point contains any NaN values
+                if not np.isnan(point).any():
                     table.add_row(
                         f"FD {i+1}",
                         f"{point[0]:.3f}",
                         f"{point[1]:.3f}"
                     )
 
-            # Log the regular message and display the table
             logging.debug("Fiducial points retrieved:")
             console.print(table)
 
@@ -371,21 +368,48 @@ class PlotTool:
     def _get_tray_file(tray_id: str, tray_dir: str) -> str:
         """Get the tray file path based on the tray ID.
 
+        Accepts two naming conventions:
+          - Exact match: ``{tray_id}.yaml``  (e.g. ``1.yaml``, ``101.yaml``)
+          - Substring match: any ``*.yaml`` file whose name contains ``{tray_id}``
+            (e.g. ``Tray1_LR.yaml``, ``Tray1_TB.yaml``)
+
+        If several files match under the substring rule, the first alphabetically
+        is used and a warning is logged.  To avoid ambiguity, rename tray files
+        to the canonical ``{tray_id}.yaml`` form (e.g. ``1.yaml``).
+
         Args:
-            tray_id: The ID of the tray
-            tray_dir: Directory containing tray files
+            tray_id: The ID of the tray (string, e.g. ``"1"`` or ``"101"``).
+            tray_dir: Directory containing tray YAML files.
 
         Returns:
-            Path to the tray file
+            Absolute path to the matched tray file.
 
         Raises:
-            ValueError: If TrayNo is not in metadata
+            ValueError: If tray_id is empty.
+            FileNotFoundError: If no matching file is found.
         """
         if not tray_id:
             raise ValueError("TrayNo not found in metadata")
 
-        filename = glob.glob(os.path.join(tray_dir, f"{tray_id}.yaml"))
-        return filename[0]
+        # 1. Exact match (preferred / canonical form)
+        exact = glob.glob(os.path.join(tray_dir, f"{tray_id}.yaml"))
+        if exact:
+            return exact[0]
+
+        # 2. Substring match — handles names like "Tray1_LR.yaml"
+        fuzzy = sorted(glob.glob(os.path.join(tray_dir, f"*{tray_id}*.yaml")))
+        if not fuzzy:
+            raise FileNotFoundError(
+                f"No tray file found for TrayNo='{tray_id}' in '{tray_dir}'. "
+                f"Expected a file named '{tray_id}.yaml' or one containing '{tray_id}' in its name. "
+                f"Files present: {os.listdir(tray_dir)}"
+            )
+        if len(fuzzy) > 1:
+            logging.warning(
+                f"Multiple tray files match TrayNo='{tray_id}': {fuzzy}. "
+                f"Using '{fuzzy[0]}'. Rename files to '{tray_id}.yaml' to remove ambiguity."
+            )
+        return fuzzy[0]
             
     def get_pin_coordinates(self):
         """Get the coordinates of the hole and slot pins from the tray file.
@@ -412,16 +436,16 @@ class PlotTool:
         position_id = meta['PositionID']
         geometry = meta['Geometry']
         density = meta['Density']
-        # Check if TrayNo exists in meta
 
         tray_id = meta.get('TrayNo', None)
         if tray_id is None:
             logging.error("TrayNo not found in metadata. Please check the metadata file.")
-        elif tray_id.isdigit() and len(tray_id) == 3:
-            tray_id = tray_id
+        elif str(tray_id).isdigit() and len(str(tray_id)) == 3:
+            tray_id = str(tray_id)
         else:
-            logging.warning(f"TrayNo '{tray_id}' is not a valid 3-digit notation.")
-            
+            logging.warning(f"TrayNo '{tray_id}' is not in the canonical 3-digit notation.")
+
+        tray_id = str(tray_id)
         tray_file = self._get_tray_file(tray_id, tray_dir)
     
         logging.debug(f"Using Tray {tray_id} info in {tray_dir}...")
@@ -440,7 +464,6 @@ class PlotTool:
 
         logging.debug(f"Calculating offsets with ...")
 
-        # Only create and display the table if log level is debug or lower
         if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
             console = Console()
             table = Table(title="Pin Coordinates")
@@ -448,7 +471,6 @@ class PlotTool:
             table.add_column("Pin Name", justify="left", style="green")
             table.add_column("Coordinates", justify="right", style="yellow")
         
-            # Add the pin information to the table
             table.add_row(
                 "Hole Pin",
                 hole_pin,
@@ -460,7 +482,6 @@ class PlotTool:
                 f"({slot_pin_xy[0]:.3f}, {slot_pin_xy[1]:.3f})"
             )
 
-            # Print the table
             console.print(table)
 
         return hole_pin_xy, slot_pin_xy
@@ -473,7 +494,6 @@ class PlotTool:
         - `YOffset`: y-offset of the sensor from the tray center
         - `AngleOff`: angle of the sensor from the tray fiducials"""
         
-        # Get the coordinates of the hole and slot 
         HolePin_xy, SlotPin_xy = self.get_pin_coordinates()
         PositionID = self.meta['PositionID']
 
@@ -482,13 +502,6 @@ class PlotTool:
         plotFD(FD_points, HolePin_xy, SlotPin_xy, True, pjoin(self.save_dir, f"{self.meta['ComponentID']}_FDpoints.png"))
 
         CenterOff, AngleOff, XOffset, YOffset = self.angle(HolePin_xy, SlotPin_xy, FD_points)
-
-        # if PositionID == 1:
-        #     NEWY = XOffset*-1
-        #     NEWX = YOffset
-        # elif PositionID == 2:
-        #     NEWY = XOffset
-        #     NEWX = YOffset*-1
 
         if abs(AngleOff) > 20:
             logging.error("The calculated angle offset is too large. Check the fiducial points and the sensor position (Pos 1 vs. 2)")
@@ -499,6 +512,7 @@ class PlotTool:
 
         return XOffset, YOffset, AngleOff
 
+    @staticmethod
     def _calculate_height_stats(zheight):
         """Calculate basic height statistics."""
         mean_h = np.mean(zheight)
@@ -564,27 +578,23 @@ def plotFD(FDpoints:np.array, holeXY:tuple, slotXY:tuple, save=False, save_name=
     plt.close()
 
 def grade(CenterOffset, AngleOff):
-    """Quality Control for modules
-    
+    """Quality Control grading for modules.
+
     Parameters
-    - `CenterOffset`: offset of the sensor from the tray center. In mm
-    - `AngleOff`: angle of the sensor from the tray fiducials. In degrees
+    - `CenterOffset`: (XOffset_mm, YOffset_mm) tuple from get_offsets()
+    - `AngleOff`: angular offset in degrees from get_offsets()
+
+    Returns 'A', 'B', or 'C'.
+
+    Thresholds (symmetric — abs values used throughout):
+      Grade A : |X| ≤ 50 μm  AND  |Y| ≤ 50 μm  AND  |angle| ≤ 0.02°
+      Grade B : |X| ≤ 100 μm AND  |Y| ≤ 100 μm AND  |angle| ≤ 0.04°
+      Grade C : everything else
     """
-    '''
-    QC designation for different measurements
-    Measurement      |         GREEN          |        YELLOW         |          RED          |
-    _________________|________________________|_______________________|_______________________|
-    Angle of Plac.   |0 < abs(x - 90.) <= 0.03 |0.03 < abs(x - 90.) <= .06| 0.06 < abs(x - 90.)<90| 
-    Placement        |      0 < x <= 0.05     |    0.05 < x <= 0.1    |      0.1 < x <= 10.   | 
-    Height           |0 < abs(x - Nom) <= 0.05|0.05 <abs(x - Nom)<=0.1|0.1 < abs(x - Nom)<=10.| 
-    Max Hght from Nom|      0 < x <= 0.05     |    0.05 < x <= 0.1    |    0.1 < x <= 10.     | 
-    Min Hght ffrom Nom|      0 < x <= 0.05     |    0.05 < x <= 0.1    |    0.1 < x <= 10.     | 
-    
-#     '''
-    X_Offset, Y_Offset = CenterOffset
-    X_Offset *= 1000
-    Y_Offset *= 1000
-    
+    X_Offset = abs(CenterOffset[0]) * 1000   # mm → μm
+    Y_Offset = abs(CenterOffset[1]) * 1000
+    AngleOff  = abs(AngleOff)
+
     if X_Offset <= 50 and Y_Offset <= 50 and AngleOff <= 0.02:
         return "A"
     elif X_Offset <= 100 and Y_Offset <= 100 and AngleOff <= 0.04:

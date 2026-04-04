@@ -69,7 +69,9 @@ ADJUSTMENTS = {
 }
 
 
-# Define the angle calculation of FD points
+# Define the angle calculation of FD points.
+# All lambdas accept an optional 4th positional argument `angle_pin` (float, degrees).
+# Lambdas that do not use it capture it via *_ to stay forward-compatible.
 ANGLE_CALC_CONFIG = {
     'Bottom':  {
         1: lambda fd3to1, *_: calc_basic_angle(-fd3to1),
@@ -86,8 +88,8 @@ ANGLE_CALC_CONFIG = {
         }
     },
     'Five': {
-        1: lambda fd3to1, fdpoints, comp_type: calc_five_angle(fdpoints, fd3to1, comp_type),
-        2: lambda fd3to1, fdpoints, comp_type: calc_five_angle(fdpoints, fd3to1, comp_type, True),
+        1: lambda fd3to1, fdpoints, comp_type, *_: calc_five_angle(fdpoints, fd3to1, comp_type),
+        2: lambda fd3to1, fdpoints, comp_type, *_: calc_five_angle(fdpoints, fd3to1, comp_type, True),
     },
     'Left': {
         'LD': {
@@ -107,8 +109,10 @@ ANGLE_CALC_CONFIG = {
             2: lambda fd3to1, fdpoints, *_: calc_HDfull_angle(fdpoints, None, True),
         },
         'LD': {
-            1: lambda fd3to1, fdpoints, comp_type: calc_full_angle(fdpoints, comp_type),
-            2: lambda fd3to1, fdpoints, comp_type: calc_full_angle(fdpoints, comp_type, True),
+            # angle_pin is passed through so calc_full_angle can disambiguate
+            # correctly for both LR (horizontal pin) and TB (vertical pin) trays.
+            1: lambda fd3to1, fdpoints, comp_type, angle_pin=0: calc_full_angle(fdpoints, comp_type, angle_pin=angle_pin),
+            2: lambda fd3to1, fdpoints, comp_type, angle_pin=0: calc_full_angle(fdpoints, comp_type, True, angle_pin=angle_pin),
         }
     }
 }
@@ -216,34 +220,74 @@ def calc_five_angle(fdpoints, fd3to1, comp_type, is_second=False) -> float:
         return np.degrees(np.arctan2(sign * fd3to1[1], sign * fd3to1[0]))
 
 
-def calc_full_angle(fdpoints, comp_type, is_second=False) -> float:
-    """Calculate the angle deviation for PM/Modules with Full geometry."""
+def calc_full_angle(fdpoints, comp_type, is_second=False, angle_pin=0) -> float:
+    """Calculate the angle deviation for PM/Modules with Full geometry.
+
+    Parameters
+    ----------
+    fdpoints : np.ndarray
+        Array of fiducial points, shape (8, 2). FD3 is at index 2, FD6 at index 5.
+    comp_type : str
+        'protomodule' or 'module'
+    is_second : bool
+        True for Position 2 (sign = -1), False for Position 1 (sign = +1).
+    angle_pin : float
+        The pin reference angle in degrees (angle_Pin from angle_lookup).
+        Used to resolve the FD3-vs-FD6 direction ambiguity correctly for both
+        LR (horizontal pin, ~0°) and TB (vertical pin, ~90°) tray orientations.
+        Defaults to 0 for backward compatibility.
+
+    Returns
+    -------
+    float
+        Angle in degrees to be subtracted from angle_pin to get AngleOffset.
+    """
     sign = -1 if is_second else 1
+
     if comp_type == 'protomodule':
-        points_diff = fdpoints[4] - fdpoints[0] # vector from FD1 to FD5
+        points_diff = fdpoints[4] - fdpoints[0]  # vector from FD1 to FD5
         angle = np.degrees(np.arctan2(
             sign * points_diff[1],
             sign * points_diff[0]))
         if sign == 1:
-            logging.debug(f"Using Angle of FD1 -> FD4 for rotational offset angle: {angle}")
+            logging.debug(f"Using Angle of FD1 -> FD5 for rotational offset angle: {angle}")
         else:
-            logging.debug(f"Using Angle of FD4 -> FD1 for rotational offset angle: {angle}")
+            logging.debug(f"Using Angle of FD5 -> FD1 for rotational offset angle: {angle}")
+
     elif comp_type == 'module':
-        #! sloppy fix
-        # Compute both possible directions and pick the one with the smallest absolute angle
-        diff1 = fdpoints[2] - fdpoints[5]
-        diff2 = fdpoints[5] - fdpoints[2]
-        angle1 = np.degrees(np.arctan2(sign * diff1[1], sign * diff1[0])) - 90
-        angle2 = np.degrees(np.arctan2(sign * diff2[1], sign * diff2[0])) - 90
-        # Choose the angle closer to zero (i.e., -180/180 ambiguity)
-        if abs(angle1) < abs(angle2):
+        diff1 = fdpoints[2] - fdpoints[5]   # FD3 - FD6
+        diff2 = fdpoints[5] - fdpoints[2]   # FD6 - FD3
+
+        raw1 = np.degrees(np.arctan2(sign * diff1[1], sign * diff1[0])) - 90
+        raw2 = np.degrees(np.arctan2(sign * diff2[1], sign * diff2[0])) - 90
+
+        # Normalize each candidate into the ±180° window centred on angle_pin.
+        # This ensures the correct option is selected regardless of tray orientation
+        # (LR trays have angle_pin ≈ 0°; TB trays have angle_pin ≈ ±90°).
+        def _normalize(a):
+            delta = (a - angle_pin + 180) % 360 - 180
+            return angle_pin + delta
+
+        angle1 = _normalize(raw1)
+        angle2 = _normalize(raw2)
+
+        # Pick the candidate that produces an AngleOffset closer to zero.
+        if abs(angle1 - angle_pin) <= abs(angle2 - angle_pin):
             angle = angle1
         else:
             angle = angle2
+
         if sign == 1:
-            logging.debug(f"Using Angle of FD6 -> FD3 for rotational offset: {angle}")
+            logging.debug(f"Using Angle of FD3 -> FD6 for rotational offset: {angle:.4f}° "
+                          f"(angle_pin={angle_pin:.4f}°, raw candidates: {raw1:.4f}°, {raw2:.4f}°)")
+        else:
+            logging.debug(f"Using Angle of FD6 -> FD3 for rotational offset: {angle:.4f}° "
+                          f"(angle_pin={angle_pin:.4f}°, raw candidates: {raw1:.4f}°, {raw2:.4f}°)")
+
     else:
         logging.error(f"Component type {comp_type} not recognized for angle calculation.")
+        raise ValueError(f"Unsupported comp_type '{comp_type}' in calc_full_angle.")
+
     return angle
 
 def calc_HDfull_angle(fdpoints, comp_type, is_second=False) -> float:
