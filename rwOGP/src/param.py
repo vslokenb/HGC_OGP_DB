@@ -221,68 +221,74 @@ def calc_five_angle(fdpoints, fd3to1, comp_type, is_second=False) -> float:
 
 
 def calc_full_angle(fdpoints, comp_type, is_second=False, angle_pin=0) -> float:
-    """Calculate the angle deviation for PM/Modules with Full geometry.
+    """Calculate the angle deviation for protomodules/modules with Full geometry.
 
     Parameters
     ----------
     fdpoints : np.ndarray
-        Array of fiducial points, shape (8, 2). FD3 is at index 2, FD6 at index 5.
+        Array of fiducial points, shape (8, 2).
+        Module:      FD3 at index 2, FD6 at index 5.
+        Protomodule: FD1 at index 0, FD5 at index 4.
     comp_type : str
         'protomodule' or 'module'
     is_second : bool
         True for Position 2 (sign = -1), False for Position 1 (sign = +1).
     angle_pin : float
         The pin reference angle in degrees (angle_Pin from angle_lookup).
-        Used to resolve the FD3-vs-FD6 direction ambiguity correctly for both
-        LR (horizontal pin, ~0°) and TB (vertical pin, ~90°) tray orientations.
-        Defaults to 0 for backward compatibility.
+        Used to resolve directional ambiguity for both LR (pin ~0°) and
+        TB (pin ~90°) tray orientations. Defaults to 0 for backward compat.
 
     Returns
     -------
     float
-        Angle in degrees to be subtracted from angle_pin to get AngleOffset.
+        Angle in degrees; AngleOffset = returned value - angle_pin.
+
+    Notes
+    -----
+    Both module and protomodule use the same 4-candidate disambiguation:
+      {FD_a - FD_b,  FD_b - FD_a} × {no correction, -90° correction}
+    The candidate whose normalised value is closest to angle_pin wins.
+
+    For modules the FD3-FD6 vector is always perpendicular to the pin axis
+    (both LR and TB), so a -90° correction is always needed; the flip
+    handles the ±180° ambiguity.
+
+    For protomodules the FD5-FD1 vector is parallel to the pin on TB trays
+    (no correction needed) and perpendicular on LR trays (-90° needed).
+    The 4-candidate search selects correctly in both cases without any
+    hard-coded tray-orientation assumption.
     """
     sign = -1 if is_second else 1
 
+    def _normalize(a):
+        """Fold angle `a` into the ±180° window centred on angle_pin."""
+        delta = (a - angle_pin + 180) % 360 - 180
+        return angle_pin + delta
+
+    def _best_candidate(diff):
+        """Return the angle candidate (from diff and its flip, ±90°) that
+        produces the smallest |AngleOffset| relative to angle_pin."""
+        d1, d2 = diff, -diff
+        candidates = [
+            np.degrees(np.arctan2(sign * d1[1], sign * d1[0])),         # forward, no correction
+            np.degrees(np.arctan2(sign * d1[1], sign * d1[0])) - 90,    # forward, -90°
+            np.degrees(np.arctan2(sign * d2[1], sign * d2[0])),         # flip,    no correction
+            np.degrees(np.arctan2(sign * d2[1], sign * d2[0])) - 90,    # flip,    -90°
+        ]
+        normed = [_normalize(c) for c in candidates]
+        return min(normed, key=lambda a: abs(a - angle_pin))
+
     if comp_type == 'protomodule':
-        points_diff = fdpoints[4] - fdpoints[0]  # vector from FD1 to FD5
-        angle = np.degrees(np.arctan2(
-            sign * points_diff[1],
-            sign * points_diff[0]))
-        if sign == 1:
-            logging.debug(f"Using Angle of FD1 -> FD5 for rotational offset angle: {angle}")
-        else:
-            logging.debug(f"Using Angle of FD5 -> FD1 for rotational offset angle: {angle}")
+        diff = fdpoints[4] - fdpoints[0]   # FD5 - FD1
+        angle = _best_candidate(diff)
+        logging.debug(f"Protomodule Full angle_FD={angle:.4f}° "
+                      f"(angle_pin={angle_pin:.4f}°, FD5-FD1={diff})")
 
     elif comp_type == 'module':
-        diff1 = fdpoints[2] - fdpoints[5]   # FD3 - FD6
-        diff2 = fdpoints[5] - fdpoints[2]   # FD6 - FD3
-
-        raw1 = np.degrees(np.arctan2(sign * diff1[1], sign * diff1[0])) - 90
-        raw2 = np.degrees(np.arctan2(sign * diff2[1], sign * diff2[0])) - 90
-
-        # Normalize each candidate into the ±180° window centred on angle_pin.
-        # This ensures the correct option is selected regardless of tray orientation
-        # (LR trays have angle_pin ≈ 0°; TB trays have angle_pin ≈ ±90°).
-        def _normalize(a):
-            delta = (a - angle_pin + 180) % 360 - 180
-            return angle_pin + delta
-
-        angle1 = _normalize(raw1)
-        angle2 = _normalize(raw2)
-
-        # Pick the candidate that produces an AngleOffset closer to zero.
-        if abs(angle1 - angle_pin) <= abs(angle2 - angle_pin):
-            angle = angle1
-        else:
-            angle = angle2
-
-        if sign == 1:
-            logging.debug(f"Using Angle of FD3 -> FD6 for rotational offset: {angle:.4f}° "
-                          f"(angle_pin={angle_pin:.4f}°, raw candidates: {raw1:.4f}°, {raw2:.4f}°)")
-        else:
-            logging.debug(f"Using Angle of FD6 -> FD3 for rotational offset: {angle:.4f}° "
-                          f"(angle_pin={angle_pin:.4f}°, raw candidates: {raw1:.4f}°, {raw2:.4f}°)")
+        diff = fdpoints[2] - fdpoints[5]   # FD3 - FD6
+        angle = _best_candidate(diff)
+        logging.debug(f"Module Full angle_FD={angle:.4f}° "
+                      f"(angle_pin={angle_pin:.4f}°, FD3-FD6={diff})")
 
     else:
         logging.error(f"Component type {comp_type} not recognized for angle calculation.")
