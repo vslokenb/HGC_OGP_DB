@@ -329,10 +329,9 @@ class PlotTool:
         x_y_coords = FD_points[['X_coordinate', 'Y_coordinate']].values
         num_FDs = len(x_y_coords)
         if not num_FDs in {2, 4, 6, 8}:
-            logging.warning("The number of fiducial points measured must be 2, 4, 6, or 8.")
-            logging.warning(f"Measured {len(FD_names)} FDs:", FD_names)
-            logging.warning("This program looks for keyword 'FD' in file output. Make sure you rename your routine to include 'FD' in the name.")
-            raise ValueMissingError("Exiting... Please check the FD points and try again.")
+            comp_id = self.meta.get('ComponentID', 'unknown')
+            logging.warning(f"[{comp_id}] Invalid FD count: {num_FDs} (must be 2, 4, 6, or 8). Found: {list(FD_names)}")
+            raise ValueMissingError(f"[{comp_id}] Invalid FD count {num_FDs}. Please check the OGP routine output.")
         
         sort_indices = np.argsort(FD_numbers)
         FD_points = x_y_coords[sort_indices]
