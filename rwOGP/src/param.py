@@ -11,7 +11,10 @@ protomodules_params = {"vmini": 1.37, "vmaxi": 1.79, "new_angle": 270, "db_table
 modules_params = {"vmini": 2.75, "vmaxi": 4.0, "new_angle": 270, "db_table_name": 'module_inspect', 
                   "mother_table": 'module_info', 'prefix': 'module'}
 
-# Map channel numbers to FDs
+# Map channel numbers to physical FD indices (0-based position in this list = FD number - 1).
+# CH197 and CH191 are the top-edge sensor holes. Their relative assignment to FD4/FD5
+# does NOT affect the angle calculation (which selects the same-column pair by X proximity)
+# or the center (which averages all four). Do NOT swap these entries.
 fd_maps = [1, 8, 111, 197, 191] # FD1, FD2, FD3, FD4, FD5
 
 COMP_PREFIX = {'baseplate': 'bp', 'hexaboard': 'hxb', 'protomodule': 'proto', 'module': 'module'}
@@ -279,10 +282,23 @@ def calc_full_angle(fdpoints, comp_type, is_second=False, angle_pin=0) -> float:
         return min(normed, key=lambda a: abs(a - angle_pin))
 
     if comp_type == 'protomodule':
-        diff = fdpoints[4] - fdpoints[0]   # FD5 - FD1
+        # Select the FD (FD4 or FD5) that lies on the same column as FD1
+        # (smallest X-distance). This gives a near-vertical vector regardless
+        # of tray orientation (LR or TB) and position (1 or 2).
+        # Using the diagonal pair (always FD5-FD1) fails for configurations
+        # where FD5 is diagonally opposite FD1 rather than directly above/below it.
+        fd1 = fdpoints[0]
+        fd4 = fdpoints[3]
+        fd5 = fdpoints[4]
+        if abs(fd4[0] - fd1[0]) <= abs(fd5[0] - fd1[0]):
+            diff = fd4 - fd1
+            logging.debug(f"Protomodule Full: using FD4-FD1 (same column, |dx|={abs(fd4[0]-fd1[0]):.2f}mm)")
+        else:
+            diff = fd5 - fd1
+            logging.debug(f"Protomodule Full: using FD5-FD1 (same column, |dx|={abs(fd5[0]-fd1[0]):.2f}mm)")
         angle = _best_candidate(diff)
         logging.debug(f"Protomodule Full angle_FD={angle:.4f}° "
-                      f"(angle_pin={angle_pin:.4f}°, FD5-FD1={diff})")
+                      f"(angle_pin={angle_pin:.4f}°, diff={diff})")
 
     elif comp_type == 'module':
         diff = fdpoints[2] - fdpoints[5]   # FD3 - FD6
